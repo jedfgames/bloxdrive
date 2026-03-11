@@ -1,0 +1,6 @@
+{
+    "name": "rbx-package-loader",
+    "tree": {
+        "$path": "Source/RbxPackageLoader"
+    }
+}
