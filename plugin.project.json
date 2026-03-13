@@ -1,0 +1,12 @@
+{
+    "name": "rbx-package-loader",
+    "tree": {
+        "$className": "Folder",
+        "Plugin": {
+            "$path": "Source/Plugin"
+        },
+        "RbxPackageLoader": {
+            "$path": "Source/RbxPackageLoader"
+        }
+    }
+}

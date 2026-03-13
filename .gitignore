@@ -1,7 +1,9 @@
+.assetfile-cache.json
 .claude
 .DS_Store
 .env
 .local
+.luau-lsp
 .mcp.json
 .vscode
 *.bak
@@ -15,5 +17,6 @@ aftman.toml
 Build
 DevPackages
 Packages
+rbx-package-registry
 sourcemap.json
 Tools

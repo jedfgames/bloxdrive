@@ -15,7 +15,8 @@ local Testable = require("@devpackages/Testable")
 local process = require("@lune/process")
 
 local TESTS = {
-    { Name = "ExampleTest", Func = require("../Tests/ExampleTest.spec") },
+    { Name = "Merger", Func = require("../Tests/Merger.spec") },
+    { Name = "TreeDiff", Func = require("../Tests/TreeDiff.spec") },
 }
 
 local function runTests()

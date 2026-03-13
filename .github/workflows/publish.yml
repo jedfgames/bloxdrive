@@ -21,6 +21,12 @@ jobs:
       - name: Setup Rokit
         uses: CompeyDev/setup-rokit@v0.1.2
 
+      - name: Install dependencies
+        run: wally install
+
+      - name: Build plugin
+        run: lune run ./Scripts/BuildPlugin.luau
+
       - name: Get version and changelog
         id: version
         run: |
@@ -62,4 +68,5 @@ jobs:
         run: |
           gh release create ${{ steps.version.outputs.tag }} \
             --title "${{ steps.version.outputs.tag }}" \
-            --notes-file /tmp/changelog.txt
+            --notes-file /tmp/changelog.txt \
+            Build/rbx-package-loader.rbxm

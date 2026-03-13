@@ -1,0 +1,12 @@
+{
+    "mappings": [
+        {
+            "assets": "Assets",
+            "output": "Source/Plugin/Assets.luau",
+            "apiKeyEnvName": "ROBLOX_ASSETS_API_KEY",
+            "creator": {
+                "groupId": "13032636"
+            }
+        }
+    ]
+}
