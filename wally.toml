@@ -21,4 +21,5 @@ exclude = ["**"]
 t = "horsenuggets/t@3.1.1-horse.0.3"
 
 [dev-dependencies]
+Dotenv = "horsenuggets/dotenv-luau@0.1.2"
 Testable = "horsenuggets/testable@0.1.0"
