@@ -55,6 +55,7 @@ jobs:
           git push origin ${{ steps.version.outputs.tag }}
 
       - name: Publish to Wally
+        continue-on-error: true
         env:
           WALLY_AUTH: ${{ secrets.WALLY_AUTH }}
         run: |
