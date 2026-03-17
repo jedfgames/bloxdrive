@@ -1,4 +1,3 @@
-.assetfile-cache.json
 .claude
 .DS_Store
 .env
@@ -17,6 +16,7 @@ aftman.toml
 Build
 DevPackages
 Packages
+PLANS.md
 rbx-package-registry
 sourcemap.json
 Tools
