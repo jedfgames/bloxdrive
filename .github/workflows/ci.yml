@@ -81,6 +81,9 @@ jobs:
       - name: Install dependencies
         run: wally install
 
+      - name: Generate Lune type definitions
+        run: lune --generate-luau-types
+
       - name: Run static analysis
         run: lune run ./Scripts/Lint.luau
 

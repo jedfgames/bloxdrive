@@ -134,6 +134,10 @@ async function handleVersion(
 ): Promise<Response> {
     const version = parseInt(versionStr, 10);
 
+    if (request.method !== "GET" && request.method !== "PUT") {
+        return json({ error: "Method not allowed" }, 405);
+    }
+
     if (request.method === "GET") {
         const row = await env.DB.prepare(
             "SELECT tree FROM versions WHERE package_id = ? AND version = ?",
