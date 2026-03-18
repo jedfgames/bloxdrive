@@ -8,7 +8,7 @@ serve, not through the build pipeline.
 
 --]]
 
-local Fusion = require(script.Parent.Parent.Parent.Packages.Fusion)
+local Fusion = require("@packages/Fusion")
 
 local PromptInput = require(script.Parent.PromptInput)
 

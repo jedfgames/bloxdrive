@@ -78,7 +78,7 @@ local function lint()
         allPassed = false
     end
 
-    -- Tests/E2E/RemoteTestScript.luau (Roblox, e2e sourcemap)
+    -- Tests/E2E/ (Roblox, e2e sourcemap)
     local e2eArgs = {
         "analyze",
         "--platform=roblox",

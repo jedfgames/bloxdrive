@@ -7,8 +7,9 @@
         "tests": "./Tests/"
     },
     "globals": [
-        "__GITHUB_PAT__",
+        "__REGISTRY_TOKEN__",
         "afterAll",
+        "warn",
         "afterEach",
         "beforeAll",
         "beforeEach",
