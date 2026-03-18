@@ -82,7 +82,7 @@ jobs:
         run: wally install
 
       - name: Generate Lune type definitions
-        run: lune --generate-luau-types
+        run: lune setup
 
       - name: Run static analysis
         run: lune run ./Scripts/Lint.luau
