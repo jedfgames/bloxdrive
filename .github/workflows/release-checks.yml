@@ -79,6 +79,9 @@ jobs:
         run: wally install
 
       - name: Run tests
+        env:
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+          ROBLOX_E2E_API_KEY: ${{ secrets.ROBLOX_E2E_API_KEY }}
         run: lune run ./Scripts/RunTests.luau
 
   analyze:

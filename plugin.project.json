@@ -2,6 +2,9 @@
     "name": "rbx-package-loader",
     "tree": {
         "$className": "Folder",
+        "Packages": {
+            "$path": "Packages"
+        },
         "Plugin": {
             "$path": "Source/Plugin"
         },

@@ -11,8 +11,8 @@ from the registry's hierarchical file map (path -> content pairs).
 
 --]]
 
-local PropertyReflection = require("@self/PropertyReflection")
-local TreeUtils = require("@self/TreeUtils")
+local PropertyReflection = require("./PropertyReflection")
+local TreeUtils = require("./TreeUtils")
 
 local Deserializer = {}
 

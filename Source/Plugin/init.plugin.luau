@@ -9,18 +9,28 @@ deserialization, and merging.
 
 --]]
 
+local RunService = game:GetService("RunService")
+
+-- Only run in the edit DataModel, not play/server/client
+if not RunService:IsEdit() then
+    return
+end
+
 local ChangeHistoryService = game:GetService("ChangeHistoryService")
 local HttpService = game:GetService("HttpService")
 local Selection = game:GetService("Selection")
 
-local Assets = require(script.Parent.Assets)
-local AutoSync = require(script.Parent.AutoSync)
-local CredentialStore = require(script.Parent.CredentialStore)
-local Logger = require(script.Parent.Parent.RbxPackageLoader.Logger)
-local PackagePublisher = require(script.Parent.PackagePublisher)
-local PackagePuller = require(script.Parent.PackagePuller)
-local RbxPackageLoader = require(script.Parent.Parent.RbxPackageLoader)
-local Toolbar = require(script.Parent.Toolbar)
+local Fusion = require("@packages/Fusion")
+
+local Assets = require("@self/Assets")
+local AutoSync = require("@self/AutoSync")
+local CredentialStore = require("@self/CredentialStore")
+local Logger = require("@rbxpackageloader/Logger")
+local PackagePublisher = require("@self/PackagePublisher")
+local PackagePuller = require("@self/PackagePuller")
+local PromptInput = require("@self/Components/PromptInput")
+local RbxPackageLoader = require("@rbxpackageloader")
+local Toolbar = require("@self/Toolbar")
 
 local PACKAGE_MARKER_NAME = ".rbx-package"
 local PROMPT_WIDGET_ID = "PackageLoaderPrompt"
@@ -61,60 +71,41 @@ local function _promptForInput(title: string, defaultValue: string?): string?
 
     local widget = _promptWidget :: DockWidgetPluginGui
 
-    -- Clear previous contents
+    -- Clean up previous Fusion scope if any
     for _, child in widget:GetChildren() do
         child:Destroy()
     end
 
     widget.Title = title
 
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.fromScale(1, 1)
-    frame.BackgroundColor3 = Color3.fromRGB(46, 46, 46)
-    frame.BorderSizePixel = 0
-    frame.Parent = widget
-
-    local textBox = Instance.new("TextBox")
-    textBox.Size = UDim2.new(1, -20, 0, 30)
-    textBox.Position = UDim2.fromOffset(10, 10)
-    textBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    textBox.Font = Enum.Font.Code
-    textBox.TextSize = 14
-    textBox.Text = defaultValue or ""
-    textBox.PlaceholderText = "Enter value..."
-    textBox.ClearTextOnFocus = false
-    textBox.Parent = frame
-
-    local submitButton = Instance.new("TextButton")
-    submitButton.Size = UDim2.new(0, 80, 0, 25)
-    submitButton.Position = UDim2.new(0.5, -40, 1, -35)
-    submitButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-    submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    submitButton.Font = Enum.Font.GothamBold
-    submitButton.TextSize = 14
-    submitButton.Text = "Submit"
-    submitButton.Parent = frame
-
     local result: string? = nil
     local done = false
 
-    submitButton.MouseButton1Click:Connect(function()
-        local text = textBox.Text
-        if text ~= "" then
+    local scope = Fusion:scoped()
+    local ui = PromptInput(scope, {
+        DefaultValue = defaultValue,
+        PlaceholderText = "Enter value...",
+        OnSubmit = function(text: string)
             result = text
-        end
-        done = true
-    end)
+            done = true
+        end,
+    })
 
+    ui.Parent = widget
     widget.Enabled = true
-    textBox:CaptureFocus()
+
+    -- Focus the text box after parenting
+    local textBox = ui:FindFirstChild("Input")
+    if textBox and textBox:IsA("TextBox") then
+        textBox:CaptureFocus()
+    end
 
     while not done do
         task.wait(0.1)
     end
 
     widget.Enabled = false
+    Fusion.doCleanup(scope)
     return result
 end
 
@@ -223,14 +214,30 @@ toolbar:CreateButton({
             return
         end
 
+        -- Validate the package exists before creating any instances
+        local registryConfig = if token then { AuthToken = token } else nil
+        local registry = RbxPackageLoader.Registry.new(registryConfig)
+        local metaSuccess, metadata = pcall(function()
+            return registry:FetchMetadata(packageId)
+        end)
+
+        if not metaSuccess then
+            Logger.warn(`Package "{packageId}" not found in registry.`)
+            return
+        end
+
+        if metadata.Name then
+            packageName = metadata.Name
+        end
+
         local parent = instance or game:GetService("Workspace")
         local folder = Instance.new("Folder")
-        folder.Name = packageId
+        folder.Name = packageName or packageId
         folder.Parent = parent
         pullParent = folder
     end
 
-    Logger.print(`Pulling "{packageId}"...`)
+    Logger.print(`Pulling "{packageName or packageId}"...`)
 
     local result = PackagePuller.pull(RbxPackageLoader, {
         PackageId = packageId,
@@ -247,10 +254,14 @@ toolbar:CreateButton({
         end
 
         Selection:Set({ pullParent })
-        ChangeHistoryService:SetWaypoint(`Pulled {packageId} version {result.Version}`)
-        Logger.print(`Pulled "{packageId}" version {result.Version}{conflictMsg}.`)
+        ChangeHistoryService:SetWaypoint(`Pulled {packageName or packageId} version {result.Version}`)
+        Logger.print(`Pulled "{packageName or packageId}" version {result.Version}{conflictMsg}.`)
     else
-        Logger.warn(`Failed to pull "{packageId}": {result.Error}`)
+        -- Clean up the folder if we created it for a fresh pull
+        if not marker then
+            pullParent:Destroy()
+        end
+        Logger.warn(`Failed to pull "{packageName or packageId}": {result.Error}`)
     end
 end)
 

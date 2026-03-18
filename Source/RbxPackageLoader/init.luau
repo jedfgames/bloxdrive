@@ -29,6 +29,8 @@ local PACKAGE_MARKER_NAME = ".rbx-package"
 
 local RbxPackageLoader = {}
 
+local _registryConfig: { BaseUrl: string?, AuthToken: string? }? = nil
+
 -- Re-export sub-modules for plugin and advanced usage
 RbxPackageLoader.Deserializer = Deserializer
 RbxPackageLoader.Merger = Merger
@@ -40,10 +42,27 @@ RbxPackageLoader.TreeDiff = TreeDiff
 RbxPackageLoader.TreeUtils = TreeUtils
 RbxPackageLoader.Types = Types
 
+type Config = {
+    AuthToken: string?,
+    BaseUrl: string?,
+}
+
 type LoadOptions = {
     Version: number?,
-    Parent: Instance,
+    Parent: Instance?,
 }
+
+--[=[
+    Configures the module-level registry settings. Call this once at
+    startup to provide credentials that all subsequent `load` calls
+    will use.
+
+    @param config Config -- Configuration with optional AuthToken and BaseUrl
+]=]
+function RbxPackageLoader.configure(config: Config)
+    assert(type(config) == "table", "Expected a table config")
+    _registryConfig = config
+end
 
 type LoadResult = {
     PackageId: string,
@@ -54,26 +73,35 @@ type LoadResult = {
 }
 
 --[=[
-    Loads a package by ID from the registry and places it under the given
-    parent instance. If a version is not specified, the latest version is
-    fetched.
+    Loads a package by ID from the registry and deserializes it into the
+    DataModel. If a version is not specified, the latest version is fetched.
 
-    If the parent already contains package content (identified by a
-    `.rbx-package` marker), a three-way merge is performed between the
-    previously installed version, the current DataModel state, and the new
-    version.
+    When `options.Parent` is provided and already contains package content
+    (identified by a `.rbx-package` marker), a three-way merge is performed
+    between the previously installed version, the current DataModel state,
+    and the new version. When `options.Parent` is omitted, the root instance
+    is created but not parented to anything.
+
+    Returns a tuple of the root Instance (or nil on failure) and a LoadResult
+    table describing the outcome.
 
     @param packageId string -- The package identifier
-    @param options LoadOptions -- Load options including parent and version
+    @param options LoadOptions -- Load options including optional parent and version
+    @return Instance? -- The root instance of the loaded package, or nil on failure
     @return LoadResult -- The result of the load operation
 ]=]
-function RbxPackageLoader.load(packageId: string, options: LoadOptions): LoadResult
+function RbxPackageLoader.load(packageId: string, options: LoadOptions): (Instance?, LoadResult)
     assert(type(packageId) == "string", "Expected a string packageId")
     assert(type(options) == "table", "Expected a table options")
-    assert(typeof(options.Parent) == "Instance", "Expected an Instance for options.Parent")
+
+    if options.Parent ~= nil then
+        assert(typeof(options.Parent) == "Instance", "Expected an Instance for options.Parent")
+    end
+
+    local rootInstance: Instance? = nil
 
     local success, result = pcall(function(): LoadResult
-        local registry = Registry.new()
+        local registry = Registry.new(_registryConfig)
 
         -- Determine which version to fetch
         local targetVersion: number
@@ -86,14 +114,18 @@ function RbxPackageLoader.load(packageId: string, options: LoadOptions): LoadRes
             remoteTree, targetVersion = registry:FetchLatest(packageId)
         end
 
-        -- Check for existing package marker
-        local existingMarker = _findExistingMarker(options.Parent, packageId)
+        -- Check for existing package marker (only when Parent is provided)
+        local existingMarker: Types.PackageInfo? = nil
+        if options.Parent then
+            existingMarker = _findExistingMarker(options.Parent, packageId)
+        end
 
         if existingMarker then
             -- Package already exists, perform a merge
             local currentVersion = existingMarker.Metadata.Version
 
             if currentVersion == targetVersion then
+                rootInstance = existingMarker.Parent
                 return {
                     PackageId = packageId,
                     Success = true,
@@ -119,6 +151,8 @@ function RbxPackageLoader.load(packageId: string, options: LoadOptions): LoadRes
             -- Update the marker
             _updateMarker(existingMarker.Marker, packageId, targetVersion)
 
+            rootInstance = existingMarker.Parent
+
             local conflicts = if #mergeResult.Conflicts > 0 then mergeResult.Conflicts else nil
 
             if conflicts then
@@ -135,10 +169,22 @@ function RbxPackageLoader.load(packageId: string, options: LoadOptions): LoadRes
             }
         else
             -- Fresh install
-            _applyTree(remoteTree, options.Parent)
+            local parent: Instance
 
-            -- Create the package marker
-            _createMarker(options.Parent, packageId, targetVersion)
+            if options.Parent then
+                -- Apply into existing parent
+                parent = options.Parent
+                _applyTree(remoteTree, parent)
+            else
+                -- No parent specified, create a root instance from
+                -- the tree's className and apply contents into it
+                local className = remoteTree["$className"]
+                parent = Instance.new(className)
+                _applyTree(remoteTree, parent)
+            end
+
+            _createMarker(parent, packageId, targetVersion)
+            rootInstance = parent
 
             return {
                 PackageId = packageId,
@@ -149,15 +195,16 @@ function RbxPackageLoader.load(packageId: string, options: LoadOptions): LoadRes
     end)
 
     if not success then
-        return {
-            PackageId = packageId,
-            Success = false,
-            Version = 0,
-            Error = tostring(result),
-        }
+        return nil,
+            {
+                PackageId = packageId,
+                Success = false,
+                Version = 0,
+                Error = tostring(result),
+            }
     end
 
-    return result
+    return rootInstance, result
 end
 
 function _findExistingMarker(parent: Instance, packageId: string): Types.PackageInfo?

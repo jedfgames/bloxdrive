@@ -1,6 +1,6 @@
-.assetfile-cache.json
 .claude
 .DS_Store
+.wrangler
 .env
 .local
 .luau-lsp
@@ -15,8 +15,10 @@
 *.rbxmx
 aftman.toml
 Build
+node_modules
 DevPackages
 Packages
+PLANS.md
 rbx-package-registry
-sourcemap.json
+*sourcemap*.json
 Tools

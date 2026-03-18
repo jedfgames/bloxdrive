@@ -16,6 +16,42 @@ from pure-data modules like TreeDiff or Merger.
 
 --]]
 
+-- Some properties are reported as serializable by ReflectionService but
+-- cannot be accessed by their reflected name. This map provides the
+-- public API name to use instead.
+local PROPERTY_ALIASES: { [string]: string } = {
+    Color3uint8 = "Color",
+    MaterialVariantSerialized = "MaterialVariant",
+}
+
+-- Properties that are serializable according to ReflectionService but
+-- should be skipped entirely. Includes legacy surface joint params,
+-- runtime physics state, and redundant collision group ID.
+local SKIP_PROPERTIES: { [string]: boolean } = {
+    BackParamA = true,
+    BackParamB = true,
+    BackSurfaceInput = true,
+    BottomParamA = true,
+    BottomParamB = true,
+    BottomSurfaceInput = true,
+    CollisionGroupId = true,
+    FrontParamA = true,
+    FrontParamB = true,
+    FrontSurfaceInput = true,
+    LeftParamA = true,
+    LeftParamB = true,
+    LeftSurfaceInput = true,
+    RightParamA = true,
+    RightParamB = true,
+    RightSurfaceInput = true,
+    RotVelocity = true,
+    TopParamA = true,
+    TopParamB = true,
+    TopSurfaceInput = true,
+    Velocity = true,
+    formFactorRaw = true,
+}
+
 local PropertyReflection = {}
 
 type PropertyInfo = {
@@ -99,12 +135,22 @@ function PropertyReflection.getSerializableProperties(instance: Instance): { [st
             continue
         end
 
+        -- Skip legacy or internal-only properties
+        if SKIP_PROPERTIES[info.Name] then
+            continue
+        end
+
+        -- Resolve aliased property names. Some internal properties
+        -- (e.g. Color3uint8) can't be accessed directly and need
+        -- their public API name (e.g. Color) instead.
+        local propName = PROPERTY_ALIASES[info.Name] or info.Name
+
         local success, value = pcall(function()
-            return (instance :: any)[info.Name]
+            return (instance :: any)[propName]
         end)
 
         if success and value ~= nil then
-            result[info.Name] = _encodeValue(value, info.Type)
+            result[propName] = _encodeValue(value, info.Type)
         end
     end
 

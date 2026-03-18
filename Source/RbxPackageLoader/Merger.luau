@@ -10,8 +10,8 @@ following the Google Docs philosophy of never blocking the user.
 
 --]]
 
-local TreeDiff = require("@self/TreeDiff")
-local TreeUtils = require("@self/TreeUtils")
+local TreeDiff = require("./TreeDiff")
+local TreeUtils = require("./TreeUtils")
 
 local Merger = {}
 

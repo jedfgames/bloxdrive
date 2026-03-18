@@ -1,0 +1,21 @@
+{
+    "name": "rbx-package-loader-e2e",
+    "tree": {
+        "$className": "DataModel",
+        "HttpService": {
+            "$className": "HttpService",
+            "$properties": {
+                "HttpEnabled": true
+            }
+        },
+        "ReplicatedStorage": {
+            "$className": "ReplicatedStorage",
+            "Source": {
+                "$className": "Folder",
+                "RbxPackageLoader": {
+                    "$path": "Source/RbxPackageLoader"
+                }
+            }
+        }
+    }
+}

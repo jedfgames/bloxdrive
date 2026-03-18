@@ -2,17 +2,17 @@
 
 PackagePublisher
 
-Handles publishing packages to the jedfgames/rbx-package-registry GitHub
-repo. Serializes a selected instance subtree into a hierarchical file
-structure and pushes it as a new version via the GitHub Contents API.
-
-Each instance becomes its own file: leaf instances are `Name.json`,
-containers are directories with `instance.json`. A `manifest.json`
-listing all files is uploaded last as the commit point.
+Handles publishing packages to the rbx-package-registry Cloudflare
+Worker. Serializes a selected instance subtree into a tree and uploads
+it as a new version via a single PUT request.
 
 --]]
 
 local HttpService = game:GetService("HttpService")
+
+local DEFAULT_REGISTRY_URL = "https://rbx-package-registry.batchprogrammer314.workers.dev"
+
+local MAX_PUBLISH_RETRIES = 3
 
 local PackagePublisher = {}
 
@@ -30,14 +30,10 @@ type PublishResult = {
     Error: string?,
 }
 
-local REGISTRY_OWNER = "jedfgames"
-local REGISTRY_REPO = "rbx-package-registry"
-local API_BASE = "https://api.github.com"
-
 --[=[
-    Publishes a new version of a package to the registry. Serializes the
-    given instance subtree into hierarchical files, increments the version
-    number, and pushes all files plus updated metadata.json to GitHub.
+    Publishes a new version of a package to the registry. Serializes
+    the given instance subtree, determines the next version number,
+    and uploads the tree in a single request.
 
     @param serializer Serializer -- The serializer module
     @param options PublishOptions -- Publish configuration
@@ -49,186 +45,111 @@ function PackagePublisher.publish(serializer: any, options: PublishOptions): Pub
     assert(typeof(options.Root) == "Instance", "Expected an Instance Root")
     assert(type(options.AuthToken) == "string", "Expected a string AuthToken")
 
-    local success, result = pcall(function(): PublishResult
-        -- Serialize the instance tree into hierarchical files
-        local tree = serializer.serialize(options.Root)
-        local serialized = serializer.serializeToFiles(tree)
+    local baseUrl = options.BaseUrl or DEFAULT_REGISTRY_URL
 
-        -- Fetch current metadata (or create new)
-        local metadata = _fetchOrCreateMetadata(options.PackageId, options.PackageName, options.AuthToken)
-        local newVersion = metadata.LatestVersion + 1
-        local versionPath = `packages/{options.PackageId}/versions/{newVersion}`
+    -- Serialize the tree up front
+    local tree = serializer.serialize(options.Root)
+    local treeJson = HttpService:JSONEncode(tree)
 
-        -- Upload all instance files first
-        for filePath, content in serialized.Files do
-            local jsonContent = HttpService:JSONEncode(content)
-            _uploadFile(
-                options.AuthToken,
-                `{versionPath}/{filePath}`,
-                jsonContent,
-                `Publish {options.PackageId} v{newVersion}: {filePath}`
-            )
+    for attempt = 1, MAX_PUBLISH_RETRIES do
+        local success, result = pcall(function(): PublishResult
+            -- Fetch current metadata to determine next version
+            local metadata = _fetchMetadata(baseUrl, options.PackageId, options.AuthToken)
+            local newVersion = metadata.LatestVersion + 1
+
+            -- Single PUT to publish the version
+            _putVersion(baseUrl, options.AuthToken, options.PackageId, options.PackageName, newVersion, treeJson)
+
+            return {
+                Success = true,
+                Version = newVersion,
+            }
+        end)
+
+        if success then
+            return result
         end
 
-        -- Upload manifest.json last (acts as the commit point)
-        local manifestJson = HttpService:JSONEncode({ files = serialized.Manifest })
-        _uploadFile(
-            options.AuthToken,
-            `{versionPath}/manifest.json`,
-            manifestJson,
-            `Publish {options.PackageId} v{newVersion}: manifest`
-        )
+        local errorStr = tostring(result)
 
-        -- Update metadata.json
-        metadata.LatestVersion = newVersion
-        local metadataJson = HttpService:JSONEncode({
-            name = metadata.Name,
-            latestVersion = metadata.LatestVersion,
-        })
-        _uploadFile(
-            options.AuthToken,
-            `packages/{options.PackageId}/metadata.json`,
-            metadataJson,
-            `Update {options.PackageId} metadata to version {newVersion}`
-        )
+        -- Retry on 409 Conflict (version already claimed by
+        -- another publisher)
+        local isConflict = string.find(errorStr, "409")
+        if isConflict and attempt < MAX_PUBLISH_RETRIES then
+            task.wait(1)
+            continue
+        end
 
-        return {
-            Success = true,
-            Version = newVersion,
-        }
-    end)
-
-    if not success then
         return {
             Success = false,
-            Error = tostring(result),
+            Error = errorStr,
         }
     end
 
-    return result
+    return {
+        Success = false,
+        Error = "Exceeded maximum publish retries due to version conflicts.",
+    }
 end
 
-function _fetchOrCreateMetadata(
-    packageId: string,
-    packageName: string,
-    authToken: string
-): { Name: string, LatestVersion: number }
-    local url = `{API_BASE}/repos/{REGISTRY_OWNER}/{REGISTRY_REPO}/contents/packages/{packageId}/metadata.json`
+function _fetchMetadata(baseUrl: string, packageId: string, authToken: string): { Name: string, LatestVersion: number }
+    local url = `{baseUrl}/packages/{packageId}`
 
     local success, response = pcall(function()
-        return HttpService:GetAsync(url, true, {
-            Authorization = `token {authToken}`,
-            Accept = "application/vnd.github.v3.raw",
+        return HttpService:RequestAsync({
+            Url = url,
+            Method = "GET",
+            Headers = {
+                Authorization = `Bearer {authToken}`,
+            },
         })
     end)
 
-    if success and response then
-        local decoded = HttpService:JSONDecode(response)
+    if success and response.Success then
+        local decoded = HttpService:JSONDecode(response.Body)
         return {
-            Name = decoded.name or decoded.Name or packageId,
-            LatestVersion = decoded.latestVersion or decoded.LatestVersion or 0,
+            Name = decoded.name or packageId,
+            LatestVersion = decoded.latestVersion or 0,
         }
     end
 
-    -- Package doesn't exist yet, create initial metadata
+    -- Package doesn't exist yet (404)
     return {
-        Name = packageName,
+        Name = packageId,
         LatestVersion = 0,
     }
 end
 
-function _uploadFile(authToken: string, path: string, content: string, message: string)
-    local url = `{API_BASE}/repos/{REGISTRY_OWNER}/{REGISTRY_REPO}/contents/{path}`
-
-    -- Check if file already exists to get its SHA (needed for updates)
-    local sha: string? = nil
-    local checkSuccess, checkResponse = pcall(function()
-        return HttpService:GetAsync(url, true, {
-            Authorization = `token {authToken}`,
-            Accept = "application/vnd.github.v3+json",
-        })
-    end)
-
-    if checkSuccess and checkResponse then
-        local decoded = HttpService:JSONDecode(checkResponse)
-        sha = decoded.sha
-    end
-
-    -- Base64 encode the content
-    local encoded = _base64Encode(content)
-
-    local body: { [string]: any } = {
-        message = message,
-        content = encoded,
-    }
-
-    if sha then
-        body.sha = sha
-    end
-
-    local requestBody = HttpService:JSONEncode(body)
+function _putVersion(
+    baseUrl: string,
+    authToken: string,
+    packageId: string,
+    packageName: string,
+    version: number,
+    treeJson: string
+)
+    local url = `{baseUrl}/packages/{packageId}/versions/{version}`
 
     local putSuccess, putResponse = pcall(function()
         return HttpService:RequestAsync({
             Url = url,
             Method = "PUT",
             Headers = {
-                Authorization = `token {authToken}`,
+                Authorization = `Bearer {authToken}`,
                 ["Content-Type"] = "application/json",
-                Accept = "application/vnd.github.v3+json",
+                ["X-Package-Name"] = packageName,
             },
-            Body = requestBody,
+            Body = treeJson,
         })
     end)
 
     if not putSuccess then
-        error(`Failed to upload file "{path}": {putResponse}`)
+        error(`Failed to publish version {version}: {putResponse}`)
     end
 
     if not putResponse.Success then
-        error(`Failed to upload file "{path}" ({putResponse.StatusCode}): {putResponse.Body}`)
+        error(`Failed to publish version {version} ({putResponse.StatusCode}): {putResponse.Body}`)
     end
-end
-
-function _base64Encode(data: string): string
-    local CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-    local result = {}
-
-    local i = 1
-    while i <= #data do
-        local a = string.byte(data, i)
-        local b = if i + 1 <= #data then string.byte(data, i + 1) else 0
-        local c = if i + 2 <= #data then string.byte(data, i + 2) else 0
-
-        local remaining = #data - i + 1
-
-        local n = a * 65536 + b * 256 + c
-
-        table.insert(result, string.sub(CHARS, bit32.rshift(n, 18) + 1, bit32.rshift(n, 18) + 1))
-        table.insert(
-            result,
-            string.sub(CHARS, bit32.band(bit32.rshift(n, 12), 63) + 1, bit32.band(bit32.rshift(n, 12), 63) + 1)
-        )
-
-        if remaining >= 2 then
-            table.insert(
-                result,
-                string.sub(CHARS, bit32.band(bit32.rshift(n, 6), 63) + 1, bit32.band(bit32.rshift(n, 6), 63) + 1)
-            )
-        else
-            table.insert(result, "=")
-        end
-
-        if remaining >= 3 then
-            table.insert(result, string.sub(CHARS, bit32.band(n, 63) + 1, bit32.band(n, 63) + 1))
-        else
-            table.insert(result, "=")
-        end
-
-        i += 3
-    end
-
-    return table.concat(result)
 end
 
 return PackagePublisher

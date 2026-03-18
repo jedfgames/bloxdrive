@@ -2,19 +2,15 @@
 
 Registry
 
-HTTP client for fetching packages from the jedfgames/rbx-package-registry
-GitHub repository. Retrieves package metadata and versioned instance files
-via GitHub's raw content URLs. Supports both the new hierarchical format
-(manifest.json + individual files) and the legacy single tree.json format.
+HTTP client for fetching packages from the rbx-package-registry
+Cloudflare Worker. Retrieves package metadata and versioned instance
+trees via a simple REST API backed by D1 (SQLite at the edge).
 
 --]]
 
 local HttpService = game:GetService("HttpService")
 
-local Deserializer = require("@self/Deserializer")
-
-local API_BASE_URL = "https://api.github.com/repos/jedfgames/rbx-package-registry/contents"
-local DEFAULT_BASE_URL = "https://raw.githubusercontent.com/jedfgames/rbx-package-registry/main"
+local DEFAULT_BASE_URL = "https://rbx-package-registry.batchprogrammer314.workers.dev"
 
 local Registry = {}
 Registry.__index = Registry
@@ -31,7 +27,7 @@ export type Registry = typeof(setmetatable(
     Creates a new Registry client.
 
     @param config { BaseUrl: string?, AuthToken: string? }? -- Optional
-    > configuration. Defaults to the jedfgames/rbx-package-registry raw URL.
+    > configuration. Defaults to the Workers registry URL.
     @return Registry -- The registry client
 ]=]
 function Registry.new(config: { BaseUrl: string?, AuthToken: string? }?): Registry
@@ -50,43 +46,17 @@ end
 function Registry.FetchMetadata(self: Registry, packageId: string): { Name: string, LatestVersion: number }
     assert(type(packageId) == "string", "Expected a string packageId")
 
-    -- Use the GitHub API with raw content accept header to avoid CDN
-    -- caching that raw.githubusercontent.com applies
-    local url = `{API_BASE_URL}/packages/{packageId}/metadata.json`
-    local headers: { [string]: string } = {
-        Accept = "application/vnd.github.v3.raw",
-    }
-    if self._authToken then
-        headers["Authorization"] = `token {self._authToken}`
-    end
-
-    local success, response = pcall(function()
-        return HttpService:GetAsync(url, true, headers)
-    end)
-
-    if not success then
-        error(`Failed to fetch metadata for "{packageId}": {response}`)
-    end
-
+    local response = self:_get(`{self._baseUrl}/packages/{packageId}`)
     local metadata = HttpService:JSONDecode(response)
 
-    -- Registry JSON uses lowercase keys (name, latestVersion) so normalize
-    -- to PascalCase for consistency with our Luau conventions
-    local normalized = {
-        Name = metadata.name or metadata.Name,
-        LatestVersion = metadata.latestVersion or metadata.LatestVersion,
+    return {
+        Name = metadata.name,
+        LatestVersion = metadata.latestVersion,
     }
-
-    assert(type(normalized.Name) == "string", `Invalid metadata for "{packageId}": missing name`)
-    assert(type(normalized.LatestVersion) == "number", `Invalid metadata for "{packageId}": missing latestVersion`)
-
-    return normalized
 end
 
 --[=[
-    Fetches a specific version of a package from the registry. Tries the
-    new hierarchical format first (manifest.json + individual files), then
-    falls back to the legacy single tree.json format.
+    Fetches a specific version of a package from the registry.
 
     @param packageId string -- The package identifier
     @param version number -- The version number to fetch
@@ -96,39 +66,19 @@ function Registry.FetchVersion(self: Registry, packageId: string, version: numbe
     assert(type(packageId) == "string", "Expected a string packageId")
     assert(type(version) == "number", "Expected a number version")
 
-    local versionBase = `{self._baseUrl}/packages/{packageId}/versions/{version}`
-
-    -- Try new hierarchical format first
-    local manifestSuccess, manifestResponse = pcall(function()
-        return self:_get(`{versionBase}/manifest.json`)
-    end)
-
-    if manifestSuccess then
-        local manifest = HttpService:JSONDecode(manifestResponse)
-        local files: { [string]: any } = {}
-
-        for _, filePath in manifest.files do
-            local fileResponse = self:_get(`{versionBase}/{filePath}`)
-            files[filePath] = HttpService:JSONDecode(fileResponse)
-        end
-
-        return Deserializer.reassembleTree(files)
-    end
-
-    -- Fall back to legacy tree.json format
-    local response = self:_get(`{versionBase}/tree.json`)
+    local response = self:_get(`{self._baseUrl}/packages/{packageId}/versions/{version}`)
     local tree = HttpService:JSONDecode(response)
 
-    assert(type(tree) == "table", `Invalid tree.json for "{packageId}" version {version}`)
-    assert(tree["$className"] ~= nil, `Missing $className in tree.json for "{packageId}" version {version}`)
+    assert(type(tree) == "table", `Invalid tree for "{packageId}" version {version}`)
+    assert(tree["$className"] ~= nil, `Missing $className for "{packageId}" version {version}`)
 
     return tree
 end
 
 --[=[
     Fetches the latest version of a package from the registry. First
-    retrieves metadata to determine the latest version number, then fetches
-    that version's tree.
+    retrieves metadata to determine the latest version number, then
+    fetches that version's tree.
 
     @param packageId string -- The package identifier
     @return TreeNode -- The deserialized tree
@@ -141,9 +91,11 @@ function Registry.FetchLatest(self: Registry, packageId: string): ({ [string]: a
 end
 
 function Registry._get(self: Registry, url: string): string
-    local headers = {}
+    local headers: { [string]: string }? = nil
     if self._authToken then
-        headers["Authorization"] = `token {self._authToken}`
+        headers = {
+            Authorization = `Bearer {self._authToken}`,
+        }
     end
 
     local success, response = pcall(function()

@@ -61,6 +61,9 @@ jobs:
         run: wally install
 
       - name: Run tests
+        env:
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+          ROBLOX_E2E_API_KEY: ${{ secrets.ROBLOX_E2E_API_KEY }}
         run: lune run ./Scripts/RunTests.luau
 
   analyze:
@@ -77,6 +80,9 @@ jobs:
 
       - name: Install dependencies
         run: wally install
+
+      - name: Generate Lune type definitions
+        run: lune setup
 
       - name: Run static analysis
         run: lune run ./Scripts/Lint.luau

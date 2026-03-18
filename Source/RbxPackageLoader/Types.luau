@@ -85,7 +85,7 @@ export type MergeResult = {
 ]=]
 export type LoadOptions = {
     Version: number?,
-    Parent: Instance,
+    Parent: Instance?,
 }
 
 --[=[

@@ -6,7 +6,7 @@ Simple logging module that prepends a consistent prefix to all output.
 
 --]]
 
-local PREFIX = "[rbx-package-loader]"
+local PREFIX = "[RbxPackageLoader]"
 
 local Logger = {}
 

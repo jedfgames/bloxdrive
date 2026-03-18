@@ -1,0 +1,8 @@
+name = "rbx-package-registry"
+main = "Source/Index.ts"
+compatibility_date = "2025-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "rbx-package-registry"
+database_id = "99f051d3-de7a-4820-ba44-0122260465da"

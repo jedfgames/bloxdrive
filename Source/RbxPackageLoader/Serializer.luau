@@ -13,8 +13,8 @@ directories with `instance.json`.
 
 --]]
 
-local PropertyReflection = require("@self/PropertyReflection")
-local TreeUtils = require("@self/TreeUtils")
+local PropertyReflection = require("./PropertyReflection")
+local TreeUtils = require("./TreeUtils")
 
 local PACKAGE_MARKER_NAME = ".rbx-package"
 
@@ -50,7 +50,12 @@ function _serializeInstance(instance: Instance): { [string]: any }
         node["$attributes"] = attributes
     end
 
-    -- Serialize children, skipping the package marker
+    -- Serialize children, skipping the package marker. When
+    -- multiple children share the same name, auto-increment like
+    -- Roblox does (Part, Part1, Part2). The instance is also
+    -- renamed in the DataModel to keep things consistent.
+    local usedKeys: { [string]: boolean } = {}
+
     for _, child in instance:GetChildren() do
         if child.Name == PACKAGE_MARKER_NAME and child:IsA("StringValue") then
             continue
@@ -58,10 +63,19 @@ function _serializeInstance(instance: Instance): { [string]: any }
 
         local childName = child.Name
         if TreeUtils.isMetadataKey(childName) then
-            -- Prefix with underscore to avoid collision with $ keys
             childName = `_{childName}`
         end
 
+        if usedKeys[childName] then
+            local counter = 1
+            while usedKeys[`{childName}{counter}`] do
+                counter += 1
+            end
+            childName = `{childName}{counter}`
+            child.Name = childName
+        end
+
+        usedKeys[childName] = true
         node[childName] = _serializeInstance(child)
     end
 

@@ -9,7 +9,7 @@ since they are keyed by name in the Rojo format.
 
 --]]
 
-local TreeUtils = require("@self/TreeUtils")
+local TreeUtils = require("./TreeUtils")
 
 local TreeDiff = {}
 
