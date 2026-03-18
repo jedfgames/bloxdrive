@@ -26,23 +26,72 @@ local Dotenv = require("@devpackages/Dotenv")
 local PLUGIN_NAME = "rbx-package-loader.rbxm"
 local BUILD_PATH = `Build/{PLUGIN_NAME}`
 
+-- Counts how many Parent levels are needed to reach the plugin
+-- root from a given instance.
+local function _depthFromRoot(instance: roblox.Instance): number
+    local depth = 0
+    local current = instance.Parent
+    while current do
+        depth += 1
+        current = current.Parent
+    end
+    return depth
+end
+
+-- Builds a script.Parent.Parent... chain to reach the plugin root
+-- from a given depth level.
+local function _parentChain(depth: number): string
+    if depth == 0 then
+        return "script"
+    end
+    local parts = { "script" }
+    for _ = 1, depth do
+        table.insert(parts, "Parent")
+    end
+    return table.concat(parts, ".")
+end
+
+-- Maps .luaurc alias prefixes to their location in the Rojo tree.
+-- Each value is the instance path from the plugin root.
+local ALIAS_MAP: { [string]: string } = {
+    packages = "Packages",
+    rbxpackageloader = "RbxPackageLoader",
+}
+
 local function patchRequires(instances: { roblox.Instance })
     local patched = 0
 
     for _, instance in instances do
         if instance:IsA("LuaSourceContainer") then
             local source = (instance :: any).Source :: string
-            -- Studio does not understand @self aliases from .luaurc.
-            -- For init.luau containers (ModuleScript with children), @self
-            -- refers to the script itself, so require("@self/X") becomes
-            -- require(script.X). For non-init files, @self refers to the
-            -- parent directory, so it becomes require(script.Parent.X).
             local newSource = source
             local isContainer = instance:IsA("ModuleScript") and #instance:GetChildren() > 0
-            if isContainer then
-                newSource = string.gsub(source, 'require%("@self/([^"]+)"%)', "require(script.%1)")
-            else
-                newSource = string.gsub(source, 'require%("@self/([^"]+)"%)', "require(script.Parent.%1)")
+
+            -- Patch @self aliases. For init.luau containers, @self
+            -- refers to the script itself. For non-init files, @self
+            -- refers to the parent directory.
+            local selfBase = if isContainer then "script" else "script.Parent"
+            newSource = string.gsub(newSource, 'require%("@self/([^"]+)"%)', function(path)
+                local dotPath = string.gsub(path, "/", ".")
+                return `require({selfBase}.{dotPath})`
+            end)
+
+            -- Patch alias-based requires (@packages, @rbxpackageloader,
+            -- etc.) by computing the relative path from the script to
+            -- the plugin root, then appending the target path.
+            local depth = _depthFromRoot(instance)
+            local rootRef = _parentChain(depth)
+            for alias, treePath in ALIAS_MAP do
+                -- Bare alias: require("@rbxpackageloader") with no path
+                local barePattern = `require%("@{alias}"%)`
+                newSource = string.gsub(newSource, barePattern, `require({rootRef}.{treePath})`)
+
+                -- Alias with path: require("@packages/Fusion")
+                local pathPattern = `require%("@{alias}/([^"]+)"%)`
+                newSource = string.gsub(newSource, pathPattern, function(path)
+                    local dotPath = string.gsub(path, "/", ".")
+                    return `require({rootRef}.{treePath}.{dotPath})`
+                end)
             end
 
             if newSource ~= source then
@@ -51,7 +100,7 @@ local function patchRequires(instances: { roblox.Instance })
             end
         end
 
-        patchRequires(instance:GetChildren())
+        patched += patchRequires(instance:GetChildren())
     end
 
     return patched
