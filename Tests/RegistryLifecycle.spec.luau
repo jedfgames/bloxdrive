@@ -232,7 +232,7 @@ local function _makeTreeWithAttributes(): { [string]: any }
 end
 
 return function()
-    Dotenv.load()
+    pcall(Dotenv.load)
     _token = process.env.REGISTRY_TOKEN
 
     if _token == nil or _token == "" then

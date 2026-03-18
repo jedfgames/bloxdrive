@@ -40,7 +40,7 @@ type TestResult = {
 }
 
 local function _loadApiKey(): string?
-    Dotenv.load()
+    pcall(Dotenv.load)
     local key = process.env.ROBLOX_E2E_API_KEY
     if key == nil or key == "" then
         return nil

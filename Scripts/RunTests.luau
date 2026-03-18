@@ -15,7 +15,7 @@ local Dotenv = require("@devpackages/Dotenv")
 local Testable = require("@devpackages/Testable")
 local process = require("@lune/process")
 
-Dotenv.load()
+pcall(Dotenv.load)
 
 Testable.configure({
     Verbose = true,

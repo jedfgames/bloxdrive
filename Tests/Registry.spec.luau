@@ -25,7 +25,7 @@ local TEST_PACKAGE_ID = "registry-spec-fixture"
 local _token: string? = nil
 
 local function _loadToken(): string?
-    Dotenv.load()
+    pcall(Dotenv.load)
     local token = process.env.REGISTRY_TOKEN
     if token == nil or token == "" then
         return nil

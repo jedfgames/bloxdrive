@@ -65,22 +65,20 @@ local function lint()
 
     local allPassed = true
 
-    -- Source/ and Tests/*.spec.luau (Roblox, dev sourcemap)
+    -- Source/ (Roblox, dev sourcemap)
     local robloxArgs = {
         "analyze",
         "--platform=roblox",
         "--sourcemap=sourcemap.json",
         "--no-flags-enabled",
-        "--ignore=Tests/E2E/**",
         table.unpack(IGNORE_ARGS),
     }
     table.insert(robloxArgs, "Source/")
-    table.insert(robloxArgs, "Tests/")
-    if not analyze("Source/ and Tests/", robloxArgs) then
+    if not analyze("Source/", robloxArgs) then
         allPassed = false
     end
 
-    -- Tests/E2E/ (Roblox, e2e sourcemap)
+    -- Tests/E2E/RemoteTestScript.luau (Roblox, e2e sourcemap)
     local e2eArgs = {
         "analyze",
         "--platform=roblox",
@@ -93,17 +91,18 @@ local function lint()
         allPassed = false
     end
 
-    -- Scripts/ (Lune, no sourcemap)
+    -- Scripts/ and Tests/*.spec.luau (Lune, no sourcemap)
     local luneArgs = {
         "analyze",
         "--platform=lune",
         "--no-flags-enabled",
         "--ignore=Source/**",
-        "--ignore=Tests/**",
+        "--ignore=Tests/E2E/**",
         table.unpack(IGNORE_ARGS),
     }
     table.insert(luneArgs, "Scripts/")
-    if not analyze("Scripts/", luneArgs) then
+    table.insert(luneArgs, "Tests/")
+    if not analyze("Scripts/ and Tests/", luneArgs) then
         allPassed = false
     end
 
