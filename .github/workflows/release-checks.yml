@@ -80,7 +80,7 @@ jobs:
 
       - name: Run tests
         env:
-          GITHUB_PAT: ${{ secrets.REGISTRY_PAT }}
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
           ROBLOX_E2E_API_KEY: ${{ secrets.ROBLOX_E2E_API_KEY }}
         run: lune run ./Scripts/RunTests.luau
 
