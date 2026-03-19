@@ -3,7 +3,7 @@
         "devpackages": "./DevPackages/",
         "lune": "~/.lune/.typedefs/0.10.4-horse.10.0/",
         "packages": "./Packages/",
-        "rbxpackageloader": "./Source/RbxPackageLoader/",
+        "bloxdrive": "./Source/Bloxdrive/",
         "tests": "./Tests/"
     },
     "globals": [

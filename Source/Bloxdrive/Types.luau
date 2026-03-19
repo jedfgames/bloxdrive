@@ -2,7 +2,7 @@
 
 Types
 
-Type definitions for the rbx-package-loader system. Defines the shapes of
+Type definitions for the bloxdrive system. Defines the shapes of
 serialized instance trees, package markers, registry metadata, diff
 operations, and merge results.
 
@@ -11,7 +11,7 @@ operations, and merge results.
 local Types = {}
 
 --[=[
-    Parsed contents of a `.rbx-package` StringValue. Identifies which package
+    Parsed contents of a `.bloxdrive` StringValue. Identifies which package
     a subtree belongs to, what version is installed, and whether to
     auto-update.
 ]=]
@@ -48,7 +48,7 @@ export type PackageMetadata = {
 ]=]
 export type RegistryConfig = {
     BaseUrl: string,
-    AuthToken: string?,
+    RegistryKey: string?,
 }
 
 --[=[

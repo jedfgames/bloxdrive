@@ -1,5 +1,5 @@
 {
-    "name": "rbx-package-registry",
+    "name": "bloxdrive-registry",
     "private": true,
     "scripts": {
         "dev": "wrangler dev",

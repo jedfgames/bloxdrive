@@ -16,13 +16,13 @@ directories with `instance.json`.
 local PropertyReflection = require("./PropertyReflection")
 local TreeUtils = require("./TreeUtils")
 
-local PACKAGE_MARKER_NAME = ".rbx-package"
+local PACKAGE_MARKER_NAME = ".bloxdrive"
 
 local Serializer = {}
 
 --[=[
     Serializes an instance and all its descendants into a TreeNode. Skips
-    the `.rbx-package` StringValue marker since it is metadata, not package
+    the `.bloxdrive` StringValue marker since it is metadata, not package
     content.
 
     @param root Instance -- The root instance to serialize

@@ -1,6 +1,6 @@
 --[[
 
-RbxPackageLoader
+Bloxdrive
 
 A toolchain for managing Roblox instance-based packages deterministically.
 Replaces Roblox's native package system with one that supports
@@ -25,25 +25,25 @@ local Types = require("@self/Types")
 
 local HttpService = game:GetService("HttpService")
 
-local PACKAGE_MARKER_NAME = ".rbx-package"
+local PACKAGE_MARKER_NAME = ".bloxdrive"
 
-local RbxPackageLoader = {}
+local Bloxdrive = {}
 
-local _registryConfig: { BaseUrl: string?, AuthToken: string? }? = nil
+local _registryConfig: { BaseUrl: string?, RegistryKey: string? }? = nil
 
 -- Re-export sub-modules for plugin and advanced usage
-RbxPackageLoader.Deserializer = Deserializer
-RbxPackageLoader.Merger = Merger
-RbxPackageLoader.PackageScanner = PackageScanner
-RbxPackageLoader.PropertyReflection = PropertyReflection
-RbxPackageLoader.Registry = Registry
-RbxPackageLoader.Serializer = Serializer
-RbxPackageLoader.TreeDiff = TreeDiff
-RbxPackageLoader.TreeUtils = TreeUtils
-RbxPackageLoader.Types = Types
+Bloxdrive.Deserializer = Deserializer
+Bloxdrive.Merger = Merger
+Bloxdrive.PackageScanner = PackageScanner
+Bloxdrive.PropertyReflection = PropertyReflection
+Bloxdrive.Registry = Registry
+Bloxdrive.Serializer = Serializer
+Bloxdrive.TreeDiff = TreeDiff
+Bloxdrive.TreeUtils = TreeUtils
+Bloxdrive.Types = Types
 
 type Config = {
-    AuthToken: string?,
+    RegistryKey: string?,
     BaseUrl: string?,
 }
 
@@ -57,9 +57,9 @@ type LoadOptions = {
     startup to provide credentials that all subsequent `load` calls
     will use.
 
-    @param config Config -- Configuration with optional AuthToken and BaseUrl
+    @param config Config -- Configuration with optional RegistryKey and BaseUrl
 ]=]
-function RbxPackageLoader.configure(config: Config)
+function Bloxdrive.configure(config: Config)
     assert(type(config) == "table", "Expected a table config")
     _registryConfig = config
 end
@@ -77,7 +77,7 @@ type LoadResult = {
     DataModel. If a version is not specified, the latest version is fetched.
 
     When `options.Parent` is provided and already contains package content
-    (identified by a `.rbx-package` marker), a three-way merge is performed
+    (identified by a `.bloxdrive` marker), a three-way merge is performed
     between the previously installed version, the current DataModel state,
     and the new version. When `options.Parent` is omitted, the root instance
     is created but not parented to anything.
@@ -90,7 +90,7 @@ type LoadResult = {
     @return Instance? -- The root instance of the loaded package, or nil on failure
     @return LoadResult -- The result of the load operation
 ]=]
-function RbxPackageLoader.load(packageId: string, options: LoadOptions): (Instance?, LoadResult)
+function Bloxdrive.load(packageId: string, options: LoadOptions): (Instance?, LoadResult)
     assert(type(packageId) == "string", "Expected a string packageId")
     assert(type(options) == "table", "Expected a table options")
 
@@ -288,4 +288,4 @@ function _updateMarker(marker: StringValue, packageId: string, version: number)
     marker.Value = HttpService:JSONEncode(decoded)
 end
 
-return RbxPackageLoader
+return Bloxdrive

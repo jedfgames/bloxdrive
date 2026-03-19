@@ -1,5 +1,5 @@
 {
-    "name": "rbx-package-loader",
+    "name": "bloxdrive",
     "tree": {
         "$className": "Folder",
         "Packages": {
@@ -8,8 +8,8 @@
         "Plugin": {
             "$path": "Source/Plugin"
         },
-        "RbxPackageLoader": {
-            "$path": "Source/RbxPackageLoader"
+        "Bloxdrive": {
+            "$path": "Source/Bloxdrive"
         }
     }
 }

@@ -1,13 +1,13 @@
 --[[
 
-Merger
+Merger.spec
 
 Tests for the Merger module. These tests use pure TreeNode tables and do
 not require any Roblox APIs.
 
 --]]
 
-local Merger = require("@rbxpackageloader/Merger")
+local Merger = require("@bloxdrive/Merger")
 
 return function()
     describe("merge", function()

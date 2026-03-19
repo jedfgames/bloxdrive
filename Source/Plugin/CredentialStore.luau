@@ -2,12 +2,12 @@
 
 CredentialStore
 
-Stores and retrieves the GitHub auth token using Roblox Studio's plugin
-settings API. The token persists across Studio sessions.
+Stores and retrieves the registry key using Roblox Studio's plugin
+settings API. The key persists across Studio sessions.
 
 --]]
 
-local SETTING_KEY = "RbxPackageLoader_AuthToken"
+local SETTING_KEY = "Bloxdrive_RegistryKey"
 
 local CredentialStore = {}
 
@@ -24,45 +24,45 @@ function CredentialStore.init(pluginInstance: Plugin)
 end
 
 --[=[
-    Returns the stored auth token, or nil if none is set.
+    Returns the stored registry key, or nil if none is set.
 
-    @return string? -- The auth token
+    @return string? -- The registry key
 ]=]
-function CredentialStore.getToken(): string?
+function CredentialStore.getKey(): string?
     assert(_plugin ~= nil, "CredentialStore not initialized")
-    local token = _plugin:GetSetting(SETTING_KEY)
-    if type(token) == "string" and token ~= "" then
-        return token
+    local key = _plugin:GetSetting(SETTING_KEY)
+    if type(key) == "string" and key ~= "" then
+        return key
     end
     return nil
 end
 
 --[=[
-    Stores an auth token in plugin settings.
+    Stores a registry key in plugin settings.
 
-    @param token string -- The auth token to store
+    @param key string -- The registry key to store
 ]=]
-function CredentialStore.setToken(token: string)
+function CredentialStore.setKey(key: string)
     assert(_plugin ~= nil, "CredentialStore not initialized")
-    assert(type(token) == "string", "Expected a string token")
-    _plugin:SetSetting(SETTING_KEY, token)
+    assert(type(key) == "string", "Expected a string key")
+    _plugin:SetSetting(SETTING_KEY, key)
 end
 
 --[=[
-    Clears the stored auth token.
+    Clears the stored registry key.
 ]=]
-function CredentialStore.clearToken()
+function CredentialStore.clearKey()
     assert(_plugin ~= nil, "CredentialStore not initialized")
     _plugin:SetSetting(SETTING_KEY, nil)
 end
 
 --[=[
-    Returns whether an auth token is stored.
+    Returns whether a registry key is stored.
 
-    @return boolean -- Whether a token exists
+    @return boolean -- Whether a key exists
 ]=]
-function CredentialStore.hasToken(): boolean
-    return CredentialStore.getToken() ~= nil
+function CredentialStore.hasKey(): boolean
+    return CredentialStore.getKey() ~= nil
 end
 
 return CredentialStore

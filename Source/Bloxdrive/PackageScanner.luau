@@ -2,7 +2,7 @@
 
 PackageScanner
 
-Scans the Roblox DataModel for `.rbx-package` StringValue markers. Each
+Scans the Roblox DataModel for `.bloxdrive` StringValue markers. Each
 marker identifies a managed package subtree with its ID, version, and
 auto-update preference.
 
@@ -10,7 +10,7 @@ auto-update preference.
 
 local HttpService = game:GetService("HttpService")
 
-local PACKAGE_MARKER_NAME = ".rbx-package"
+local PACKAGE_MARKER_NAME = ".bloxdrive"
 
 local PackageScanner = {}
 
@@ -27,7 +27,7 @@ type PackageInfo = {
 }
 
 --[=[
-    Scans the given roots (or the entire DataModel) for `.rbx-package`
+    Scans the given roots (or the entire DataModel) for `.bloxdrive`
     StringValue markers. Parses their JSON metadata and returns information
     about each discovered package.
 

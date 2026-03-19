@@ -1,8 +1,8 @@
 --[[
 
-Registry
+Registry.spec
 
-Tests for fetching package data from the rbx-package-registry
+Tests for fetching package data from the bloxdrive-registry
 Cloudflare Worker. Creates a temporary package, verifies fetch
 operations, then cleans up. Uses Lune's net library since
 HttpService is not available outside Roblox.
@@ -17,7 +17,7 @@ local net = require("@lune/net")
 local process = require("@lune/process")
 local serde = require("@lune/serde")
 
-local TreeUtils = require("@rbxpackageloader/TreeUtils")
+local TreeUtils = require("@bloxdrive/TreeUtils")
 
 local REGISTRY_URL = "https://rbx-package-registry.batchprogrammer314.workers.dev"
 local TEST_PACKAGE_ID = "registry-spec-fixture"

@@ -1,14 +1,15 @@
 --[[
 
-PromptInput.story
+PublishPrompt.story
 
-Previews the PromptInput component in UI Labs.
+Previews the Publish prompt as shown when the Publish toolbar button
+is clicked on a new (unmarked) instance.
 
 --]]
 
 local Fusion = require("@packages/Fusion")
 
-local PromptInput = require("./PromptInput")
+local PromptInput = require("../Components/PromptInput")
 
 return {
     fusion = Fusion,
@@ -23,10 +24,10 @@ return {
             BackgroundTransparency = 1,
 
             [Fusion.Children] = PromptInput(scope, {
-                DefaultValue = "HelloWorld",
+                DefaultValue = "MyPackage",
                 PlaceholderText = "Enter package name...",
                 OnSubmit = function(text: string)
-                    print(`Submitted "{text}"`)
+                    print(`[Publish] Submitted "{text}"`)
                 end,
             }),
         })

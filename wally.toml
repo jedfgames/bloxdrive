@@ -1,11 +1,11 @@
 [package]
-name = "jedfgames/rbx-package-loader"
+name = "jedfgames/bloxdrive"
 description = "A toolchain for managing Roblox instance-based packages deterministically."
 version = "0.0.2"
 license = "MIT"
 realm = "shared"
 registry = "https://github.com/UpliftGames/wally-index"
-repository = "https://github.com/jedfgames/rbx-package-loader"
+repository = "https://github.com/jedfgames/bloxdrive"
 include = [
     "default.project.json",
     "init.luau",

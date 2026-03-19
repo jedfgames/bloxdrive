@@ -1,16 +1,19 @@
 {
-    "name": "rbx-package-loader-storybook",
+    "name": "bloxdrive-storybook",
     "tree": {
         "$className": "DataModel",
         "ReplicatedStorage": {
             "$className": "ReplicatedStorage",
-            "PackageLoader": {
+            "Bloxdrive": {
                 "$className": "Folder",
                 "Components": {
                     "$path": "Source/Plugin/Components"
                 },
                 "Packages": {
                     "$path": "Packages"
+                },
+                "Prompts": {
+                    "$path": "Source/Plugin/Prompts"
                 }
             }
         }

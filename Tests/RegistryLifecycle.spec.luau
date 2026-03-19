@@ -1,9 +1,9 @@
 --[[
 
-RegistryLifecycle
+RegistryLifecycle.spec
 
 Stress tests that create, publish, update, fetch, diff, merge, and
-verify real packages on the rbx-package-registry Cloudflare Worker.
+verify real packages on the bloxdrive-registry Cloudflare Worker.
 Test packages use a "test-" prefix in their ID so they can be cleaned
 up without affecting real data. Exercises every registry operation
 end-to-end using Lune's net library.
@@ -19,9 +19,9 @@ local process = require("@lune/process")
 local serde = require("@lune/serde")
 local task = require("@lune/task")
 
-local Merger = require("@rbxpackageloader/Merger")
-local TreeDiff = require("@rbxpackageloader/TreeDiff")
-local TreeUtils = require("@rbxpackageloader/TreeUtils")
+local Merger = require("@bloxdrive/Merger")
+local TreeDiff = require("@bloxdrive/TreeDiff")
+local TreeUtils = require("@bloxdrive/TreeUtils")
 
 local REGISTRY_URL = "https://rbx-package-registry.batchprogrammer314.workers.dev"
 local TEST_PREFIX = "test-"

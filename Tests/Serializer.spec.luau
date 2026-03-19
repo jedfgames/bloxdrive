@@ -1,6 +1,6 @@
 --[[
 
-Serializer
+Serializer.spec
 
 Tests for the Serializer module. These tests use Lune's roblox library
 to create real Instance objects for serialization testing.
@@ -10,9 +10,9 @@ to create real Instance objects for serialization testing.
 local roblox = require("@lune/roblox")
 local Instance = roblox.Instance
 
-local PropertyReflection = require("@rbxpackageloader/PropertyReflection")
-local Serializer = require("@rbxpackageloader/Serializer")
-local TreeUtils = require("@rbxpackageloader/TreeUtils")
+local PropertyReflection = require("@bloxdrive/PropertyReflection")
+local Serializer = require("@bloxdrive/Serializer")
+local TreeUtils = require("@bloxdrive/TreeUtils")
 
 -- Set up a mock PropertyReflection provider for Lune since
 -- ReflectionService is not available
@@ -58,12 +58,12 @@ return function()
             expect(tree.ChildB["$className"]).to.equal("Folder")
         end)
 
-        it("should skip .rbx-package markers", function()
+        it("should skip .bloxdrive markers", function()
             local folder = Instance.new("Folder")
             folder.Name = "Root"
 
             local marker = Instance.new("StringValue")
-            marker.Name = ".rbx-package"
+            marker.Name = ".bloxdrive"
             marker.Value = '{"Id":"test"}'
             marker.Parent = folder
 
@@ -72,7 +72,7 @@ return function()
             child.Parent = folder
 
             local tree = Serializer.serialize(folder)
-            expect(tree[".rbx-package"]).to.equal(nil)
+            expect(tree[".bloxdrive"]).to.equal(nil)
             expect(tree.RealChild).to.be.ok()
         end)
 

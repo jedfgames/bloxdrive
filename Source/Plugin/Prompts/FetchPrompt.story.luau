@@ -1,14 +1,15 @@
 --[[
 
-PromptInput.story
+FetchPrompt.story
 
-Previews the PromptInput component in UI Labs.
+Previews the Fetch prompt as shown when the Fetch toolbar button is
+clicked without a package marker on the selected instance.
 
 --]]
 
 local Fusion = require("@packages/Fusion")
 
-local PromptInput = require("./PromptInput")
+local PromptInput = require("../Components/PromptInput")
 
 return {
     fusion = Fusion,
@@ -23,10 +24,9 @@ return {
             BackgroundTransparency = 1,
 
             [Fusion.Children] = PromptInput(scope, {
-                DefaultValue = "HelloWorld",
-                PlaceholderText = "Enter package name...",
+                PlaceholderText = "Enter package ID...",
                 OnSubmit = function(text: string)
-                    print(`Submitted "{text}"`)
+                    print(`[Fetch] Submitted "{text}"`)
                 end,
             }),
         })

@@ -1,13 +1,13 @@
 --[[
 
-Deserializer
+Deserializer.spec
 
 Tests for the Deserializer module. Tests cover both tree-to-instance
 deserialization and the reassembleTree file-to-tree reconstruction.
 
 --]]
 
-local Deserializer = require("@rbxpackageloader/Deserializer")
+local Deserializer = require("@bloxdrive/Deserializer")
 
 return function()
     describe("reassembleTree", function()

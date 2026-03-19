@@ -2,7 +2,7 @@
 
 PackagePublisher
 
-Handles publishing packages to the rbx-package-registry Cloudflare
+Handles publishing packages to the bloxdrive-registry Cloudflare
 Worker. Serializes a selected instance subtree into a tree and uploads
 it as a new version via a single PUT request.
 
@@ -20,7 +20,7 @@ type PublishOptions = {
     PackageId: string,
     PackageName: string,
     Root: Instance,
-    AuthToken: string,
+    RegistryKey: string,
     BaseUrl: string?,
 }
 
@@ -43,7 +43,7 @@ function PackagePublisher.publish(serializer: any, options: PublishOptions): Pub
     assert(type(options.PackageId) == "string", "Expected a string PackageId")
     assert(type(options.PackageName) == "string", "Expected a string PackageName")
     assert(typeof(options.Root) == "Instance", "Expected an Instance Root")
-    assert(type(options.AuthToken) == "string", "Expected a string AuthToken")
+    assert(type(options.RegistryKey) == "string", "Expected a string RegistryKey")
 
     local baseUrl = options.BaseUrl or DEFAULT_REGISTRY_URL
 
@@ -54,11 +54,11 @@ function PackagePublisher.publish(serializer: any, options: PublishOptions): Pub
     for attempt = 1, MAX_PUBLISH_RETRIES do
         local success, result = pcall(function(): PublishResult
             -- Fetch current metadata to determine next version
-            local metadata = _fetchMetadata(baseUrl, options.PackageId, options.AuthToken)
+            local metadata = _fetchMetadata(baseUrl, options.PackageId, options.RegistryKey)
             local newVersion = metadata.LatestVersion + 1
 
             -- Single PUT to publish the version
-            _putVersion(baseUrl, options.AuthToken, options.PackageId, options.PackageName, newVersion, treeJson)
+            _putVersion(baseUrl, options.RegistryKey, options.PackageId, options.PackageName, newVersion, treeJson)
 
             return {
                 Success = true,
@@ -92,7 +92,11 @@ function PackagePublisher.publish(serializer: any, options: PublishOptions): Pub
     }
 end
 
-function _fetchMetadata(baseUrl: string, packageId: string, authToken: string): { Name: string, LatestVersion: number }
+function _fetchMetadata(
+    baseUrl: string,
+    packageId: string,
+    registryKey: string
+): { Name: string, LatestVersion: number }
     local url = `{baseUrl}/packages/{packageId}`
 
     local success, response = pcall(function()
@@ -100,7 +104,7 @@ function _fetchMetadata(baseUrl: string, packageId: string, authToken: string): 
             Url = url,
             Method = "GET",
             Headers = {
-                Authorization = `Bearer {authToken}`,
+                Authorization = `Bearer {registryKey}`,
             },
         })
     end)
@@ -122,7 +126,7 @@ end
 
 function _putVersion(
     baseUrl: string,
-    authToken: string,
+    registryKey: string,
     packageId: string,
     packageName: string,
     version: number,
@@ -135,7 +139,7 @@ function _putVersion(
             Url = url,
             Method = "PUT",
             Headers = {
-                Authorization = `Bearer {authToken}`,
+                Authorization = `Bearer {registryKey}`,
                 ["Content-Type"] = "application/json",
                 ["X-Package-Name"] = packageName,
             },

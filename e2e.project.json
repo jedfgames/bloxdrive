@@ -1,5 +1,5 @@
 {
-    "name": "rbx-package-loader-e2e",
+    "name": "bloxdrive-e2e",
     "tree": {
         "$className": "DataModel",
         "HttpService": {
@@ -12,8 +12,8 @@
             "$className": "ReplicatedStorage",
             "Source": {
                 "$className": "Folder",
-                "RbxPackageLoader": {
-                    "$path": "Source/RbxPackageLoader"
+                "Bloxdrive": {
+                    "$path": "Source/Bloxdrive"
                 }
             }
         }

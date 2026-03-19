@@ -2,10 +2,10 @@
 
 Plugin
 
-Studio plugin for rbx-package-loader. Provides toolbar buttons to publish,
-pull, and manage instance-based packages. Stores credentials in plugin
-settings and uses the core RbxPackageLoader library for serialization,
-deserialization, and merging.
+Studio plugin for bloxdrive. Provides toolbar buttons to
+publish, fetch, and manage instance-based packages. Stores credentials
+in plugin settings and uses the core Bloxdrive library for
+serialization, deserialization, and merging.
 
 --]]
 
@@ -24,16 +24,18 @@ local Fusion = require("@packages/Fusion")
 
 local Assets = require("@self/Assets")
 local AutoSync = require("@self/AutoSync")
+local Bloxdrive = require("@bloxdrive")
 local CredentialStore = require("@self/CredentialStore")
-local Logger = require("@rbxpackageloader/Logger")
+local Logger = require("@bloxdrive/Logger")
 local PackagePublisher = require("@self/PackagePublisher")
 local PackagePuller = require("@self/PackagePuller")
 local PromptInput = require("@self/Components/PromptInput")
-local RbxPackageLoader = require("@rbxpackageloader")
+local SetKeyPrompt = require("@self/Components/SetKeyPrompt")
 local Toolbar = require("@self/Toolbar")
 
-local PACKAGE_MARKER_NAME = ".rbx-package"
-local PROMPT_WIDGET_ID = "PackageLoaderPrompt"
+local PACKAGE_MARKER_NAME = ".bloxdrive"
+local PROMPT_WIDGET_ID = "BloxdrivePrompt"
+local SET_KEY_WIDGET_ID = "BloxdriveSetKey"
 local TOOLBAR_NAME = "Packages"
 
 local function _generateId(): string
@@ -45,6 +47,8 @@ local function _generateId(): string
 end
 
 local _promptWidget: DockWidgetPluginGui? = nil
+local _promptScope: Fusion.Scope? = nil
+local _promptDone = false
 
 local function _getSelectedInstance(): Instance?
     local selected = Selection:Get()
@@ -63,7 +67,18 @@ local function _findPackageMarker(instance: Instance): StringValue?
     return nil
 end
 
-local function _promptForInput(title: string, defaultValue: string?): string?
+local function _closePrompt()
+    if _promptWidget then
+        (_promptWidget :: DockWidgetPluginGui).Enabled = false
+    end
+    if _promptScope then
+        Fusion.doCleanup(_promptScope)
+        _promptScope = nil
+    end
+    _promptDone = true
+end
+
+local function _promptForInput(title: string, defaultValue: string?, placeholderText: string?): string?
     if not _promptWidget then
         local widgetInfo = DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Float, false, true, 300, 100, 200, 80)
         _promptWidget = plugin:CreateDockWidgetPluginGuiAsync(PROMPT_WIDGET_ID, widgetInfo)
@@ -71,23 +86,27 @@ local function _promptForInput(title: string, defaultValue: string?): string?
 
     local widget = _promptWidget :: DockWidgetPluginGui
 
-    -- Clean up previous Fusion scope if any
-    for _, child in widget:GetChildren() do
-        child:Destroy()
+    -- Toggle off if the prompt is already open with the same title
+    if widget.Enabled and widget.Title == title then
+        _closePrompt()
+        return nil
     end
+
+    -- Clean up previous prompt if switching to a different one
+    _closePrompt()
 
     widget.Title = title
 
     local result: string? = nil
-    local done = false
+    _promptDone = false
 
-    local scope = Fusion:scoped()
-    local ui = PromptInput(scope, {
+    _promptScope = Fusion:scoped()
+    local ui = PromptInput(_promptScope, {
         DefaultValue = defaultValue,
-        PlaceholderText = "Enter value...",
+        PlaceholderText = placeholderText or "Enter value...",
         OnSubmit = function(text: string)
             result = text
-            done = true
+            _promptDone = true
         end,
     })
 
@@ -100,12 +119,11 @@ local function _promptForInput(title: string, defaultValue: string?): string?
         textBox:CaptureFocus()
     end
 
-    while not done do
+    while not _promptDone do
         task.wait(0.1)
     end
 
-    widget.Enabled = false
-    Fusion.doCleanup(scope)
+    _closePrompt()
     return result
 end
 
@@ -125,9 +143,9 @@ toolbar:CreateButton({
         return
     end
 
-    local token = CredentialStore.getToken()
-    if not token then
-        Logger.warn('No auth token set. Use the "Set Token" button first.')
+    local key = CredentialStore.getKey()
+    if not key then
+        Logger.warn('No registry key set. Use the "Set Key" button first.')
         return
     end
 
@@ -140,7 +158,7 @@ toolbar:CreateButton({
         packageId = decoded.Id
         packageName = decoded.Name or packageId
     else
-        local name = _promptForInput("Package Name", instance.Name)
+        local name = _promptForInput("Publish", instance.Name, "Enter package name...")
         if not name then
             Logger.warn("Publish cancelled.")
             return
@@ -151,11 +169,11 @@ toolbar:CreateButton({
 
     Logger.print(`Publishing "{packageName}"...`)
 
-    local result = PackagePublisher.publish(RbxPackageLoader.Serializer, {
+    local result = PackagePublisher.publish(Bloxdrive.Serializer, {
         PackageId = packageId,
         PackageName = packageName,
         Root = instance,
-        AuthToken = token,
+        RegistryKey = key,
     })
 
     if result.Success then
@@ -184,13 +202,13 @@ toolbar:CreateButton({
 end)
 
 toolbar:CreateButton({
-    Name = "Pull",
-    Label = "Pull",
-    Description = "Pull the latest version of the selected package from the registry",
+    Name = "Fetch",
+    Label = "Fetch",
+    Description = "Fetch the latest version of the selected package from the registry",
     Icon = Assets["Icons/CloudDownload.png"],
 }, function()
     local instance = _getSelectedInstance()
-    local token = CredentialStore.getToken()
+    local key = CredentialStore.getKey()
 
     -- If the selected instance already has a package marker, update
     -- in place. Otherwise, prompt for a package ID and create a new
@@ -208,15 +226,15 @@ toolbar:CreateButton({
         packageName = decoded.Name
         pullParent = instance :: Instance
     else
-        packageId = _promptForInput("Package ID")
+        packageId = _promptForInput("Fetch", nil, "Enter package ID...")
         if not packageId then
-            Logger.warn("Pull cancelled.")
+            Logger.warn("Fetch cancelled.")
             return
         end
 
         -- Validate the package exists before creating any instances
-        local registryConfig = if token then { AuthToken = token } else nil
-        local registry = RbxPackageLoader.Registry.new(registryConfig)
+        local registryConfig = if key then { RegistryKey = key } else nil
+        local registry = Bloxdrive.Registry.new(registryConfig)
         local metaSuccess, metadata = pcall(function()
             return registry:FetchMetadata(packageId)
         end)
@@ -239,11 +257,11 @@ toolbar:CreateButton({
 
     Logger.print(`Pulling "{packageName or packageId}"...`)
 
-    local result = PackagePuller.pull(RbxPackageLoader, {
+    local result = PackagePuller.pull(Bloxdrive, {
         PackageId = packageId,
         PackageName = packageName,
         Parent = pullParent,
-        AuthToken = token,
+        RegistryKey = key,
     })
 
     if result.Success then
@@ -265,20 +283,58 @@ toolbar:CreateButton({
     end
 end)
 
+local _setKeyWidget: DockWidgetPluginGui? = nil
+local _setKeyScope: Fusion.Scope? = nil
+
+local function _closeSetKeyPrompt()
+    if _setKeyWidget then
+        (_setKeyWidget :: DockWidgetPluginGui).Enabled = false
+    end
+    if _setKeyScope then
+        Fusion.doCleanup(_setKeyScope)
+        _setKeyScope = nil
+    end
+end
+
 toolbar:CreateButton({
-    Name = "SetToken",
-    Label = "Set Token",
-    Description = "Set or update the GitHub auth token for the package registry",
+    Name = "SetKey",
+    Label = "Set Key",
+    Description = "Set or update the registry key for the package registry",
     Icon = Assets["Icons/Key.png"],
 }, function()
-    local currentToken = CredentialStore.getToken()
-    local displayToken = if currentToken then string.rep("*", 20) else ""
-
-    local newToken = _promptForInput("GitHub Auth Token", displayToken)
-    if newToken and newToken ~= displayToken then
-        CredentialStore.setToken(newToken)
-        Logger.print("Auth token updated.")
+    if not _setKeyWidget then
+        local widgetInfo = DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Float, false, true, 320, 300, 280, 250)
+        _setKeyWidget = plugin:CreateDockWidgetPluginGuiAsync(SET_KEY_WIDGET_ID, widgetInfo)
     end
+
+    local widget = _setKeyWidget :: DockWidgetPluginGui
+
+    -- Toggle off if already open
+    if widget.Enabled then
+        _closeSetKeyPrompt()
+        return
+    end
+
+    -- Clean up previous scope
+    _closeSetKeyPrompt()
+
+    widget.Title = "Set Key"
+
+    _setKeyScope = Fusion:scoped()
+    local ui = SetKeyPrompt(_setKeyScope, {
+        CurrentKey = CredentialStore.getKey(),
+        OnSave = function(key: string)
+            CredentialStore.setKey(key)
+            Logger.print("Registry key updated.")
+        end,
+        OnRemove = function()
+            CredentialStore.clearKey()
+            Logger.print("Registry key removed.")
+        end,
+    })
+
+    ui.Parent = widget
+    widget.Enabled = true
 end)
 
 AutoSync.start({
@@ -286,11 +342,11 @@ AutoSync.start({
     Logger = Logger,
     PackagePublisher = PackagePublisher,
     PackagePuller = PackagePuller,
-    RbxPackageLoader = RbxPackageLoader,
+    Bloxdrive = Bloxdrive,
 })
 
 plugin.Unloading:Connect(function()
     AutoSync.stop()
 end)
 
-Logger.print("Plugin loaded.")
+Logger.print("Plugin loaded.", 2)

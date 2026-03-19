@@ -2,7 +2,7 @@
 
 Registry
 
-HTTP client for fetching packages from the rbx-package-registry
+HTTP client for fetching packages from the bloxdrive-registry
 Cloudflare Worker. Retrieves package metadata and versioned instance
 trees via a simple REST API backed by D1 (SQLite at the edge).
 
@@ -18,7 +18,7 @@ Registry.__index = Registry
 export type Registry = typeof(setmetatable(
     {} :: {
         _baseUrl: string,
-        _authToken: string?,
+        _registryKey: string?,
     },
     Registry
 ))
@@ -26,14 +26,14 @@ export type Registry = typeof(setmetatable(
 --[=[
     Creates a new Registry client.
 
-    @param config { BaseUrl: string?, AuthToken: string? }? -- Optional
+    @param config { BaseUrl: string?, RegistryKey: string? }? -- Optional
     > configuration. Defaults to the Workers registry URL.
     @return Registry -- The registry client
 ]=]
-function Registry.new(config: { BaseUrl: string?, AuthToken: string? }?): Registry
+function Registry.new(config: { BaseUrl: string?, RegistryKey: string? }?): Registry
     local self = setmetatable({}, Registry)
     self._baseUrl = if config and config.BaseUrl then config.BaseUrl else DEFAULT_BASE_URL
-    self._authToken = if config then config.AuthToken else nil
+    self._registryKey = if config then config.RegistryKey else nil
     return self
 end
 
@@ -92,9 +92,9 @@ end
 
 function Registry._get(self: Registry, url: string): string
     local headers: { [string]: string }? = nil
-    if self._authToken then
+    if self._registryKey then
         headers = {
-            Authorization = `Bearer {self._authToken}`,
+            Authorization = `Bearer {self._registryKey}`,
         }
     end
 

@@ -36,14 +36,14 @@ local function uploadE2EPlace()
         "build",
         "e2e.project.json",
         "--output",
-        "Build/e2e-test.rbxl",
+        "Build/E2ETest.rbxl",
     })
 
     if not result.ok then
         error(`Rojo build failed: {result.stderr}`)
     end
 
-    local placeData = fs.readFile("Build/e2e-test.rbxl")
+    local placeData = fs.readFile("Build/E2ETest.rbxl")
     print(`Uploading place ({#placeData} bytes)...`)
 
     local maxRetries = 5

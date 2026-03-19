@@ -1,8 +1,8 @@
 /**
- * rbx-package-registry
+ * bloxdrive-registry
  *
  * Cloudflare Worker that serves as a package registry for
- * rbx-package-loader. Stores package data in D1 (SQLite at the
+ * bloxdrive. Stores package data in D1 (SQLite at the
  * edge) and exposes a simple REST API for fetching and publishing.
  *
  * Routes:

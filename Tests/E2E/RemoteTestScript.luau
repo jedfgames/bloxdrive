@@ -4,7 +4,7 @@ RemoteTestScript
 
 Test script that runs inside a real Roblox place via the Open Cloud Luau
 Execution API. Exercises Serializer, Deserializer, PropertyReflection,
-TreeDiff, Merger, Registry, and RbxPackageLoader.load with real instances.
+TreeDiff, Merger, Registry, and Bloxdrive.load with real instances.
 
 The placeholder __REGISTRY_TOKEN__ is replaced at runtime by E2E.spec.luau
 before submitting to the execution API.
@@ -13,18 +13,18 @@ before submitting to the execution API.
 
 local REGISTRY_TOKEN = __REGISTRY_TOKEN__
 
-local ok, RbxPackageLoader = pcall(require, game.ReplicatedStorage.Source.RbxPackageLoader)
+local ok, Bloxdrive = pcall(require, game.ReplicatedStorage.Source.Bloxdrive)
 if not ok then
-    print("[FAIL] Module load - " .. tostring(RbxPackageLoader))
+    print("[FAIL] Module load - " .. tostring(Bloxdrive))
     return { Passed = 0, Failed = 1, Success = false }
 end
 
-local Deserializer = RbxPackageLoader.Deserializer
-local Merger = RbxPackageLoader.Merger
-local PropertyReflection = RbxPackageLoader.PropertyReflection
-local Serializer = RbxPackageLoader.Serializer
-local TreeDiff = RbxPackageLoader.TreeDiff
-local TreeUtils = RbxPackageLoader.TreeUtils
+local Deserializer = Bloxdrive.Deserializer
+local Merger = Bloxdrive.Merger
+local PropertyReflection = Bloxdrive.PropertyReflection
+local Serializer = Bloxdrive.Serializer
+local TreeDiff = Bloxdrive.TreeDiff
+local TreeUtils = Bloxdrive.TreeUtils
 
 local passed = 0
 local failed = 0
@@ -151,13 +151,13 @@ test("Serialize and deserialize a simple folder", function()
     folder:Destroy()
 end)
 
-test("Serialize skips .rbx-package marker", function()
+test("Serialize skips .bloxdrive marker", function()
     local folder = Instance.new("Folder")
     folder.Name = "TestPkg"
     folder.Parent = workspace
 
     local marker = Instance.new("StringValue")
-    marker.Name = ".rbx-package"
+    marker.Name = ".bloxdrive"
     marker.Value = '{"Id":"test","Version":1}'
     marker.Parent = folder
 
@@ -166,7 +166,7 @@ test("Serialize skips .rbx-package marker", function()
     child.Parent = folder
 
     local tree = Serializer.serialize(folder)
-    assertEqual(tree[".rbx-package"], nil, "Marker should be skipped")
+    assertEqual(tree[".bloxdrive"], nil, "Marker should be skipped")
     assert(tree.Content ~= nil, "Content child should exist")
 
     folder:Destroy()
@@ -545,8 +545,8 @@ if REGISTRY_TOKEN then
     })
 
     test("Registry fetches metadata", function()
-        local Registry = RbxPackageLoader.Registry
-        local registry = Registry.new({ AuthToken = REGISTRY_TOKEN })
+        local Registry = Bloxdrive.Registry
+        local registry = Registry.new({ RegistryKey = REGISTRY_TOKEN })
 
         local metadata = registry:FetchMetadata(TEST_PACKAGE_ID)
         assertEqual(metadata.Name, "E2EFixture", "Name should match")
@@ -554,8 +554,8 @@ if REGISTRY_TOKEN then
     end)
 
     test("Registry fetches a specific version", function()
-        local Registry = RbxPackageLoader.Registry
-        local registry = Registry.new({ AuthToken = REGISTRY_TOKEN })
+        local Registry = Bloxdrive.Registry
+        local registry = Registry.new({ RegistryKey = REGISTRY_TOKEN })
 
         local tree = registry:FetchVersion(TEST_PACKAGE_ID, 1)
         assertEqual(tree["$className"], "Folder", "className should be Folder")
@@ -563,22 +563,22 @@ if REGISTRY_TOKEN then
     end)
 
     test("Registry fetches latest version", function()
-        local Registry = RbxPackageLoader.Registry
-        local registry = Registry.new({ AuthToken = REGISTRY_TOKEN })
+        local Registry = Bloxdrive.Registry
+        local registry = Registry.new({ RegistryKey = REGISTRY_TOKEN })
 
         local tree, version = registry:FetchLatest(TEST_PACKAGE_ID)
         assertEqual(version, 1, "Latest version should be 1")
         assertEqual(tree["$className"], "Folder", "className should be Folder")
     end)
 
-    RbxPackageLoader.configure({ AuthToken = REGISTRY_TOKEN })
+    Bloxdrive.configure({ RegistryKey = REGISTRY_TOKEN })
 
     test("load returns instance and result with Parent", function()
         local parent = Instance.new("Folder")
         parent.Name = "LoadTestParent"
         parent.Parent = workspace
 
-        local instance, result = RbxPackageLoader.load(TEST_PACKAGE_ID, {
+        local instance, result = Bloxdrive.load(TEST_PACKAGE_ID, {
             Version = 1,
             Parent = parent,
         })
@@ -592,7 +592,7 @@ if REGISTRY_TOKEN then
     end)
 
     test("load returns instance and result without Parent", function()
-        local instance, result = RbxPackageLoader.load(TEST_PACKAGE_ID, {
+        local instance, result = Bloxdrive.load(TEST_PACKAGE_ID, {
             Version = 1,
         })
 
@@ -604,7 +604,7 @@ if REGISTRY_TOKEN then
     end)
 
     test("load returns nil instance on failure", function()
-        local instance, result = RbxPackageLoader.load("nonexistent_package_id_00", {
+        local instance, result = Bloxdrive.load("nonexistent_package_id_00", {
             Version = 1,
         })
 

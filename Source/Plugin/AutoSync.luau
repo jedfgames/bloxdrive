@@ -3,7 +3,7 @@
 AutoSync
 
 Manages automatic pulling and pushing of packages. Scans the DataModel
-for `.rbx-package` markers on startup and watches for new markers added
+for `.bloxdrive` markers on startup and watches for new markers added
 at runtime. Pulls any with AutoPull enabled, then sets up polling for
 remote changes and debounced pushing for local changes.
 
@@ -20,10 +20,10 @@ Each instance is tracked independently with its own push connections
 and timers, but pull/push locks are shared per package ID to prevent
 concurrent operations on the same registry package.
 
-Marker protection: `.rbx-package` markers are strictly validated and
+Marker protection: `.bloxdrive` markers are strictly validated and
 locked down. Moving a marker outside its root, renaming it, tampering
 with its value, or creating invalid markers all result in the marker
-being destroyed and the package unregistered. Only one `.rbx-package`
+being destroyed and the package unregistered. Only one `.bloxdrive`
 marker is allowed per parent instance.
 
 --]]
@@ -31,8 +31,8 @@ marker is allowed per parent instance.
 local ChangeHistoryService = game:GetService("ChangeHistoryService")
 local HttpService = game:GetService("HttpService")
 
-local GENERATION_ATTR = "_RbxPackageLoaderSyncGeneration"
-local PACKAGE_MARKER_NAME = ".rbx-package"
+local GENERATION_ATTR = "_BloxdriveSyncGeneration"
+local PACKAGE_MARKER_NAME = ".bloxdrive"
 local PULL_POLL_SECONDS = 5
 local PUSH_DEBOUNCE_SECONDS = 1
 
@@ -56,7 +56,7 @@ type AutoSyncState = {
     NextKey: number,
     PackagePublisher: any,
     PackagePuller: any,
-    RbxPackageLoader: any,
+    Bloxdrive: any,
     PendingPull: { [string]: boolean },
     PendingPush: { [string]: boolean },
     Pulling: { [string]: boolean },
@@ -150,7 +150,7 @@ local function _destroyInvalidMarker(marker: StringValue, reason: string)
         return marker:GetFullName()
     end)
     state.Logger.warn(
-        `[AutoSync] Destroyed invalid ".rbx-package" marker ({reason}). Was at "{if ok then path else "unknown"}".`
+        `[AutoSync] Destroyed invalid ".bloxdrive" marker ({reason}). Was at "{if ok then path else "unknown"}".`
     )
 
     -- Suppress push events from the destruction
@@ -162,23 +162,23 @@ end
 --[=[
 	Initializes the AutoSync system with the required dependencies and
 	starts monitoring all existing packages in the DataModel. Also
-	watches for new `.rbx-package` markers added at runtime.
+	watches for new `.bloxdrive` markers added at runtime.
 
 	@param config table -- Dependencies: CredentialStore, Logger,
-	PackagePublisher, PackagePuller, RbxPackageLoader
+	PackagePublisher, PackagePuller, Bloxdrive
 ]=]
 function AutoSync.start(config: {
     CredentialStore: any,
     Logger: any,
     PackagePublisher: any,
     PackagePuller: any,
-    RbxPackageLoader: any,
+    Bloxdrive: any,
 })
     assert(config.CredentialStore, "Expected CredentialStore")
     assert(config.Logger, "Expected Logger")
     assert(config.PackagePublisher, "Expected PackagePublisher")
     assert(config.PackagePuller, "Expected PackagePuller")
-    assert(config.RbxPackageLoader, "Expected RbxPackageLoader")
+    assert(config.Bloxdrive, "Expected Bloxdrive")
 
     -- Increment the generation counter to invalidate any zombie
     -- threads from prior plugin reloads
@@ -195,7 +195,7 @@ function AutoSync.start(config: {
         NextKey = 1,
         PackagePublisher = config.PackagePublisher,
         PackagePuller = config.PackagePuller,
-        RbxPackageLoader = config.RbxPackageLoader,
+        Bloxdrive = config.Bloxdrive,
         PendingPull = {},
         PendingPush = {},
         Pulling = {},
@@ -291,7 +291,10 @@ function _unregisterPackage(key: string)
         return
     end
 
-    state.Logger.print(`[AutoSync] Unregistered package "{info.Name or info.Id}" (was at {info.Root:GetFullName()}).`)
+    state.Logger.print(
+        `[AutoSync] Unregistered package "{info.Name or info.Id}" (was at {info.Root:GetFullName()}).`,
+        2
+    )
 
     -- Clean up push connections
     if state.PushConnections[key] then
@@ -356,7 +359,7 @@ function _registerPackage(info: MarkerInfo)
     end
 
     -- Check for duplicate markers under the same parent: only one
-    -- .rbx-package is allowed per parent instance
+    -- .bloxdrive is allowed per parent instance
     for _, existing in state.RegisteredPackages do
         if existing.Root == info.Root and existing.Marker ~= info.Marker then
             _destroyInvalidMarker(
@@ -372,14 +375,15 @@ function _registerPackage(info: MarkerInfo)
 
     state.RegisteredPackages[info.Key] = info
     state.Logger.print(
-        `[AutoSync] Registered package "{info.Name or info.Id}" at {info.Root:GetFullName()} (version {info.Version}).`
+        `[AutoSync] Registered package "{info.Name or info.Id}" at {info.Root:GetFullName()} (version {info.Version}).`,
+        2
     )
 
     -- Fix folder name if it's using the raw package ID but has a
     -- human-readable name
     if info.Name and info.Root.Name == info.Id and info.Root.Name ~= info.Name then
         info.Root.Name = info.Name
-        state.Logger.print(`[AutoSync] Renamed package root from "{info.Id}" to "{info.Name}".`)
+        state.Logger.print(`[AutoSync] Renamed package root from "{info.Id}" to "{info.Name}".`, 2)
     end
 
     -- Lock down the marker: watch for reparenting, renaming, and
@@ -656,13 +660,13 @@ function _reconcilePackage(info: MarkerInfo)
         return
     end
 
-    local token = state.CredentialStore.getToken()
-    if not token then
+    local key = state.CredentialStore.getKey()
+    if not key then
         return
     end
 
-    local registryConfig = { AuthToken = token }
-    local registry = state.RbxPackageLoader.Registry.new(registryConfig)
+    local registryConfig = { RegistryKey = key }
+    local registry = state.Bloxdrive.Registry.new(registryConfig)
 
     -- Fetch the registry tree for the claimed version
     local fetchSuccess, registryTree = pcall(function()
@@ -677,16 +681,17 @@ function _reconcilePackage(info: MarkerInfo)
     end
 
     -- Serialize local tree
-    local localTree = state.RbxPackageLoader.Serializer.serialize(info.Root)
+    local localTree = state.Bloxdrive.Serializer.serialize(info.Root)
 
     -- Compare using TreeUtils.deepEqual
-    local TreeUtils = state.RbxPackageLoader.TreeUtils
+    local TreeUtils = state.Bloxdrive.TreeUtils
     if TreeUtils.deepEqual(localTree, registryTree) then
         return
     end
 
     state.Logger.print(
-        `[AutoSync] Reconciling "{info.Name or info.Id}" at {info.Root:GetFullName()} (local content doesn't match registry version {info.Version}).`
+        `[AutoSync] Reconciling "{info.Name or info.Id}" at {info.Root:GetFullName()} (local content doesn't match registry version {info.Version}).`,
+        2
     )
 
     -- Local has drifted from the registry. Push local changes
@@ -709,16 +714,15 @@ function _autoPull(info: MarkerInfo)
         return
     end
 
-    local token = state.CredentialStore.getToken()
-    if not token then
+    local key = state.CredentialStore.getKey()
+    if not key then
         return
     end
 
-    -- Fetch metadata via the GitHub API (not raw URLs) to avoid CDN
-    -- caching and check if there's actually a newer version before
-    -- pulling.
-    local registryConfig = { AuthToken = token }
-    local registry = state.RbxPackageLoader.Registry.new(registryConfig)
+    -- Fetch metadata via the registry API to avoid CDN caching and
+    -- check if there's actually a newer version before pulling.
+    local registryConfig = { RegistryKey = key }
+    local registry = state.Bloxdrive.Registry.new(registryConfig)
 
     local metaSuccess, metadata = pcall(function()
         return registry:FetchMetadata(info.Id)
@@ -744,11 +748,11 @@ function _autoPull(info: MarkerInfo)
     -- Suppress AutoPush while pulling to avoid feedback loop
     state.Pulling[info.Id] = true
 
-    local result = state.PackagePuller.pull(state.RbxPackageLoader, {
+    local result = state.PackagePuller.pull(state.Bloxdrive, {
         PackageId = info.Id,
         PackageName = info.Name,
         Parent = info.Root,
-        AuthToken = token,
+        RegistryKey = key,
     })
 
     if result.Success then
@@ -873,8 +877,8 @@ function _autoPush(info: MarkerInfo)
         return
     end
 
-    local token = state.CredentialStore.getToken()
-    if not token then
+    local key = state.CredentialStore.getKey()
+    if not key then
         return
     end
 
@@ -890,8 +894,8 @@ function _autoPush(info: MarkerInfo)
     -- Pull-before-push: if the remote has a newer version, merge
     -- it into local first so we don't overwrite changes from other
     -- places. This is the key to multi-place collaboration.
-    local registryConfig = { AuthToken = token }
-    local registry = state.RbxPackageLoader.Registry.new(registryConfig)
+    local registryConfig = { RegistryKey = key }
+    local registry = state.Bloxdrive.Registry.new(registryConfig)
     local metaSuccess, metadata = pcall(function()
         return registry:FetchMetadata(info.Id)
     end)
@@ -904,11 +908,11 @@ function _autoPush(info: MarkerInfo)
         -- Set pulling flag to suppress push events from the merge
         state.Pulling[info.Id] = true
 
-        local pullResult = state.PackagePuller.pull(state.RbxPackageLoader, {
+        local pullResult = state.PackagePuller.pull(state.Bloxdrive, {
             PackageId = info.Id,
             PackageName = info.Name,
             Parent = info.Root,
-            AuthToken = token,
+            RegistryKey = key,
         })
 
         state.Pulling[info.Id] = nil
@@ -947,11 +951,11 @@ function _autoPush(info: MarkerInfo)
         `[AutoPush] Publishing "{info.Name or info.Id}" from {info.Root:GetFullName()} ({childCount} children)...`
     )
 
-    local result = state.PackagePublisher.publish(state.RbxPackageLoader.Serializer, {
+    local result = state.PackagePublisher.publish(state.Bloxdrive.Serializer, {
         PackageId = info.Id,
         PackageName = info.Name or info.Id,
         Root = info.Root,
-        AuthToken = token,
+        RegistryKey = key,
     })
 
     if not _isCurrentGeneration() then

@@ -70,4 +70,4 @@ jobs:
           gh release create ${{ steps.version.outputs.tag }} \
             --title "${{ steps.version.outputs.tag }}" \
             --notes-file /tmp/changelog.txt \
-            Build/rbx-package-loader.rbxm
+            Build/bloxdrive.rbxm

@@ -1,6 +1,6 @@
 {
-    "name": "rbx-package-loader",
+    "name": "bloxdrive",
     "tree": {
-        "$path": "Source/RbxPackageLoader"
+        "$path": "Source/Bloxdrive"
     }
 }

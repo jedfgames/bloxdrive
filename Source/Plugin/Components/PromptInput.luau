@@ -72,6 +72,10 @@ return function(
                 TextSize = 14,
                 Text = "Submit",
 
+                [Children] = scope:New("UICorner")({
+                    CornerRadius = UDim.new(0, 4),
+                }),
+
                 [OnEvent("MouseButton1Click")] = function()
                     submit()
                 end,

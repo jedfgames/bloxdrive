@@ -10,9 +10,9 @@ the package already exists locally, and applies the result.
 
 local HttpService = game:GetService("HttpService")
 
-local Logger = require("@rbxpackageloader/Logger")
+local Logger = require("@bloxdrive/Logger")
 
-local PACKAGE_MARKER_NAME = ".rbx-package"
+local PACKAGE_MARKER_NAME = ".bloxdrive"
 
 local PackagePuller = {}
 
@@ -21,7 +21,7 @@ type PullOptions = {
     PackageName: string?,
     Parent: Instance,
     Version: number?,
-    AuthToken: string?,
+    RegistryKey: string?,
 }
 
 type PullResult = {
@@ -36,7 +36,7 @@ type PullResult = {
     instance. If the package already exists locally with modifications,
     performs a three-way merge.
 
-    @param loader RbxPackageLoader -- The loader module (for sub-modules)
+    @param loader Bloxdrive -- The loader module (for sub-modules)
     @param options PullOptions -- Pull configuration
     @return PullResult -- The result of the pull operation
 ]=]
@@ -46,8 +46,8 @@ function PackagePuller.pull(loader: any, options: PullOptions): PullResult
 
     local success, result = pcall(function(): PullResult
         local registryConfig = nil
-        if options.AuthToken then
-            registryConfig = { AuthToken = options.AuthToken }
+        if options.RegistryKey then
+            registryConfig = { RegistryKey = options.RegistryKey }
         end
 
         local registry = loader.Registry.new(registryConfig)

@@ -1,5 +1,13 @@
+--[[
+
+Components.storybook
+
+Storybook definition for the Bloxdrive plugin components.
+
+--]]
+
 return {
-    name = "PackageLoader",
+    name = "Bloxdrive",
     storyRoots = {
         script.Parent,
     },
