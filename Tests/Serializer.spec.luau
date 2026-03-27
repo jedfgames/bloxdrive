@@ -12,7 +12,7 @@ local Instance = roblox.Instance
 
 local PropertyReflection = require("@bloxdrive/PropertyReflection")
 local Serializer = require("@bloxdrive/Serializer")
-local TreeUtils = require("@bloxdrive/TreeUtils")
+local _TreeUtils = require("@bloxdrive/TreeUtils")
 
 -- Set up a mock PropertyReflection provider for Lune since
 -- ReflectionService is not available

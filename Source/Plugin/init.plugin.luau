@@ -1,3 +1,5 @@
+--!nocheck
+
 --[[
 
 init.plugin

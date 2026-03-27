@@ -82,7 +82,7 @@ jobs:
         run: lune setup --no-update-luaurc
 
       - name: Run static analysis
-        run: lune run ./Submodules/luau-cicd/Scripts/RunStaticAnalysis.luau lune
+        run: lune run ./Submodules/luau-cicd/Scripts/RunStaticAnalysis.luau roblox
 
   changelog:
     name: Check changelog format
