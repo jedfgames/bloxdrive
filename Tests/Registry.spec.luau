@@ -1,6 +1,6 @@
 --[[
 
-Registry.spec
+Registry
 
 Tests for fetching package data from the bloxdrive-registry
 Cloudflare Worker. Creates a temporary package, verifies fetch
