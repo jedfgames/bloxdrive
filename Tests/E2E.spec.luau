@@ -1,6 +1,6 @@
 --[[
 
-E2E.spec
+E2E
 
 End-to-end tests that run against a real Roblox place using the Open
 Cloud Luau Execution API. Submits a Luau test script that exercises

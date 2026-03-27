@@ -1,6 +1,6 @@
 --[[
 
-Plugin
+init.plugin
 
 Studio plugin for bloxdrive. Provides toolbar buttons to
 publish, fetch, and manage instance-based packages. Stores credentials

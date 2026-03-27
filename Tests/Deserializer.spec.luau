@@ -1,6 +1,6 @@
 --[[
 
-Deserializer.spec
+Deserializer
 
 Tests for the Deserializer module. Tests cover both tree-to-instance
 deserialization and the reassembleTree file-to-tree reconstruction.

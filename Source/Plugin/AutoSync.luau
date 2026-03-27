@@ -160,12 +160,12 @@ local function _destroyInvalidMarker(marker: StringValue, reason: string)
 end
 
 --[=[
-	Initializes the AutoSync system with the required dependencies and
-	starts monitoring all existing packages in the DataModel. Also
-	watches for new `.bloxdrive` markers added at runtime.
+    Initializes the AutoSync system with the required dependencies and
+    starts monitoring all existing packages in the DataModel. Also
+    watches for new `.bloxdrive` markers added at runtime.
 
-	@param config table -- Dependencies: CredentialStore, Logger,
-	PackagePublisher, PackagePuller, Bloxdrive
+    @param config table -- Dependencies: CredentialStore, Logger,
+    PackagePublisher, PackagePuller, Bloxdrive
 ]=]
 function AutoSync.start(config: {
     CredentialStore: any,
@@ -225,8 +225,8 @@ function AutoSync.start(config: {
 end
 
 --[=[
-	Stops all AutoSync activity, cancels timers, and disconnects
-	listeners.
+    Stops all AutoSync activity, cancels timers, and disconnects
+    listeners.
 ]=]
 function AutoSync.stop()
     if not _state then

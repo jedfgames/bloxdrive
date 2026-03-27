@@ -1,6 +1,6 @@
 --[[
 
-Serializer.spec
+Serializer
 
 Tests for the Serializer module. These tests use Lune's roblox library
 to create real Instance objects for serialization testing.

@@ -1,6 +1,6 @@
 --[[
 
-Merger.spec
+Merger
 
 Tests for the Merger module. These tests use pure TreeNode tables and do
 not require any Roblox APIs.
