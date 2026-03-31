@@ -1,6 +1,6 @@
 --[[
 
-TreeUtils
+TreeUtils.spec
 
 Tests for the TreeUtils module. These tests use pure tables and do not
 require any Roblox APIs.

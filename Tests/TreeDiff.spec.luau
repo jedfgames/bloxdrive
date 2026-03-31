@@ -1,6 +1,6 @@
 --[[
 
-TreeDiff
+TreeDiff.spec
 
 Tests for the TreeDiff module. These tests use pure TreeNode tables and do
 not require any Roblox APIs.

@@ -1,6 +1,6 @@
 --[[
 
-RegistryLifecycle
+RegistryLifecycle.spec
 
 Stress tests that create, publish, update, fetch, diff, merge, and
 verify real packages on the bloxdrive-registry Cloudflare Worker.

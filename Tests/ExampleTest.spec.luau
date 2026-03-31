@@ -1,6 +1,6 @@
 --[[
 
-ExampleTest
+ExampleTest.spec
 
 Example test to demonstrate the testing framework.
 
