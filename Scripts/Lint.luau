@@ -15,9 +15,9 @@ sourcemap, and Scripts and Tests with the Lune platform.
 local Lint = require("../Submodules/luau-cicd/Scripts/Helpers/Lint")
 
 Lint.run({
-    platforms = {
-        { platform = "roblox", targets = { "Source/" }, rojoProject = "dev.project.json" },
-        { platform = "roblox", targets = { "Tests/E2E/" }, rojoProject = "e2e.project.json" },
-        { platform = "lune", targets = { "Scripts/", "Tests/" }, ignorePatterns = { "Source/**", "Tests/E2E/**" } },
+    Platforms = {
+        { Platform = "roblox", Targets = { "/Source" }, RojoProject = "dev.project.json" },
+        { Platform = "roblox", Targets = { "/Tests/E2E" }, RojoProject = "e2e.project.json" },
+        { Platform = "lune", Targets = { "/Scripts", "/Tests" }, IgnorePatterns = { "Source/**", "Tests/E2E/**" } },
     },
 })
