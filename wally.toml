@@ -7,6 +7,7 @@ realm = "shared"
 registry = "https://github.com/UpliftGames/wally-index"
 repository = "https://github.com/jedfgames/bloxdrive"
 include = [
+    ".luaurc",
     "default.project.json",
     "init.luau",
     "LICENSE",
