@@ -1,7 +1,7 @@
 {
     "aliases": {
         "devpackages": "./DevPackages/",
-        "lune": "~/.lune/.typedefs/0.10.4-horse.13.0/",
+        "lune": "~/.lune/.typedefs/0.10.4-horse.14.5/",
         "packages": "./Packages/",
         "bloxdrive": "./Source/Bloxdrive/",
         "tests": "./Tests/"
