@@ -1,24 +1,36 @@
+# Build artifacts
+*.rbxl
+*.rbxlx
+*.rbxm
+*.rbxmx
+/Build
+
+# Dependencies
+/DevPackages
+/Packages
+node_modules
+
+# Editor and environment
 .claude
 .DS_Store
-.wrangler
 .env
 .local
 .luau-lsp
 .mcp.json
 .vscode
+.wrangler
+
+# Generated files
 *.bak
 *.gen.*
 *.lock
-*.rbxl
-*.rbxlx
-*.rbxm
-*.rbxmx
-aftman.toml
-Build
-node_modules
-DevPackages
-Packages
-PLANS.md
-bloxdrive-registry
 *sourcemap*.json
-Tools
+
+# Legacy
+aftman.toml
+
+# Project
+/PLANS.md
+/TODO.md
+/Tools
+/bloxdrive-registry
