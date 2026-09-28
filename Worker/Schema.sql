@@ -11,3 +11,10 @@ CREATE TABLE IF NOT EXISTS versions (
     PRIMARY KEY (package_id, version),
     FOREIGN KEY (package_id) REFERENCES packages(id)
 );
+
+CREATE TABLE IF NOT EXISTS whitelist (
+    user_id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    token_hash TEXT NOT NULL UNIQUE,
+    created_at TEXT DEFAULT (datetime('now'))
+);
