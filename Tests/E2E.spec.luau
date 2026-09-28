@@ -15,7 +15,9 @@ it. RunTests.luau handles this automatically when ROBLOX_E2E_API_KEY
 is set.
 
 Requires ROBLOX_E2E_API_KEY in .env. Skips gracefully when the key
-is not available.
+is not available. The registry portion additionally uses REGISTRY_TOKEN
+(a whitelisted token minted via Scripts/Whitelist.luau) and skips when
+it is not set.
 
 --]]
 

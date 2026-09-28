@@ -49,6 +49,7 @@ local TESTS = {
     { Name = "Serializer", Func = require("../Tests/Serializer.spec") },
     { Name = "TreeDiff", Func = require("../Tests/TreeDiff.spec") },
     { Name = "TreeUtils", Func = require("../Tests/TreeUtils.spec") },
+    { Name = "Whitelist", Func = require("../Tests/Whitelist.spec") },
 }
 
 local function runTests()
