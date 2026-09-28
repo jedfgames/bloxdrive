@@ -7,8 +7,9 @@ Cloudflare Worker. Creates a temporary package, verifies fetch
 operations, then cleans up. Uses Lune's net library since
 HttpService is not available outside Roblox.
 
-Requires REGISTRY_TOKEN in .env. Skips gracefully when the token is
-not available.
+Requires REGISTRY_TOKEN in .env (a whitelisted token minted via
+Scripts/Whitelist.luau). Skips gracefully when the token is not
+available.
 
 --]]
 

@@ -8,8 +8,9 @@ Test packages use a "test-" prefix in their ID so they can be cleaned
 up without affecting real data. Exercises every registry operation
 end-to-end using Lune's net library.
 
-Requires REGISTRY_TOKEN in .env with write access. Skips gracefully
-when the token is not available.
+Requires REGISTRY_TOKEN in .env (a whitelisted token minted via
+Scripts/Whitelist.luau) with write access. Skips gracefully when the
+token is not available.
 
 --]]
 
