@@ -212,15 +212,18 @@ async function handleAddWhitelist(
     request: Request,
     env: Env,
 ): Promise<Response> {
-    let body: { userId?: unknown; name?: unknown };
+    let body: unknown;
     try {
         body = await request.json();
     } catch {
         return json({ error: "Invalid JSON body" }, 400);
     }
 
-    const userId = body.userId;
-    const name = body.name;
+    if (typeof body !== "object" || body === null) {
+        return json({ error: "A JSON object body is required" }, 400);
+    }
+
+    const { userId, name } = body as { userId?: unknown; name?: unknown };
     if (typeof userId !== "string" || userId === "") {
         return json({ error: "A non-empty userId is required" }, 400);
     }

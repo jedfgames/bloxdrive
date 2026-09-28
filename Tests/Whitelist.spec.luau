@@ -3,10 +3,10 @@
 Whitelist.spec
 
 Tests the bloxdrive-registry whitelist admin routes and the write
-authorization they gate. Adds a fixture user, verifies it can be
-listed and that its minted token authorizes writes, then removes it
-and verifies the token no longer works. Uses Lune's net library since
-HttpService is not available outside Roblox.
+authorization they gate. The ordered add/list/write/rotate/remove flow
+runs as a single test so it is not affected by the parallel test
+harness, while the independent negative cases run on their own. Uses
+Lune's net library since HttpService is not available outside Roblox.
 
 Requires REGISTRY_URL and ADMIN_TOKEN in .env. Skips gracefully when
 either is not available.
@@ -21,6 +21,7 @@ local serde = require("@lune/serde")
 local FIXTURE_USER_ID = "whitelist-spec-fixture-user"
 local FIXTURE_NAME = "WhitelistSpecFixture"
 local FIXTURE_PACKAGE_ID = "whitelist-spec-fixture-package"
+local MISSING_USER_ID = "whitelist-spec-nonexistent-user"
 
 local _url: string? = nil
 local _adminToken: string? = nil
@@ -50,11 +51,34 @@ local function _adminRequest(method: string, path: string, body: string?): net.F
     })
 end
 
-local function _removeFixtureUser()
-    _adminRequest("DELETE", `/admin/whitelist/{FIXTURE_USER_ID}`)
+local function _addUser(userId: string, name: string): string
+    local response = _adminRequest("POST", "/admin/whitelist", serde.encode("json", { userId = userId, name = name }))
+    assert(response.ok, `Add failed ({response.statusCode}): {response.body}`)
+    return serde.decode("json", response.body).token
 end
 
-local function _removeFixturePackage(token: string)
+-- Attempts a version write with the given token and returns the status
+-- code so callers can assert authorization outcomes.
+local function _writeVersion(token: string, version: number): number
+    assert(_url, "Config required")
+    local response = net.request({
+        url = `{_url}/packages/{FIXTURE_PACKAGE_ID}/versions/{version}`,
+        method = "PUT",
+        headers = {
+            Authorization = `Bearer {token}`,
+            ["Content-Type"] = "application/json",
+            ["X-Package-Name"] = FIXTURE_NAME,
+        },
+        body = serde.encode("json", { ["$className"] = "Folder" }),
+    })
+    return response.statusCode
+end
+
+local function _removeUser(userId: string)
+    _adminRequest("DELETE", `/admin/whitelist/{userId}`)
+end
+
+local function _deletePackage(token: string)
     assert(_url, "Config required")
     net.request({
         url = `{_url}/packages/{FIXTURE_PACKAGE_ID}`,
@@ -73,9 +97,7 @@ return function()
     end
 
     -- Ensure a clean slate before seeding.
-    _removeFixtureUser()
-
-    local mintedToken: string? = nil
+    _removeUser(FIXTURE_USER_ID)
 
     describe("admin auth", function()
         it("should reject requests without the admin token", function()
@@ -96,117 +118,87 @@ return function()
         end)
     end)
 
-    describe("add", function()
-        it("should mint a token and return it once", function()
-            local response = _adminRequest(
+    describe("validation", function()
+        it("should reject adding a user with a missing userId", function()
+            local response = _adminRequest("POST", "/admin/whitelist", serde.encode("json", { name = FIXTURE_NAME }))
+            expect(response.statusCode).to.equal(400)
+        end)
+
+        it("should reject a non-object body", function()
+            local response = _adminRequest("POST", "/admin/whitelist", serde.encode("json", 42))
+            expect(response.statusCode).to.equal(400)
+        end)
+
+        it("should return 404 when removing a nonexistent user", function()
+            local response = _adminRequest("DELETE", `/admin/whitelist/{MISSING_USER_ID}`)
+            expect(response.statusCode).to.equal(404)
+        end)
+    end)
+
+    describe("lifecycle", function()
+        it("should add, list, authorize, rotate, and revoke a token", function()
+            -- Add mints a token and returns it once.
+            local addResponse = _adminRequest(
                 "POST",
                 "/admin/whitelist",
                 serde.encode("json", { userId = FIXTURE_USER_ID, name = FIXTURE_NAME })
             )
-            assert(response.ok, `Add failed ({response.statusCode}): {response.body}`)
+            assert(addResponse.ok, `Add failed ({addResponse.statusCode}): {addResponse.body}`)
+            local added = serde.decode("json", addResponse.body)
+            expect(added.userId).to.equal(FIXTURE_USER_ID)
+            expect(added.name).to.equal(FIXTURE_NAME)
+            expect(added.token).to.be.ok()
+            expect(#added.token > 0).to.equal(true)
+            local tokenA = added.token
 
-            local decoded = serde.decode("json", response.body)
-            expect(decoded.userId).to.equal(FIXTURE_USER_ID)
-            expect(decoded.name).to.equal(FIXTURE_NAME)
-            expect(decoded.token).to.be.ok()
-            expect(#decoded.token > 0).to.equal(true)
-            mintedToken = decoded.token
-        end)
-
-        it("should reject a missing userId", function()
-            local response = _adminRequest("POST", "/admin/whitelist", serde.encode("json", { name = FIXTURE_NAME }))
-            expect(response.statusCode).to.equal(400)
-        end)
-    end)
-
-    describe("list", function()
-        it("should include the added user without exposing the token", function()
-            local response = _adminRequest("GET", "/admin/whitelist")
-            assert(response.ok, `List failed ({response.statusCode})`)
-
-            local decoded = serde.decode("json", response.body)
+            -- List includes the user without exposing the token.
+            local listResponse = _adminRequest("GET", "/admin/whitelist")
+            assert(listResponse.ok, `List failed ({listResponse.statusCode})`)
             local found = nil
-            for _, entry in decoded.entries do
+            for _, entry in serde.decode("json", listResponse.body).entries do
                 if entry.userId == FIXTURE_USER_ID then
                     found = entry
                     break
                 end
             end
-
             expect(found).to.be.ok()
             expect(found.name).to.equal(FIXTURE_NAME)
             expect(found.token).never.to.be.ok()
-        end)
-    end)
 
-    describe("write authorization", function()
-        it("should authorize a write with the minted token", function()
-            assert(mintedToken, "Token required")
-            local response = net.request({
-                url = `{_url}/packages/{FIXTURE_PACKAGE_ID}/versions/1`,
-                method = "PUT",
-                headers = {
-                    Authorization = `Bearer {mintedToken}`,
-                    ["Content-Type"] = "application/json",
-                    ["X-Package-Name"] = FIXTURE_NAME,
-                },
-                body = serde.encode("json", { ["$className"] = "Folder" }),
-            })
-            assert(response.ok, `Write failed ({response.statusCode}): {response.body}`)
-        end)
+            -- The minted token authorizes a write; an unknown one does not.
+            expect(_writeVersion(tokenA, 1)).to.equal(200)
+            expect(_writeVersion("definitely-not-whitelisted", 2)).to.equal(401)
 
-        it("should reject a write with an unknown token", function()
-            local response = net.request({
-                url = `{_url}/packages/{FIXTURE_PACKAGE_ID}/versions/2`,
-                method = "PUT",
-                headers = {
-                    Authorization = "Bearer definitely-not-whitelisted",
-                    ["Content-Type"] = "application/json",
-                },
-                body = serde.encode("json", { ["$className"] = "Folder" }),
-            })
-            expect(response.statusCode).to.equal(401)
-        end)
-    end)
+            -- Re-adding the same user rotates the token: a fresh token is
+            -- issued, it differs from the old one, the old one is revoked,
+            -- and the new one works.
+            local tokenB = _addUser(FIXTURE_USER_ID, FIXTURE_NAME)
+            expect(tokenB).never.to.equal(tokenA)
+            expect(_writeVersion(tokenA, 3)).to.equal(401)
+            expect(_writeVersion(tokenB, 3)).to.equal(200)
 
-    describe("remove", function()
-        it("should revoke the token so writes are rejected", function()
-            assert(mintedToken, "Token required")
+            -- Removing the user revokes the remaining token.
             local removeResponse = _adminRequest("DELETE", `/admin/whitelist/{FIXTURE_USER_ID}`)
             assert(removeResponse.ok, `Remove failed ({removeResponse.statusCode})`)
+            expect(_writeVersion(tokenB, 4)).to.equal(401)
 
-            local writeResponse = net.request({
-                url = `{_url}/packages/{FIXTURE_PACKAGE_ID}/versions/3`,
-                method = "PUT",
-                headers = {
-                    Authorization = `Bearer {mintedToken}`,
-                    ["Content-Type"] = "application/json",
-                },
-                body = serde.encode("json", { ["$className"] = "Folder" }),
-            })
-            expect(writeResponse.statusCode).to.equal(401)
-        end)
-
-        it("should return 404 when removing a nonexistent user", function()
-            local response = _adminRequest("DELETE", `/admin/whitelist/{FIXTURE_USER_ID}`)
-            expect(response.statusCode).to.equal(404)
+            -- Removing an already-removed user reports 404.
+            local secondRemove = _adminRequest("DELETE", `/admin/whitelist/{FIXTURE_USER_ID}`)
+            expect(secondRemove.statusCode).to.equal(404)
         end)
     end)
 
     afterAll(function()
-        if mintedToken then
-            -- Re-add so cleanup of the fixture package is authorized,
-            -- then remove the fixture user again.
-            local response = _adminRequest(
-                "POST",
-                "/admin/whitelist",
-                serde.encode("json", { userId = FIXTURE_USER_ID, name = FIXTURE_NAME })
-            )
-            if response.ok then
-                local decoded = serde.decode("json", response.body)
-                _removeFixturePackage(decoded.token)
-            end
+        -- Re-add so cleanup of the fixture package is authorized, delete
+        -- the package, then remove the fixture user again.
+        local response = _adminRequest(
+            "POST",
+            "/admin/whitelist",
+            serde.encode("json", { userId = FIXTURE_USER_ID, name = FIXTURE_NAME })
+        )
+        if response.ok then
+            _deletePackage(serde.decode("json", response.body).token)
         end
-        _removeFixtureUser()
+        _removeUser(FIXTURE_USER_ID)
     end)
 end
