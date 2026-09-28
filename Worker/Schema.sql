@@ -1,3 +1,5 @@
+-- Apply to production D1 before deploy:
+-- wrangler d1 execute bloxdrive-registry --remote --file=Worker/Schema.sql
 CREATE TABLE IF NOT EXISTS packages (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL

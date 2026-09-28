@@ -163,7 +163,7 @@ return function()
             end
             expect(found).to.be.ok()
             expect(found.name).to.equal(FIXTURE_NAME)
-            expect(found.token).never.to.be.ok()
+            expect(found.token).to.never.be.ok()
 
             -- The minted token authorizes a write; an unknown one does not.
             expect(_writeVersion(tokenA, 1)).to.equal(200)
@@ -173,7 +173,7 @@ return function()
             -- issued, it differs from the old one, the old one is revoked,
             -- and the new one works.
             local tokenB = _addUser(FIXTURE_USER_ID, FIXTURE_NAME)
-            expect(tokenB).never.to.equal(tokenA)
+            expect(tokenB).to.never.equal(tokenA)
             expect(_writeVersion(tokenA, 3)).to.equal(401)
             expect(_writeVersion(tokenB, 3)).to.equal(200)
 
