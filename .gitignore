@@ -30,7 +30,12 @@ node_modules
 aftman.toml
 
 # Project
+/CONTEXT.md
 /PLANS.md
 /TODO.md
 /Tools
 /bloxdrive-registry
+
+# Worktrees
+/.worktrees/
+/.wt/
