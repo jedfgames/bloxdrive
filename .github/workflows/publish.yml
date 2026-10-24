@@ -25,7 +25,7 @@ jobs:
         run: wally install
 
       - name: Build plugin
-        run: lune run ./Scripts/BuildPlugin.luau
+        run: ./Scripts/BuildPlugin.exec.luau
 
       - name: Get version and changelog
         id: version
