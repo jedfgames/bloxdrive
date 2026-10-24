@@ -2,7 +2,7 @@
 
 --[[
 
-Whitelist
+Whitelist.exec
 
 Manages the bloxdrive registry whitelist through the Worker's admin
 routes. Adding a user mints a fresh token and prints it once; hand it
@@ -11,9 +11,9 @@ a user revokes their token immediately without affecting anyone else.
 
 Requires REGISTRY_URL and ADMIN_TOKEN in .env.
 
-[Usage] lune run ./Scripts/Whitelist.luau add <userId> <name>
-[Usage] lune run ./Scripts/Whitelist.luau remove <userId>
-[Usage] lune run ./Scripts/Whitelist.luau list
+[Usage] ./Scripts/Whitelist.exec.luau add <userId> <name>
+[Usage] ./Scripts/Whitelist.exec.luau remove <userId>
+[Usage] ./Scripts/Whitelist.exec.luau list
 
 --]]
 
@@ -101,12 +101,14 @@ local function listUsers(url: string, adminToken: string)
 end
 
 local function usage()
-    print("[Usage] lune run ./Scripts/Whitelist.luau add <userId> <name>")
-    print("[Usage] lune run ./Scripts/Whitelist.luau remove <userId>")
-    print("[Usage] lune run ./Scripts/Whitelist.luau list")
+    print("[Usage] ./Scripts/Whitelist.exec.luau add <userId> <name>")
+    print("[Usage] ./Scripts/Whitelist.exec.luau remove <userId>")
+    print("[Usage] ./Scripts/Whitelist.exec.luau list")
 end
 
-local function whitelist()
+const Whitelist = {}
+
+function Whitelist.exec()
     local command = process.args[1]
 
     if command == "add" then
@@ -135,4 +137,4 @@ local function whitelist()
     end
 end
 
-whitelist()
+Whitelist.exec()

@@ -2,13 +2,13 @@
 
 --[[
 
-UploadE2EPlace
+UploadE2EPlace.exec
 
 Builds and uploads the E2E test place to Roblox. Run this once to
 set up the place with the latest source modules, then run
-`lune run ./Scripts/RunTests.luau E2E` to execute the E2E tests.
+`./Scripts/RunTests.exec.luau E2E` to execute the E2E tests.
 
-[Usage] lune run ./Scripts/UploadE2EPlace.luau
+[Usage] ./Scripts/UploadE2EPlace.exec.luau
 
 --]]
 
@@ -22,7 +22,9 @@ local task = require("@lune/task")
 local UNIVERSE_ID = "9873131552"
 local PLACE_ID = "94206881554615"
 
-local function uploadE2EPlace()
+const UploadE2EPlace = {}
+
+function UploadE2EPlace.exec()
     pcall(Dotenv.load)
     local apiKey = process.env.ROBLOX_E2E_API_KEY
     assert(apiKey ~= nil and apiKey ~= "", "ROBLOX_E2E_API_KEY not found in .env")
@@ -76,4 +78,4 @@ local function uploadE2EPlace()
     error("Place upload failed after all retries.")
 end
 
-uploadE2EPlace()
+UploadE2EPlace.exec()

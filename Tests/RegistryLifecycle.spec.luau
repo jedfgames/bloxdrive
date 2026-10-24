@@ -9,7 +9,7 @@ up without affecting real data. Exercises every registry operation
 end-to-end using Lune's net library.
 
 Requires REGISTRY_TOKEN in .env (a whitelisted token minted via
-Scripts/Whitelist.luau) with write access. Skips gracefully when the
+Scripts/Whitelist.exec.luau) with write access. Skips gracefully when the
 token is not available.
 
 --]]

@@ -11,12 +11,12 @@ Each remote test result is mapped to its own it() block so results
 integrate with Testable's reporting.
 
 The place must have been published with the source modules already in
-it. RunTests.luau handles this automatically when ROBLOX_E2E_API_KEY
+it. RunTests.exec.luau handles this automatically when ROBLOX_E2E_API_KEY
 is set.
 
 Requires ROBLOX_E2E_API_KEY in .env. Skips gracefully when the key
 is not available. The registry portion additionally uses REGISTRY_TOKEN
-(a whitelisted token minted via Scripts/Whitelist.luau) and skips when
+(a whitelisted token minted via Scripts/Whitelist.exec.luau) and skips when
 it is not set.
 
 --]]

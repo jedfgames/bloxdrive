@@ -2,14 +2,14 @@
 
 --[[
 
-BuildPlugin
+BuildPlugin.exec
 
 Builds the Studio plugin as an .rbxm file using Rojo and optionally
 installs the result into the Roblox Studio plugins directory. The Rojo
 fork resolves .luaurc aliases and init.plugin.luau files automatically,
 so no post-build patching is needed.
 
-[Usage] lune run ./Scripts/BuildPlugin.luau [--install]
+[Usage] ./Scripts/BuildPlugin.exec.luau [--install]
 
 --]]
 
@@ -21,7 +21,9 @@ local Dotenv = require("@devpackages/Dotenv")
 local PLUGIN_NAME = "Bloxdrive.rbxm"
 local BUILD_PATH = `Build/{PLUGIN_NAME}`
 
-local function buildPlugin()
+const BuildPlugin = {}
+
+function BuildPlugin.exec()
     local install = table.find(process.args, "--install") ~= nil
 
     if not fs.isDir("Build") then
@@ -60,4 +62,4 @@ local function buildPlugin()
     print(`Plugin installed to "{installPath}".`)
 end
 
-buildPlugin()
+BuildPlugin.exec()
