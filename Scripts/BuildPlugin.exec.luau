@@ -2,27 +2,29 @@
 
 --[[
 
-BuildPlugin
+BuildPlugin.exec
 
 Builds the Studio plugin as an .rbxm file using Rojo and optionally
 installs the result into the Roblox Studio plugins directory. The Rojo
 fork resolves .luaurc aliases and init.plugin.luau files automatically,
 so no post-build patching is needed.
 
-[Usage] lune run ./Scripts/BuildPlugin.luau [--install]
+[Usage] ./Scripts/BuildPlugin.exec.luau [--install]
 
 --]]
 
-local fs = require("@lune/fs")
-local process = require("@lune/process")
+const fs = require("@lune/fs")
+const process = require("@lune/process")
 
-local Dotenv = require("@devpackages/Dotenv")
+const Dotenv = require("@devpackages/Dotenv")
 
-local PLUGIN_NAME = "Bloxdrive.rbxm"
-local BUILD_PATH = `Build/{PLUGIN_NAME}`
+const PLUGIN_NAME = "Bloxdrive.rbxm"
+const BUILD_PATH = `Build/{PLUGIN_NAME}`
 
-local function buildPlugin()
-    local install = table.find(process.args, "--install") ~= nil
+const BuildPlugin = {}
+
+function BuildPlugin.exec()
+    const install = table.find(process.args, "--install") ~= nil
 
     if not fs.isDir("Build") then
         fs.writeDir("Build")
@@ -30,7 +32,7 @@ local function buildPlugin()
 
     print("Building plugin with Rojo...")
 
-    local result = process.exec("rojo", {
+    const result = process.exec("rojo", {
         "build",
         "plugin.project.json",
         "--output",
@@ -51,13 +53,13 @@ local function buildPlugin()
 
     -- Install to plugins directory
     pcall(Dotenv.load)
-    local pluginsDir = process.env.ROBLOX_PLUGINS_DIR
+    const pluginsDir = process.env.ROBLOX_PLUGINS_DIR
     assert(pluginsDir, "ROBLOX_PLUGINS_DIR is not set in .env or environment.")
     assert(fs.isDir(pluginsDir), `Plugins directory "{pluginsDir}" does not exist.`)
 
-    local installPath = `{pluginsDir}/{PLUGIN_NAME}`
+    const installPath = `{pluginsDir}/{PLUGIN_NAME}`
     fs.copy(BUILD_PATH, installPath, { overwrite = true })
     print(`Plugin installed to "{installPath}".`)
 end
 
-buildPlugin()
+BuildPlugin.exec()

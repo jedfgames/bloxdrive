@@ -8,10 +8,10 @@ current verbosity are silenced. Default verbosity is 1.
 
 --]]
 
-local PREFIX = "[Bloxdrive]"
-local DEFAULT_VERBOSITY = 1
+const PREFIX = "[Bloxdrive]"
+const DEFAULT_VERBOSITY = 1
 
-local Logger = {}
+const Logger = {}
 
 Logger.Verbosity = DEFAULT_VERBOSITY
 

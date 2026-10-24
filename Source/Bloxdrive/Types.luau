@@ -8,7 +8,7 @@ operations, and merge results.
 
 --]]
 
-local Types = {}
+const Types = {}
 
 --[=[
     Parsed contents of a `.bloxdrive` StringValue. Identifies which package

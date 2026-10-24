@@ -11,10 +11,10 @@ from the registry's hierarchical file map (path -> content pairs).
 
 --]]
 
-local PropertyReflection = require("./PropertyReflection")
-local TreeUtils = require("./TreeUtils")
+const PropertyReflection = require("./PropertyReflection")
+const TreeUtils = require("./TreeUtils")
 
-local Deserializer = {}
+const Deserializer = {}
 
 --[=[
     Deserializes a TreeNode into a Roblox instance subtree and parents it
@@ -34,13 +34,13 @@ function Deserializer.deserialize(name: string, tree: { [string]: any }, parent:
 end
 
 function _deserializeNode(name: string, node: { [string]: any }, parent: Instance): Instance
-    local className = node["$className"]
+    const className = node["$className"]
     assert(type(className) == "string", `Expected $className for "{name}"`)
 
-    local instance = Instance.new(className)
+    const instance = Instance.new(className)
 
     -- Set properties before parenting for efficiency
-    local properties = node["$properties"]
+    const properties = node["$properties"]
     if properties then
         for propName, propValue in properties do
             PropertyReflection.setProperty(instance, propName, propValue)
@@ -48,7 +48,7 @@ function _deserializeNode(name: string, node: { [string]: any }, parent: Instanc
     end
 
     -- Set attributes
-    local attributes = node["$attributes"]
+    const attributes = node["$attributes"]
     if attributes then
         for attrName, attrValue in attributes do
             instance:SetAttribute(attrName, attrValue)
@@ -92,10 +92,10 @@ end
 
 function _reassembleAtPrefix(files: { [string]: any }, prefix: string): { [string]: any }
     -- Get this node's metadata from instance.json
-    local instancePath = if prefix == "" then "instance.json" else `{prefix}/instance.json`
-    local node = {}
+    const instancePath = if prefix == "" then "instance.json" else `{prefix}/instance.json`
+    const node = {}
 
-    local metadata = files[instancePath]
+    const metadata = files[instancePath]
     assert(metadata ~= nil, `Missing metadata at "{instancePath}"`)
 
     for key, value in metadata do
@@ -103,7 +103,7 @@ function _reassembleAtPrefix(files: { [string]: any }, prefix: string): { [strin
     end
 
     -- Find all direct children at this prefix level
-    local childrenFound: { [string]: string } = {}
+    const childrenFound: { [string]: string } = {}
 
     for path in files do
         if path == instancePath then
@@ -121,10 +121,10 @@ function _reassembleAtPrefix(files: { [string]: any }, prefix: string): { [strin
         end
 
         -- Extract the top-level segment of the relative path
-        local slashPos = string.find(relativePath, "/")
+        const slashPos = string.find(relativePath, "/")
         if slashPos then
             -- This is inside a subdirectory (container child)
-            local dirName = string.sub(relativePath, 1, slashPos - 1)
+            const dirName = string.sub(relativePath, 1, slashPos - 1)
             if not childrenFound[dirName] then
                 childrenFound[dirName] = "directory"
             end
@@ -132,7 +132,7 @@ function _reassembleAtPrefix(files: { [string]: any }, prefix: string): { [strin
             -- This is a direct file (leaf child)
             -- Strip the .json extension to get the child name
             if string.sub(relativePath, -5) == ".json" then
-                local childName = string.sub(relativePath, 1, -6)
+                const childName = string.sub(relativePath, 1, -6)
                 childrenFound[childName] = "file"
             end
         end
@@ -141,11 +141,11 @@ function _reassembleAtPrefix(files: { [string]: any }, prefix: string): { [strin
     -- Reassemble each child
     for childName, childType in childrenFound do
         if childType == "directory" then
-            local childPrefix = if prefix == "" then childName else `{prefix}/{childName}`
+            const childPrefix = if prefix == "" then childName else `{prefix}/{childName}`
             node[childName] = _reassembleAtPrefix(files, childPrefix)
         else
-            local filePath = if prefix == "" then `{childName}.json` else `{prefix}/{childName}.json`
-            local childData = files[filePath]
+            const filePath = if prefix == "" then `{childName}.json` else `{prefix}/{childName}.json`
+            const childData = files[filePath]
             if childData then
                 node[childName] = childData
             end

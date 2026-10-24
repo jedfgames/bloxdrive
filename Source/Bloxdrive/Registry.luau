@@ -8,11 +8,11 @@ trees via a simple REST API backed by D1 (SQLite at the edge).
 
 --]]
 
-local HttpService = game:GetService("HttpService")
+const HttpService = game:GetService("HttpService")
 
-local DEFAULT_BASE_URL = "https://rbx-package-registry.batchprogrammer314.workers.dev"
+const DEFAULT_BASE_URL = "https://rbx-package-registry.batchprogrammer314.workers.dev"
 
-local Registry = {}
+const Registry = {}
 Registry.__index = Registry
 
 export type Registry = typeof(setmetatable(
@@ -31,7 +31,7 @@ export type Registry = typeof(setmetatable(
     @return Registry -- The registry client
 ]=]
 function Registry.new(config: { BaseUrl: string?, RegistryKey: string? }?): Registry
-    local self = setmetatable({}, Registry)
+    const self = setmetatable({}, Registry)
     self._baseUrl = if config and config.BaseUrl then config.BaseUrl else DEFAULT_BASE_URL
     self._registryKey = if config then config.RegistryKey else nil
     return self
@@ -46,8 +46,8 @@ end
 function Registry.FetchMetadata(self: Registry, packageId: string): { Name: string, LatestVersion: number }
     assert(type(packageId) == "string", "Expected a string packageId")
 
-    local response = self:_get(`{self._baseUrl}/packages/{packageId}`)
-    local metadata = HttpService:JSONDecode(response)
+    const response = self:_get(`{self._baseUrl}/packages/{packageId}`)
+    const metadata = HttpService:JSONDecode(response)
 
     return {
         Name = metadata.name,
@@ -66,8 +66,8 @@ function Registry.FetchVersion(self: Registry, packageId: string, version: numbe
     assert(type(packageId) == "string", "Expected a string packageId")
     assert(type(version) == "number", "Expected a number version")
 
-    local response = self:_get(`{self._baseUrl}/packages/{packageId}/versions/{version}`)
-    local tree = HttpService:JSONDecode(response)
+    const response = self:_get(`{self._baseUrl}/packages/{packageId}/versions/{version}`)
+    const tree = HttpService:JSONDecode(response)
 
     assert(type(tree) == "table", `Invalid tree for "{packageId}" version {version}`)
     assert(tree["$className"] ~= nil, `Missing $className for "{packageId}" version {version}`)
@@ -85,8 +85,8 @@ end
     @return number -- The latest version number
 ]=]
 function Registry.FetchLatest(self: Registry, packageId: string): ({ [string]: any }, number)
-    local metadata = self:FetchMetadata(packageId)
-    local tree = self:FetchVersion(packageId, metadata.LatestVersion)
+    const metadata = self:FetchMetadata(packageId)
+    const tree = self:FetchVersion(packageId, metadata.LatestVersion)
     return tree, metadata.LatestVersion
 end
 
@@ -98,7 +98,7 @@ function Registry._get(self: Registry, url: string): string
         }
     end
 
-    local success, response = pcall(function()
+    const success, response = pcall(function()
         return HttpService:GetAsync(url, true, headers)
     end)
 

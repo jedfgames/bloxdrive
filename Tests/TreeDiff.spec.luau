@@ -7,12 +7,12 @@ not require any Roblox APIs.
 
 --]]
 
-local TreeDiff = require("@bloxdrive/TreeDiff")
+const TreeDiff = require("@bloxdrive/TreeDiff")
 
 return function()
     describe("diff", function()
         it("should return no operations for identical trees", function()
-            local tree = {
+            const tree = {
                 ["$className"] = "Folder",
                 ["$properties"] = { Value = 10 },
                 Child = {
@@ -21,55 +21,55 @@ return function()
                 },
             }
 
-            local ops = TreeDiff.diff(tree, tree)
+            const ops = TreeDiff.diff(tree, tree)
             expect(#ops).to.equal(0)
         end)
 
         it("should detect added children", function()
-            local oldTree = {
+            const oldTree = {
                 ["$className"] = "Folder",
             }
-            local newTree = {
+            const newTree = {
                 ["$className"] = "Folder",
                 NewChild = {
                     ["$className"] = "Part",
                 },
             }
 
-            local ops = TreeDiff.diff(oldTree, newTree)
+            const ops = TreeDiff.diff(oldTree, newTree)
             expect(#ops).to.equal(1)
             expect(ops[1].Kind).to.equal("Add")
             expect(ops[1].Path[1]).to.equal("NewChild")
         end)
 
         it("should detect removed children", function()
-            local oldTree = {
+            const oldTree = {
                 ["$className"] = "Folder",
                 OldChild = {
                     ["$className"] = "Part",
                 },
             }
-            local newTree = {
+            const newTree = {
                 ["$className"] = "Folder",
             }
 
-            local ops = TreeDiff.diff(oldTree, newTree)
+            const ops = TreeDiff.diff(oldTree, newTree)
             expect(#ops).to.equal(1)
             expect(ops[1].Kind).to.equal("Remove")
             expect(ops[1].Path[1]).to.equal("OldChild")
         end)
 
         it("should detect modified properties", function()
-            local oldTree = {
+            const oldTree = {
                 ["$className"] = "Part",
                 ["$properties"] = { Anchored = true },
             }
-            local newTree = {
+            const newTree = {
                 ["$className"] = "Part",
                 ["$properties"] = { Anchored = false },
             }
 
-            local ops = TreeDiff.diff(oldTree, newTree)
+            const ops = TreeDiff.diff(oldTree, newTree)
             expect(#ops).to.equal(1)
             expect(ops[1].Kind).to.equal("Modify")
             expect(ops[1].Path[1]).to.equal("$properties")
@@ -79,48 +79,48 @@ return function()
         end)
 
         it("should detect added properties", function()
-            local oldTree = {
+            const oldTree = {
                 ["$className"] = "Part",
                 ["$properties"] = {},
             }
-            local newTree = {
+            const newTree = {
                 ["$className"] = "Part",
                 ["$properties"] = { Anchored = true },
             }
 
-            local ops = TreeDiff.diff(oldTree, newTree)
+            const ops = TreeDiff.diff(oldTree, newTree)
             expect(#ops).to.equal(1)
             expect(ops[1].Kind).to.equal("Add")
             expect(ops[1].Path[2]).to.equal("Anchored")
         end)
 
         it("should detect removed properties", function()
-            local oldTree = {
+            const oldTree = {
                 ["$className"] = "Part",
                 ["$properties"] = { Anchored = true },
             }
-            local newTree = {
+            const newTree = {
                 ["$className"] = "Part",
                 ["$properties"] = {},
             }
 
-            local ops = TreeDiff.diff(oldTree, newTree)
+            const ops = TreeDiff.diff(oldTree, newTree)
             expect(#ops).to.equal(1)
             expect(ops[1].Kind).to.equal("Remove")
             expect(ops[1].Path[2]).to.equal("Anchored")
         end)
 
         it("should detect modified attributes", function()
-            local oldTree = {
+            const oldTree = {
                 ["$className"] = "Folder",
                 ["$attributes"] = { Score = 10 },
             }
-            local newTree = {
+            const newTree = {
                 ["$className"] = "Folder",
                 ["$attributes"] = { Score = 20 },
             }
 
-            local ops = TreeDiff.diff(oldTree, newTree)
+            const ops = TreeDiff.diff(oldTree, newTree)
             expect(#ops).to.equal(1)
             expect(ops[1].Kind).to.equal("Modify")
             expect(ops[1].Path[1]).to.equal("$attributes")
@@ -128,20 +128,20 @@ return function()
         end)
 
         it("should detect className changes as remove + add", function()
-            local oldTree = {
+            const oldTree = {
                 ["$className"] = "Folder",
                 Child = {
                     ["$className"] = "Part",
                 },
             }
-            local newTree = {
+            const newTree = {
                 ["$className"] = "Folder",
                 Child = {
                     ["$className"] = "MeshPart",
                 },
             }
 
-            local ops = TreeDiff.diff(oldTree, newTree)
+            const ops = TreeDiff.diff(oldTree, newTree)
             expect(#ops).to.equal(2)
 
             local removeOp, addOp
@@ -160,7 +160,7 @@ return function()
         end)
 
         it("should handle deeply nested changes", function()
-            local oldTree = {
+            const oldTree = {
                 ["$className"] = "Folder",
                 A = {
                     ["$className"] = "Folder",
@@ -170,7 +170,7 @@ return function()
                     },
                 },
             }
-            local newTree = {
+            const newTree = {
                 ["$className"] = "Folder",
                 A = {
                     ["$className"] = "Folder",
@@ -181,7 +181,7 @@ return function()
                 },
             }
 
-            local ops = TreeDiff.diff(oldTree, newTree)
+            const ops = TreeDiff.diff(oldTree, newTree)
             expect(#ops).to.equal(1)
             expect(ops[1].Path[1]).to.equal("A")
             expect(ops[1].Path[2]).to.equal("B")

@@ -10,10 +10,10 @@ following the Google Docs philosophy of never blocking the user.
 
 --]]
 
-local TreeDiff = require("./TreeDiff")
-local TreeUtils = require("./TreeUtils")
+const TreeDiff = require("./TreeDiff")
+const TreeUtils = require("./TreeUtils")
 
-local Merger = {}
+const Merger = {}
 
 type ConflictInfo = {
     Path: { string },
@@ -46,8 +46,8 @@ function Merger.merge(
     assert(type(localTree) == "table", "Expected a table for localTree")
     assert(type(remoteTree) == "table", "Expected a table for remoteTree")
 
-    local conflicts: { ConflictInfo } = {}
-    local merged = _mergeNodes(baseTree, localTree, remoteTree, {}, conflicts)
+    const conflicts: { ConflictInfo } = {}
+    const merged = _mergeNodes(baseTree, localTree, remoteTree, {}, conflicts)
 
     return {
         Tree = merged,
@@ -62,7 +62,7 @@ function _mergeNodes(
     path: { string },
     conflicts: { ConflictInfo }
 ): { [string]: any }
-    local merged: { [string]: any } = {}
+    const merged: { [string]: any } = {}
 
     -- Use local's className as the base (should be same across all three)
     merged["$className"] = localNode["$className"]
@@ -94,12 +94,12 @@ function _mergeNodes(
     end
 
     -- Merge children
-    local baseChildren = TreeUtils.getChildKeys(baseNode)
-    local localChildren = TreeUtils.getChildKeys(localNode)
-    local remoteChildren = TreeUtils.getChildKeys(remoteNode)
+    const baseChildren = TreeUtils.getChildKeys(baseNode)
+    const localChildren = TreeUtils.getChildKeys(localNode)
+    const remoteChildren = TreeUtils.getChildKeys(remoteNode)
 
     -- Collect all child names
-    local allChildren: { [string]: boolean } = {}
+    const allChildren: { [string]: boolean } = {}
     for name in baseChildren do
         allChildren[name] = true
     end
@@ -111,10 +111,10 @@ function _mergeNodes(
     end
 
     for childName in allChildren do
-        local inBase = baseChildren[childName] ~= nil
-        local inLocal = localChildren[childName] ~= nil
-        local inRemote = remoteChildren[childName] ~= nil
-        local childPath = _appendPath(path, childName)
+        const inBase = baseChildren[childName] ~= nil
+        const inLocal = localChildren[childName] ~= nil
+        const inRemote = remoteChildren[childName] ~= nil
+        const childPath = _appendPath(path, childName)
 
         if inBase and inLocal and inRemote then
             -- All three have it: recurse
@@ -128,13 +128,13 @@ function _mergeNodes(
             merged[childName] = TreeUtils.deepClone(remoteNode[childName])
         elseif not inBase and inLocal and inRemote then
             -- Both added: merge the two new versions (use empty base)
-            local emptyBase = { ["$className"] = localNode[childName]["$className"] }
+            const emptyBase = { ["$className"] = localNode[childName]["$className"] }
             merged[childName] =
                 _mergeNodes(emptyBase, localNode[childName], remoteNode[childName], childPath, conflicts)
         elseif inBase and not inLocal and inRemote then
             -- Deleted locally: respect the deletion
             -- But check if remote made changes to it
-            local remoteDiffs = TreeDiff.diff(baseNode[childName], remoteNode[childName])
+            const remoteDiffs = TreeDiff.diff(baseNode[childName], remoteNode[childName])
             if #remoteDiffs > 0 then
                 -- Remote changed it but local deleted it: orphan conflict
                 merged[`{childName}_ORPHANED`] = TreeUtils.deepClone(remoteNode[childName])
@@ -148,7 +148,7 @@ function _mergeNodes(
         elseif inBase and inLocal and not inRemote then
             -- Deleted remotely: respect the deletion
             -- But check if local made changes to it
-            local localDiffs = TreeDiff.diff(baseNode[childName], localNode[childName])
+            const localDiffs = TreeDiff.diff(baseNode[childName], localNode[childName])
             if #localDiffs > 0 then
                 -- Local changed it but remote deleted it: orphan conflict
                 merged[`{childName}_ORPHANED`] = TreeUtils.deepClone(localNode[childName])
@@ -174,10 +174,10 @@ function _mergeTable(
     path: { string },
     conflicts: { ConflictInfo }
 ): { [string]: any }
-    local merged = {}
+    const merged = {}
 
     -- Collect all keys
-    local allKeys: { [string]: boolean } = {}
+    const allKeys: { [string]: boolean } = {}
     for key in base do
         allKeys[key] = true
     end
@@ -189,12 +189,12 @@ function _mergeTable(
     end
 
     for key in allKeys do
-        local baseVal = base[key]
-        local localVal = local_[key]
-        local remoteVal = remote[key]
+        const baseVal = base[key]
+        const localVal = local_[key]
+        const remoteVal = remote[key]
 
-        local localChanged = not TreeUtils.deepEqual(baseVal, localVal)
-        local remoteChanged = not TreeUtils.deepEqual(baseVal, remoteVal)
+        const localChanged = not TreeUtils.deepEqual(baseVal, localVal)
+        const remoteChanged = not TreeUtils.deepEqual(baseVal, remoteVal)
 
         if not localChanged and not remoteChanged then
             -- No changes
@@ -226,7 +226,7 @@ function _mergeTable(
 end
 
 function _appendPath(path: { string }, segment: string): { string }
-    local newPath = table.clone(path)
+    const newPath = table.clone(path)
     table.insert(newPath, segment)
     return newPath
 end

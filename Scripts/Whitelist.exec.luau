@@ -2,7 +2,7 @@
 
 --[[
 
-Whitelist
+Whitelist.exec
 
 Manages the bloxdrive registry whitelist through the Worker's admin
 routes. Adding a user mints a fresh token and prints it once; hand it
@@ -11,31 +11,31 @@ a user revokes their token immediately without affecting anyone else.
 
 Requires REGISTRY_URL and ADMIN_TOKEN in .env.
 
-[Usage] lune run ./Scripts/Whitelist.luau add <userId> <name>
-[Usage] lune run ./Scripts/Whitelist.luau remove <userId>
-[Usage] lune run ./Scripts/Whitelist.luau list
+[Usage] ./Scripts/Whitelist.exec.luau add <userId> <name>
+[Usage] ./Scripts/Whitelist.exec.luau remove <userId>
+[Usage] ./Scripts/Whitelist.exec.luau list
 
 --]]
 
-local Dotenv = require("@devpackages/Dotenv")
-local net = require("@lune/net")
-local process = require("@lune/process")
-local serde = require("@lune/serde")
+const Dotenv = require("@devpackages/Dotenv")
+const net = require("@lune/net")
+const process = require("@lune/process")
+const serde = require("@lune/serde")
 
-local function loadConfig(): (string, string)
+const function loadConfig(): (string, string)
     pcall(Dotenv.load)
 
-    local url = process.env.REGISTRY_URL
+    const url = process.env.REGISTRY_URL
     assert(url ~= nil and url ~= "", "REGISTRY_URL not found in .env")
 
-    local adminToken = process.env.ADMIN_TOKEN
+    const adminToken = process.env.ADMIN_TOKEN
     assert(adminToken ~= nil and adminToken ~= "", "ADMIN_TOKEN not found in .env")
 
     return url, adminToken
 end
 
-local function addUser(url: string, adminToken: string, userId: string, name: string)
-    local response = net.request({
+const function addUser(url: string, adminToken: string, userId: string, name: string)
+    const response = net.request({
         url = `{url}/admin/whitelist`,
         method = "POST",
         headers = {
@@ -49,7 +49,7 @@ local function addUser(url: string, adminToken: string, userId: string, name: st
         error(`Failed to add user ({response.statusCode}): {response.body}`)
     end
 
-    local decoded = serde.decode("json", response.body)
+    const decoded = serde.decode("json", response.body)
     print(`Added "{decoded.name}" ({decoded.userId}) to the whitelist.`)
     print("")
     print("Share this token with them now. It will not be shown again.")
@@ -58,8 +58,8 @@ local function addUser(url: string, adminToken: string, userId: string, name: st
     print("")
 end
 
-local function removeUser(url: string, adminToken: string, userId: string)
-    local response = net.request({
+const function removeUser(url: string, adminToken: string, userId: string)
+    const response = net.request({
         url = `{url}/admin/whitelist/{userId}`,
         method = "DELETE",
         headers = { Authorization = `Bearer {adminToken}` },
@@ -75,8 +75,8 @@ local function removeUser(url: string, adminToken: string, userId: string)
     print(`Removed user "{userId}" from the whitelist.`)
 end
 
-local function listUsers(url: string, adminToken: string)
-    local response = net.request({
+const function listUsers(url: string, adminToken: string)
+    const response = net.request({
         url = `{url}/admin/whitelist`,
         method = "GET",
         headers = { Authorization = `Bearer {adminToken}` },
@@ -86,8 +86,8 @@ local function listUsers(url: string, adminToken: string)
         error(`Failed to list users ({response.statusCode}): {response.body}`)
     end
 
-    local decoded = serde.decode("json", response.body)
-    local entries = decoded.entries
+    const decoded = serde.decode("json", response.body)
+    const entries = decoded.entries
 
     if #entries == 0 then
         print("The whitelist is empty.")
@@ -100,34 +100,36 @@ local function listUsers(url: string, adminToken: string)
     end
 end
 
-local function usage()
-    print("[Usage] lune run ./Scripts/Whitelist.luau add <userId> <name>")
-    print("[Usage] lune run ./Scripts/Whitelist.luau remove <userId>")
-    print("[Usage] lune run ./Scripts/Whitelist.luau list")
+const function usage()
+    print("[Usage] ./Scripts/Whitelist.exec.luau add <userId> <name>")
+    print("[Usage] ./Scripts/Whitelist.exec.luau remove <userId>")
+    print("[Usage] ./Scripts/Whitelist.exec.luau list")
 end
 
-local function whitelist()
-    local command = process.args[1]
+const Whitelist = {}
+
+function Whitelist.exec()
+    const command = process.args[1]
 
     if command == "add" then
-        local userId = process.args[2]
-        local name = process.args[3]
+        const userId = process.args[2]
+        const name = process.args[3]
         if not userId or not name then
             usage()
             process.exit(1)
         end
-        local url, adminToken = loadConfig()
+        const url, adminToken = loadConfig()
         addUser(url, adminToken, userId, name)
     elseif command == "remove" then
-        local userId = process.args[2]
+        const userId = process.args[2]
         if not userId then
             usage()
             process.exit(1)
         end
-        local url, adminToken = loadConfig()
+        const url, adminToken = loadConfig()
         removeUser(url, adminToken, userId)
     elseif command == "list" then
-        local url, adminToken = loadConfig()
+        const url, adminToken = loadConfig()
         listUsers(url, adminToken)
     else
         usage()
@@ -135,4 +137,4 @@ local function whitelist()
     end
 end
 
-whitelist()
+Whitelist.exec()

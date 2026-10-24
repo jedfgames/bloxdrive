@@ -7,7 +7,7 @@ require any Roblox APIs.
 
 --]]
 
-local TreeUtils = require("@bloxdrive/TreeUtils")
+const TreeUtils = require("@bloxdrive/TreeUtils")
 
 return function()
     describe("isMetadataKey", function()
@@ -32,7 +32,7 @@ return function()
 
     describe("getChildKeys", function()
         it("should return child keys with $className", function()
-            local node = {
+            const node = {
                 ["$className"] = "Folder",
                 ["$properties"] = { Value = 10 },
                 Child = {
@@ -40,14 +40,14 @@ return function()
                 },
             }
 
-            local children = TreeUtils.getChildKeys(node)
+            const children = TreeUtils.getChildKeys(node)
             expect(children.Child).to.equal(true)
             expect(children["$className"]).to.equal(nil)
             expect(children["$properties"]).to.equal(nil)
         end)
 
         it("should skip non-table values", function()
-            local node = {
+            const node = {
                 ["$className"] = "Folder",
                 SomeString = "hello",
                 Child = {
@@ -55,13 +55,13 @@ return function()
                 },
             }
 
-            local children = TreeUtils.getChildKeys(node)
+            const children = TreeUtils.getChildKeys(node)
             expect(children.Child).to.equal(true)
             expect(children.SomeString).to.equal(nil)
         end)
 
         it("should skip tables without $className", function()
-            local node = {
+            const node = {
                 ["$className"] = "Folder",
                 NotAChild = { key = "value" },
                 Child = {
@@ -69,18 +69,18 @@ return function()
                 },
             }
 
-            local children = TreeUtils.getChildKeys(node)
+            const children = TreeUtils.getChildKeys(node)
             expect(children.Child).to.equal(true)
             expect(children.NotAChild).to.equal(nil)
         end)
 
         it("should return empty for a leaf node", function()
-            local node = {
+            const node = {
                 ["$className"] = "Part",
                 ["$properties"] = { Anchored = true },
             }
 
-            local children = TreeUtils.getChildKeys(node)
+            const children = TreeUtils.getChildKeys(node)
             expect(next(children)).to.equal(nil)
         end)
     end)
@@ -113,9 +113,9 @@ return function()
         end)
 
         it("should compare nested tables", function()
-            local a = { x = { y = { z = 1 } } }
-            local b = { x = { y = { z = 1 } } }
-            local c = { x = { y = { z = 2 } } }
+            const a = { x = { y = { z = 1 } } }
+            const b = { x = { y = { z = 1 } } }
+            const c = { x = { y = { z = 2 } } }
 
             expect(TreeUtils.deepEqual(a, b)).to.equal(true)
             expect(TreeUtils.deepEqual(a, c)).to.equal(false)
@@ -136,8 +136,8 @@ return function()
         end)
 
         it("should clone a flat table", function()
-            local original = { a = 1, b = 2 }
-            local cloned = TreeUtils.deepClone(original)
+            const original = { a = 1, b = 2 }
+            const cloned = TreeUtils.deepClone(original)
 
             expect(cloned.a).to.equal(1)
             expect(cloned.b).to.equal(2)
@@ -145,16 +145,16 @@ return function()
         end)
 
         it("should deep clone nested tables", function()
-            local original = { x = { y = 1 } }
-            local cloned = TreeUtils.deepClone(original)
+            const original = { x = { y = 1 } }
+            const cloned = TreeUtils.deepClone(original)
 
             expect(cloned.x.y).to.equal(1)
             expect(cloned.x).to.never.equal(original.x)
         end)
 
         it("should not share references with the original", function()
-            local original = { items = { 1, 2, 3 } }
-            local cloned = TreeUtils.deepClone(original)
+            const original = { items = { 1, 2, 3 } }
+            const cloned = TreeUtils.deepClone(original)
 
             table.insert(cloned.items, 4)
             expect(#original.items).to.equal(3)

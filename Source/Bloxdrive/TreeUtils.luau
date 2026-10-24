@@ -7,13 +7,13 @@ dependencies so it can be used in both Studio and Lune contexts.
 
 --]]
 
-local METADATA_KEYS = {
+const METADATA_KEYS = {
     ["$className"] = true,
     ["$properties"] = true,
     ["$attributes"] = true,
 }
 
-local TreeUtils = {}
+const TreeUtils = {}
 
 --[=[
     Returns whether a key is a metadata key (prefixed with `$`) rather than
@@ -34,7 +34,7 @@ end
     @return { [string]: boolean } -- Set of child names
 ]=]
 function TreeUtils.getChildKeys(node: { [string]: any }): { [string]: boolean }
-    local children = {}
+    const children = {}
     for key, value in node do
         if not METADATA_KEYS[key] and type(value) == "table" and value["$className"] ~= nil then
             children[key] = true
@@ -85,7 +85,7 @@ function TreeUtils.deepClone(value: any): any
         return value
     end
 
-    local clone = {}
+    const clone = {}
     for key, v in value do
         clone[key] = TreeUtils.deepClone(v)
     end

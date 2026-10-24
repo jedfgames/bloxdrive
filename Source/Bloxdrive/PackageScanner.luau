@@ -8,11 +8,11 @@ auto-update preference.
 
 --]]
 
-local HttpService = game:GetService("HttpService")
+const HttpService = game:GetService("HttpService")
 
-local PACKAGE_MARKER_NAME = ".bloxdrive"
+const PACKAGE_MARKER_NAME = ".bloxdrive"
 
-local PackageScanner = {}
+const PackageScanner = {}
 
 type PackageMarker = {
     Id: string,
@@ -35,8 +35,8 @@ type PackageInfo = {
     @return { PackageInfo } -- The discovered packages
 ]=]
 function PackageScanner.scan(roots: { Instance }?): { PackageInfo }
-    local scanRoots = roots or { game }
-    local results: { PackageInfo } = {}
+    const scanRoots = roots or { game }
+    const results: { PackageInfo } = {}
 
     for _, root in scanRoots do
         _scanDescendants(root, results)
@@ -55,13 +55,13 @@ function _scanDescendants(root: Instance, results: { PackageInfo })
             continue
         end
 
-        local parent = descendant.Parent
+        const parent = descendant.Parent
         if parent == nil then
             continue
         end
 
-        local success, metadata = pcall(function(): PackageMarker
-            local decoded = HttpService:JSONDecode(descendant.Value)
+        const success, metadata = pcall(function(): PackageMarker
+            const decoded = HttpService:JSONDecode(descendant.Value)
 
             assert(type(decoded.Id) == "string", "Missing Id in package marker")
             assert(type(decoded.Version) == "number", "Missing Version in package marker")

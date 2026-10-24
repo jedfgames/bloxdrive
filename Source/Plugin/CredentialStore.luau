@@ -7,9 +7,9 @@ settings API. The key persists across Studio sessions.
 
 --]]
 
-local SETTING_KEY = "Bloxdrive_RegistryKey"
+const SETTING_KEY = "Bloxdrive_RegistryKey"
 
-local CredentialStore = {}
+const CredentialStore = {}
 
 local _plugin: Plugin? = nil
 
@@ -30,7 +30,7 @@ end
 ]=]
 function CredentialStore.getKey(): string?
     assert(_plugin ~= nil, "CredentialStore not initialized")
-    local key = _plugin:GetSetting(SETTING_KEY)
+    const key = _plugin:GetSetting(SETTING_KEY)
     if type(key) == "string" and key ~= "" then
         return key
     end

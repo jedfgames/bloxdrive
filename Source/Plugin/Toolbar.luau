@@ -9,7 +9,7 @@ button from staying highlighted.
 
 --]]
 
-local Toolbar = {}
+const Toolbar = {}
 Toolbar.__index = Toolbar
 
 export type ToolbarButtonConfig = {
@@ -23,7 +23,7 @@ function Toolbar.new(plugin: Plugin, toolbarName: string)
     assert(typeof(plugin) == "Instance" and plugin:IsA("Plugin"), `Expected "plugin" to be a Plugin instance.`)
     assert(typeof(toolbarName) == "string", `Expected "toolbarName" to be a string.`)
 
-    local self = setmetatable({}, Toolbar)
+    const self = setmetatable({}, Toolbar)
 
     self.Plugin = plugin
     self.PluginToolbar = plugin:CreateToolbar(toolbarName)
@@ -37,7 +37,7 @@ function Toolbar.CreateButton(self: Toolbar, config: ToolbarButtonConfig, onClic
     assert(typeof(onClick) == "function", `Expected "onClick" to be a function.`)
     assert(not self.Buttons[config.Name], `A button with the name "{config.Name}" already exists in this toolbar.`)
 
-    local button = self.PluginToolbar:CreateButton(config.Name, config.Description, config.Icon, config.Label)
+    const button = self.PluginToolbar:CreateButton(config.Name, config.Description, config.Icon, config.Label)
     button.ClickableWhenViewportHidden = true
     button.Click:Connect(function()
         button:SetActive(false)

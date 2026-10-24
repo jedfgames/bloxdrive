@@ -19,7 +19,7 @@ from pure-data modules like TreeDiff or Merger.
 -- Some properties are reported as serializable by ReflectionService but
 -- cannot be accessed by their reflected name. This map provides the
 -- public API name to use instead.
-local PROPERTY_ALIASES: { [string]: string } = {
+const PROPERTY_ALIASES: { [string]: string } = {
     Color3uint8 = "Color",
     MaterialVariantSerialized = "MaterialVariant",
 }
@@ -27,7 +27,7 @@ local PROPERTY_ALIASES: { [string]: string } = {
 -- Properties that are serializable according to ReflectionService but
 -- should be skipped entirely. Includes legacy surface joint params,
 -- runtime physics state, and redundant collision group ID.
-local SKIP_PROPERTIES: { [string]: boolean } = {
+const SKIP_PROPERTIES: { [string]: boolean } = {
     BackParamA = true,
     BackParamB = true,
     BackSurfaceInput = true,
@@ -52,7 +52,7 @@ local SKIP_PROPERTIES: { [string]: boolean } = {
     formFactorRaw = true,
 }
 
-local PropertyReflection = {}
+const PropertyReflection = {}
 
 type PropertyInfo = {
     Name: string,
@@ -66,14 +66,14 @@ type ReflectionProvider = {
 
 local _provider: ReflectionProvider? = nil
 
-local function _getDefaultProvider(): ReflectionProvider
-    local reflectionService = game:GetService("ReflectionService")
+const function _getDefaultProvider(): ReflectionProvider
+    const reflectionService = game:GetService("ReflectionService")
 
-    local provider = {} :: ReflectionProvider
+    const provider = {} :: ReflectionProvider
 
     function provider.GetSerializableProperties(self: ReflectionProvider, className: string): { PropertyInfo }
-        local reflected = reflectionService:GetPropertiesOfClass(className)
-        local result = {}
+        const reflected = reflectionService:GetPropertiesOfClass(className)
+        const result = {}
 
         for _, prop in reflected do
             if prop.Serialized then
@@ -91,7 +91,7 @@ local function _getDefaultProvider(): ReflectionProvider
     return provider
 end
 
-local function _getProvider(): ReflectionProvider
+const function _getProvider(): ReflectionProvider
     if not _provider then
         _provider = _getDefaultProvider()
     end
@@ -125,9 +125,9 @@ end
 function PropertyReflection.getSerializableProperties(instance: Instance): { [string]: any }
     assert(typeof(instance) == "Instance", "Expected an Instance")
 
-    local provider = _getProvider()
-    local propertyInfos = provider:GetSerializableProperties(instance.ClassName)
-    local result = {}
+    const provider = _getProvider()
+    const propertyInfos = provider:GetSerializableProperties(instance.ClassName)
+    const result = {}
 
     for _, info in propertyInfos do
         -- Skip Name since it's represented by the tree key
@@ -143,9 +143,9 @@ function PropertyReflection.getSerializableProperties(instance: Instance): { [st
         -- Resolve aliased property names. Some internal properties
         -- (e.g. Color3uint8) can't be accessed directly and need
         -- their public API name (e.g. Color) instead.
-        local propName = PROPERTY_ALIASES[info.Name] or info.Name
+        const propName = PROPERTY_ALIASES[info.Name] or info.Name
 
-        local success, value = pcall(function()
+        const success, value = pcall(function()
             return (instance :: any)[propName]
         end)
 
@@ -169,7 +169,7 @@ function PropertyReflection.setProperty(instance: Instance, name: string, value:
     assert(typeof(instance) == "Instance", "Expected an Instance")
     assert(type(name) == "string", "Expected a string property name")
 
-    local decoded = _decodeValue(value)
+    const decoded = _decodeValue(value)
 
     local success = pcall(function()
         (instance :: any)[name] = decoded
@@ -179,10 +179,10 @@ function PropertyReflection.setProperty(instance: Instance, name: string, value:
     -- (e.g. "size", "shape") that can be read but not set. Retry with
     -- the first letter uppercased to use the API-compatible name.
     if not success then
-        local firstChar = string.sub(name, 1, 1)
-        local upper = string.upper(firstChar)
+        const firstChar = string.sub(name, 1, 1)
+        const upper = string.upper(firstChar)
         if upper ~= firstChar then
-            local pascalName = upper .. string.sub(name, 2)
+            const pascalName = upper .. string.sub(name, 2)
             success = pcall(function()
                 (instance :: any)[pascalName] = decoded
             end)
@@ -202,7 +202,7 @@ end
     @return any -- The Rojo-format encoded value
 ]=]
 function _encodeValue(value: any, typeName: string): any
-    local valueType = typeof(value)
+    const valueType = typeof(value)
 
     -- Simple types use implicit format
     if valueType == "string" or valueType == "number" or valueType == "boolean" then
@@ -217,7 +217,7 @@ function _encodeValue(value: any, typeName: string): any
     elseif valueType == "Color3" then
         return { Color3 = { value.R, value.G, value.B } }
     elseif valueType == "CFrame" then
-        local components = { value:GetComponents() }
+        const components = { value:GetComponents() }
         return {
             CFrame = {
                 position = { components[1], components[2], components[3] },
@@ -251,7 +251,7 @@ function _encodeValue(value: any, typeName: string): any
     elseif valueType == "EnumItem" then
         return { Enum = value.Value }
     elseif valueType == "NumberSequence" then
-        local keypoints = {}
+        const keypoints = {}
         for _, kp in value.Keypoints do
             table.insert(keypoints, {
                 time = kp.Time,
@@ -261,7 +261,7 @@ function _encodeValue(value: any, typeName: string): any
         end
         return { NumberSequence = { keypoints = keypoints } }
     elseif valueType == "ColorSequence" then
-        local keypoints = {}
+        const keypoints = {}
         for _, kp in value.Keypoints do
             table.insert(keypoints, {
                 time = kp.Time,
@@ -280,7 +280,7 @@ function _encodeValue(value: any, typeName: string): any
     end
 
     -- Fallback: try to convert to string
-    local success, str = pcall(tostring, value)
+    const success, str = pcall(tostring, value)
     if success then
         return str
     end
@@ -302,7 +302,7 @@ function _decodeValue(value: any): any
     end
 
     -- Explicit format: single-key table where key is the type name
-    local typeName, typeValue = next(value)
+    const typeName, typeValue = next(value)
     if typeName == nil then
         return value
     end
@@ -319,8 +319,8 @@ function _decodeValue(value: any): any
     elseif typeName == "Color3" then
         return Color3.new(typeValue[1], typeValue[2], typeValue[3])
     elseif typeName == "CFrame" then
-        local pos = typeValue.position
-        local ori = typeValue.orientation
+        const pos = typeValue.position
+        const ori = typeValue.orientation
         return CFrame.new(
             pos[1],
             pos[2],
@@ -348,13 +348,13 @@ function _decodeValue(value: any): any
     elseif typeName == "Enum" then
         return typeValue
     elseif typeName == "NumberSequence" then
-        local keypoints = {}
+        const keypoints = {}
         for _, kp in typeValue.keypoints do
             table.insert(keypoints, NumberSequenceKeypoint.new(kp.time, kp.value, kp.envelope))
         end
         return NumberSequence.new(keypoints)
     elseif typeName == "ColorSequence" then
-        local keypoints = {}
+        const keypoints = {}
         for _, kp in typeValue.keypoints do
             table.insert(
                 keypoints,
@@ -363,8 +363,8 @@ function _decodeValue(value: any): any
         end
         return ColorSequence.new(keypoints)
     elseif typeName == "Font" then
-        local weight = (Enum.FontWeight :: any)[typeValue.weight]
-        local style = (Enum.FontStyle :: any)[typeValue.style]
+        const weight = (Enum.FontWeight :: any)[typeValue.weight]
+        const style = (Enum.FontStyle :: any)[typeValue.style]
         return Font.new(typeValue.family, weight, style)
     elseif typeName == "Bool" then
         return typeValue

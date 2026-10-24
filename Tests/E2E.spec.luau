@@ -11,29 +11,29 @@ Each remote test result is mapped to its own it() block so results
 integrate with Testable's reporting.
 
 The place must have been published with the source modules already in
-it. RunTests.luau handles this automatically when ROBLOX_E2E_API_KEY
+it. RunTests.exec.luau handles this automatically when ROBLOX_E2E_API_KEY
 is set.
 
 Requires ROBLOX_E2E_API_KEY in .env. Skips gracefully when the key
 is not available. The registry portion additionally uses REGISTRY_TOKEN
-(a whitelisted token minted via Scripts/Whitelist.luau) and skips when
+(a whitelisted token minted via Scripts/Whitelist.exec.luau) and skips when
 it is not set.
 
 --]]
 
-local Dotenv = require("@devpackages/Dotenv")
-local fs = require("@lune/fs")
-local net = require("@lune/net")
-local process = require("@lune/process")
-local serde = require("@lune/serde")
-local task = require("@lune/task")
+const Dotenv = require("@devpackages/Dotenv")
+const fs = require("@lune/fs")
+const net = require("@lune/net")
+const process = require("@lune/process")
+const serde = require("@lune/serde")
+const task = require("@lune/task")
 
-local UNIVERSE_ID = "9873131552"
-local PLACE_ID = "94206881554615"
-local BASE_URL = "https://apis.roblox.com/cloud/v2"
-local POLL_INTERVAL = 3
-local MAX_POLL_ATTEMPTS = 100
-local REMOTE_SCRIPT_PATH = "Tests/E2E/RemoteTestScript.luau"
+const UNIVERSE_ID = "9873131552"
+const PLACE_ID = "94206881554615"
+const BASE_URL = "https://apis.roblox.com/cloud/v2"
+const POLL_INTERVAL = 3
+const MAX_POLL_ATTEMPTS = 100
+const REMOTE_SCRIPT_PATH = "Tests/E2E/RemoteTestScript.luau"
 
 type TestResult = {
     Name: string,
@@ -41,23 +41,23 @@ type TestResult = {
     Error: string?,
 }
 
-local function _loadApiKey(): string?
+const function _loadApiKey(): string?
     pcall(Dotenv.load)
-    local key = process.env.ROBLOX_E2E_API_KEY
+    const key = process.env.ROBLOX_E2E_API_KEY
     if key == nil or key == "" then
         return nil
     end
     return key
 end
 
-local function _getTestScript(registryToken: string?): string
-    local template = fs.readFile(REMOTE_SCRIPT_PATH)
-    local tokenLiteral = if registryToken then `"{registryToken}"` else "nil"
+const function _getTestScript(registryToken: string?): string
+    const template = fs.readFile(REMOTE_SCRIPT_PATH)
+    const tokenLiteral = if registryToken then `"{registryToken}"` else "nil"
     return string.gsub(template, "__REGISTRY_TOKEN__", tokenLiteral)
 end
 
-local function _createTask(apiKey: string, scriptSource: string): string
-    local response = net.request({
+const function _createTask(apiKey: string, scriptSource: string): string
+    const response = net.request({
         url = `{BASE_URL}/universes/{UNIVERSE_ID}/places/{PLACE_ID}/luau-execution-session-tasks`,
         method = "POST",
         headers = {
@@ -74,15 +74,15 @@ local function _createTask(apiKey: string, scriptSource: string): string
         error(`Task creation failed ({response.statusCode}): {response.body}`)
     end
 
-    local decoded = serde.decode("json", response.body)
+    const decoded = serde.decode("json", response.body)
     return decoded.path
 end
 
-local function _pollTask(apiKey: string, taskPath: string): { [string]: any }
+const function _pollTask(apiKey: string, taskPath: string): { [string]: any }
     for i = 1, MAX_POLL_ATTEMPTS do
         task.wait(POLL_INTERVAL)
 
-        local response = net.request({
+        const response = net.request({
             url = `{BASE_URL}/{taskPath}`,
             method = "GET",
             headers = {
@@ -95,8 +95,8 @@ local function _pollTask(apiKey: string, taskPath: string): { [string]: any }
             continue
         end
 
-        local decoded = serde.decode("json", response.body)
-        local state = decoded.state
+        const decoded = serde.decode("json", response.body)
+        const state = decoded.state
 
         if state == "COMPLETE" or state == "FAILED" then
             return decoded
@@ -110,8 +110,8 @@ local function _pollTask(apiKey: string, taskPath: string): { [string]: any }
     error("Task timed out after polling limit.")
 end
 
-local function _getTaskLogs(apiKey: string, taskPath: string): { string }
-    local response = net.request({
+const function _getTaskLogs(apiKey: string, taskPath: string): { string }
+    const response = net.request({
         url = `{BASE_URL}/{taskPath}/logs`,
         method = "GET",
         headers = {
@@ -124,9 +124,9 @@ local function _getTaskLogs(apiKey: string, taskPath: string): { string }
         return {}
     end
 
-    local decoded = serde.decode("json", response.body)
-    local logEntries = decoded.luauExecutionSessionTaskLogs
-    local allMessages: { string } = {}
+    const decoded = serde.decode("json", response.body)
+    const logEntries = decoded.luauExecutionSessionTaskLogs
+    const allMessages: { string } = {}
 
     if logEntries then
         for _, entry in logEntries do
@@ -141,11 +141,11 @@ local function _getTaskLogs(apiKey: string, taskPath: string): { string }
     return allMessages
 end
 
-local function _parseTestResults(logs: { string }): { TestResult }
-    local results: { TestResult } = {}
+const function _parseTestResults(logs: { string }): { TestResult }
+    const results: { TestResult } = {}
 
     for _, line in logs do
-        local passName = line:match("^%[PASS%] (.+)$")
+        const passName = line:match("^%[PASS%] (.+)$")
         if passName then
             table.insert(results, {
                 Name = passName,
@@ -154,7 +154,7 @@ local function _parseTestResults(logs: { string }): { TestResult }
             continue
         end
 
-        local failName, failErr = line:match("^%[FAIL%] (.+) %- (.+)$")
+        const failName, failErr = line:match("^%[FAIL%] (.+) %- (.+)$")
         if failName then
             table.insert(results, {
                 Name = failName,
@@ -167,7 +167,7 @@ local function _parseTestResults(logs: { string }): { TestResult }
     return results
 end
 
-local function _runRemoteTests(apiKey: string): { TestResult }
+const function _runRemoteTests(apiKey: string): { TestResult }
     -- Load registry token to inject into the remote test script
     local registryToken = process.env.REGISTRY_TOKEN
     if registryToken == nil or registryToken == "" then
@@ -176,19 +176,19 @@ local function _runRemoteTests(apiKey: string): { TestResult }
     end
 
     print("  Submitting Luau execution task...")
-    local testScript = _getTestScript(registryToken)
-    local taskPath = _createTask(apiKey, testScript)
+    const testScript = _getTestScript(registryToken)
+    const taskPath = _createTask(apiKey, testScript)
 
     print("  Polling for task completion...")
-    local taskResult = _pollTask(apiKey, taskPath)
+    const taskResult = _pollTask(apiKey, taskPath)
 
-    local logs = _getTaskLogs(apiKey, taskPath)
+    const logs = _getTaskLogs(apiKey, taskPath)
 
     for _, line in logs do
         print(`    {line}`)
     end
 
-    local results = _parseTestResults(logs)
+    const results = _parseTestResults(logs)
 
     -- If the task itself failed (e.g. module load error) and we got
     -- no parseable test results, synthesize a failure from the error
@@ -208,7 +208,7 @@ local function _runRemoteTests(apiKey: string): { TestResult }
 end
 
 return function()
-    local apiKey = _loadApiKey()
+    const apiKey = _loadApiKey()
 
     if apiKey == nil then
         print("  ROBLOX_E2E_API_KEY not found in .env, E2E tests will be skipped.")
@@ -218,7 +218,7 @@ return function()
         return
     end
 
-    local results = _runRemoteTests(apiKey)
+    const results = _runRemoteTests(apiKey)
 
     if #results == 0 then
         describe("Open Cloud", function()

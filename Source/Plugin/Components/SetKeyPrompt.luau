@@ -10,15 +10,15 @@ and provides controls to set, test, or remove the key.
 
 --]]
 
-local HttpService = game:GetService("HttpService")
+const HttpService = game:GetService("HttpService")
 
-local Fusion = require("@packages/Fusion")
+const Fusion = require("@packages/Fusion")
 
-local Children = Fusion.Children
-local OnChange = Fusion.OnChange
-local OnEvent = Fusion.OnEvent
+const Children = Fusion.Children
+const OnChange = Fusion.OnChange
+const OnEvent = Fusion.OnEvent
 
-local REGISTRY_URL = "https://rbx-package-registry.batchprogrammer314.workers.dev"
+const REGISTRY_URL = "https://rbx-package-registry.batchprogrammer314.workers.dev"
 
 type UsedAs<T> = Fusion.UsedAs<T>
 
@@ -29,15 +29,15 @@ type SetKeyPromptProps = {
     OnClose: (() -> ())?,
 }
 
-local function _testRegistryKey(key: string): (boolean, string)
-    local headers = { Authorization = `Bearer {key}` }
+const function _testRegistryKey(key: string): (boolean, string)
+    const headers = { Authorization = `Bearer {key}` }
 
-    local success, response = pcall(function()
+    const success, response = pcall(function()
         return HttpService:GetAsync(`{REGISTRY_URL}/health`, true, headers)
     end)
 
     if not success then
-        local message = tostring(response)
+        const message = tostring(response)
         if message:find("HTTP 401") or message:find("HTTP 403") then
             return false, "Invalid key"
         elseif message:find("HTTP requests are not enabled") then
@@ -50,7 +50,7 @@ local function _testRegistryKey(key: string): (boolean, string)
     return true, "Valid"
 end
 
-local function _makeInfoSection(scope: Fusion.Scope): Fusion.Child
+const function _makeInfoSection(scope: Fusion.Scope): Fusion.Child
     return scope:New("Frame")({
         Name = "InfoContent",
         Size = UDim2.new(1, -20, 0, 0),
@@ -100,7 +100,7 @@ local function _makeInfoSection(scope: Fusion.Scope): Fusion.Child
     })
 end
 
-local function _makeKeyStatus(scope: Fusion.Scope, hasKey: Fusion.Value<boolean>, onRemove: () -> ()): Fusion.Child
+const function _makeKeyStatus(scope: Fusion.Scope, hasKey: Fusion.Value<boolean>, onRemove: () -> ()): Fusion.Child
     return scope:New("Frame")({
         Name = "KeyStatus",
         Size = UDim2.new(1, -20, 0, 28),
@@ -177,19 +177,19 @@ local function _makeKeyStatus(scope: Fusion.Scope, hasKey: Fusion.Value<boolean>
 end
 
 return function(scope: Fusion.Scope, props: SetKeyPromptProps): Fusion.Child
-    local inputText = scope:Value("")
-    local hasKey = scope:Value(props.CurrentKey ~= nil)
-    local statusText = scope:Value("")
-    local statusColor = scope:Value(Color3.fromRGB(180, 180, 180))
-    local isTesting = scope:Value(false)
+    const inputText = scope:Value("")
+    const hasKey = scope:Value(props.CurrentKey ~= nil)
+    const statusText = scope:Value("")
+    const statusColor = scope:Value(Color3.fromRGB(180, 180, 180))
+    const isTesting = scope:Value(false)
 
-    local function setStatus(text: string, color: Color3)
+    const function setStatus(text: string, color: Color3)
         statusText:set(text)
         statusColor:set(color)
     end
 
-    local function testKey()
-        local key = Fusion.peek(inputText)
+    const function testKey()
+        const key = Fusion.peek(inputText)
         if key == "" then
             setStatus("Enter a key first", Color3.fromRGB(200, 160, 60))
             return
@@ -199,7 +199,7 @@ return function(scope: Fusion.Scope, props: SetKeyPromptProps): Fusion.Child
         setStatus("Testing...", Color3.fromRGB(180, 180, 180))
 
         task.spawn(function()
-            local valid, message = _testRegistryKey(key)
+            const valid, message = _testRegistryKey(key)
             isTesting:set(false)
 
             if valid then
@@ -210,8 +210,8 @@ return function(scope: Fusion.Scope, props: SetKeyPromptProps): Fusion.Child
         end)
     end
 
-    local function saveKey()
-        local key = Fusion.peek(inputText)
+    const function saveKey()
+        const key = Fusion.peek(inputText)
         if key == "" then
             setStatus("Enter a key first", Color3.fromRGB(200, 160, 60))
             return
@@ -221,7 +221,7 @@ return function(scope: Fusion.Scope, props: SetKeyPromptProps): Fusion.Child
         setStatus("Validating...", Color3.fromRGB(180, 180, 180))
 
         task.spawn(function()
-            local valid, message = _testRegistryKey(key)
+            const valid, message = _testRegistryKey(key)
             isTesting:set(false)
 
             if valid then
@@ -237,7 +237,7 @@ return function(scope: Fusion.Scope, props: SetKeyPromptProps): Fusion.Child
         end)
     end
 
-    local function removeKey()
+    const function removeKey()
         hasKey:set(false)
         inputText:set("")
         setStatus("Key removed", Color3.fromRGB(200, 160, 60))

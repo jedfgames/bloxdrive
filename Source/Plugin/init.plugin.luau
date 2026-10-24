@@ -11,37 +11,37 @@ serialization, deserialization, and merging.
 
 --]]
 
-local RunService = game:GetService("RunService")
+const RunService = game:GetService("RunService")
 
 -- Only run in the edit DataModel, not play/server/client
 if not RunService:IsEdit() then
     return
 end
 
-local ChangeHistoryService = game:GetService("ChangeHistoryService")
-local HttpService = game:GetService("HttpService")
-local Selection = game:GetService("Selection")
+const ChangeHistoryService = game:GetService("ChangeHistoryService")
+const HttpService = game:GetService("HttpService")
+const Selection = game:GetService("Selection")
 
-local Fusion = require("@packages/Fusion")
+const Fusion = require("@packages/Fusion")
 
-local Assets = require("@self/Assets")
-local AutoSync = require("@self/AutoSync")
-local Bloxdrive = require("@bloxdrive")
-local CredentialStore = require("@self/CredentialStore")
-local Logger = require("@bloxdrive/Logger")
-local PackagePublisher = require("@self/PackagePublisher")
-local PackagePuller = require("@self/PackagePuller")
-local PromptInput = require("@self/Components/PromptInput")
-local SetKeyPrompt = require("@self/Components/SetKeyPrompt")
-local Toolbar = require("@self/Toolbar")
+const Assets = require("@self/Assets")
+const AutoSync = require("@self/AutoSync")
+const Bloxdrive = require("@bloxdrive")
+const CredentialStore = require("@self/CredentialStore")
+const Logger = require("@bloxdrive/Logger")
+const PackagePublisher = require("@self/PackagePublisher")
+const PackagePuller = require("@self/PackagePuller")
+const PromptInput = require("@self/Components/PromptInput")
+const SetKeyPrompt = require("@self/Components/SetKeyPrompt")
+const Toolbar = require("@self/Toolbar")
 
-local PACKAGE_MARKER_NAME = ".bloxdrive"
-local PROMPT_WIDGET_ID = "BloxdrivePrompt"
-local SET_KEY_WIDGET_ID = "BloxdriveSetKey"
-local TOOLBAR_NAME = "Packages"
+const PACKAGE_MARKER_NAME = ".bloxdrive"
+const PROMPT_WIDGET_ID = "BloxdrivePrompt"
+const SET_KEY_WIDGET_ID = "BloxdriveSetKey"
+const TOOLBAR_NAME = "Packages"
 
-local function _generateId(): string
-    local chars = {}
+const function _generateId(): string
+    const chars = {}
     for _ = 1, 16 do
         table.insert(chars, string.format("%x", math.random(0, 15)))
     end
@@ -52,15 +52,15 @@ local _promptWidget: DockWidgetPluginGui? = nil
 local _promptScope: Fusion.Scope? = nil
 local _promptDone = false
 
-local function _getSelectedInstance(): Instance?
-    local selected = Selection:Get()
+const function _getSelectedInstance(): Instance?
+    const selected = Selection:Get()
     if #selected ~= 1 then
         return nil
     end
     return selected[1]
 end
 
-local function _findPackageMarker(instance: Instance): StringValue?
+const function _findPackageMarker(instance: Instance): StringValue?
     for _, child in instance:GetChildren() do
         if child:IsA("StringValue") and child.Name == PACKAGE_MARKER_NAME then
             return child
@@ -69,7 +69,7 @@ local function _findPackageMarker(instance: Instance): StringValue?
     return nil
 end
 
-local function _closePrompt()
+const function _closePrompt()
     if _promptWidget then
         (_promptWidget :: DockWidgetPluginGui).Enabled = false
     end
@@ -80,13 +80,13 @@ local function _closePrompt()
     _promptDone = true
 end
 
-local function _promptForInput(title: string, defaultValue: string?, placeholderText: string?): string?
+const function _promptForInput(title: string, defaultValue: string?, placeholderText: string?): string?
     if not _promptWidget then
-        local widgetInfo = DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Float, false, true, 300, 100, 200, 80)
+        const widgetInfo = DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Float, false, true, 300, 100, 200, 80)
         _promptWidget = plugin:CreateDockWidgetPluginGuiAsync(PROMPT_WIDGET_ID, widgetInfo)
     end
 
-    local widget = _promptWidget :: DockWidgetPluginGui
+    const widget = _promptWidget :: DockWidgetPluginGui
 
     -- Toggle off if the prompt is already open with the same title
     if widget.Enabled and widget.Title == title then
@@ -102,9 +102,9 @@ local function _promptForInput(title: string, defaultValue: string?, placeholder
     local result: string? = nil
     _promptDone = false
 
-    local scope = Fusion:scoped()
+    const scope = Fusion:scoped()
     _promptScope = scope
-    local ui = PromptInput(scope, {
+    const ui = PromptInput(scope, {
         DefaultValue = defaultValue,
         PlaceholderText = placeholderText or "Enter value...",
         OnSubmit = function(text: string)
@@ -117,7 +117,7 @@ local function _promptForInput(title: string, defaultValue: string?, placeholder
     widget.Enabled = true
 
     -- Focus the text box after parenting
-    local textBox = ui:FindFirstChild("Input")
+    const textBox = ui:FindFirstChild("Input")
     if textBox and textBox:IsA("TextBox") then
         textBox:CaptureFocus()
     end
@@ -132,7 +132,7 @@ end
 
 CredentialStore.init(plugin)
 
-local toolbar = Toolbar.new(plugin, TOOLBAR_NAME)
+const toolbar = Toolbar.new(plugin, TOOLBAR_NAME)
 
 toolbar:CreateButton({
     Name = "Publish",
@@ -140,28 +140,28 @@ toolbar:CreateButton({
     Description = "Publish the selected instance subtree as a package version",
     Icon = Assets["Icons/Publish.png"],
 }, function()
-    local instance = _getSelectedInstance()
+    const instance = _getSelectedInstance()
     if not instance then
         Logger.warn("Select exactly one instance to publish.")
         return
     end
 
-    local key = CredentialStore.getKey()
+    const key = CredentialStore.getKey()
     if not key then
         Logger.warn('No registry key set. Use the "Set Key" button first.')
         return
     end
 
-    local marker = _findPackageMarker(instance)
+    const marker = _findPackageMarker(instance)
     local packageId: string
     local packageName: string
 
     if marker then
-        local decoded = HttpService:JSONDecode(marker.Value)
+        const decoded = HttpService:JSONDecode(marker.Value)
         packageId = decoded.Id
         packageName = decoded.Name or packageId
     else
-        local name = _promptForInput("Publish", instance.Name, "Enter package name...")
+        const name = _promptForInput("Publish", instance.Name, "Enter package name...")
         if not name then
             Logger.warn("Publish cancelled.")
             return
@@ -172,7 +172,7 @@ toolbar:CreateButton({
 
     Logger.print(`Publishing "{packageName}"...`)
 
-    local result = PackagePublisher.publish(Bloxdrive.Serializer, {
+    const result = PackagePublisher.publish(Bloxdrive.Serializer, {
         PackageId = packageId,
         PackageName = packageName,
         Root = instance,
@@ -181,7 +181,7 @@ toolbar:CreateButton({
 
     if result.Success then
         if not marker then
-            local newMarker = Instance.new("StringValue")
+            const newMarker = Instance.new("StringValue")
             newMarker.Name = PACKAGE_MARKER_NAME
             newMarker.Value = HttpService:JSONEncode({
                 AutoPull = true,
@@ -192,7 +192,7 @@ toolbar:CreateButton({
             })
             newMarker.Parent = instance
         else
-            local decoded = HttpService:JSONDecode(marker.Value)
+            const decoded = HttpService:JSONDecode(marker.Value)
             decoded.Version = result.Version
             marker.Value = HttpService:JSONEncode(decoded)
         end
@@ -210,21 +210,21 @@ toolbar:CreateButton({
     Description = "Fetch the latest version of the selected package from the registry",
     Icon = Assets["Icons/CloudDownload.png"],
 }, function()
-    local instance = _getSelectedInstance()
-    local key = CredentialStore.getKey()
+    const instance = _getSelectedInstance()
+    const key = CredentialStore.getKey()
 
     -- If the selected instance already has a package marker, update
     -- in place. Otherwise, prompt for a package ID and create a new
     -- folder under the selected instance (or workspace if nothing
     -- is selected).
-    local marker = if instance then _findPackageMarker(instance) else nil
+    const marker = if instance then _findPackageMarker(instance) else nil
     local packageId: string?
     local pullParent: Instance
 
     local packageName: string?
 
     if marker then
-        local decoded = HttpService:JSONDecode(marker.Value)
+        const decoded = HttpService:JSONDecode(marker.Value)
         packageId = decoded.Id
         packageName = decoded.Name
         pullParent = instance :: Instance
@@ -236,9 +236,9 @@ toolbar:CreateButton({
         end
 
         -- Validate the package exists before creating any instances
-        local registryConfig = if key then { RegistryKey = key } else nil
-        local registry = Bloxdrive.Registry.new(registryConfig)
-        local metaSuccess, metadata = pcall(function()
+        const registryConfig = if key then { RegistryKey = key } else nil
+        const registry = Bloxdrive.Registry.new(registryConfig)
+        const metaSuccess, metadata = pcall(function()
             return registry:FetchMetadata(packageId)
         end)
 
@@ -251,8 +251,8 @@ toolbar:CreateButton({
             packageName = metadata.Name
         end
 
-        local parent = instance or game:GetService("Workspace")
-        local folder = Instance.new("Folder")
+        const parent = instance or game:GetService("Workspace")
+        const folder = Instance.new("Folder")
         folder.Name = packageName or packageId
         folder.Parent = parent
         pullParent = folder
@@ -260,7 +260,7 @@ toolbar:CreateButton({
 
     Logger.print(`Pulling "{packageName or packageId}"...`)
 
-    local result = PackagePuller.pull(Bloxdrive, {
+    const result = PackagePuller.pull(Bloxdrive, {
         PackageId = packageId,
         PackageName = packageName,
         Parent = pullParent,
@@ -270,7 +270,7 @@ toolbar:CreateButton({
     if result.Success then
         local conflictMsg = ""
         if result.ConflictCount > 0 then
-            local suffix = if result.ConflictCount == 1 then "conflict" else "conflicts"
+            const suffix = if result.ConflictCount == 1 then "conflict" else "conflicts"
             conflictMsg = ` with {result.ConflictCount} {suffix}`
         end
 
@@ -289,7 +289,7 @@ end)
 local _setKeyWidget: DockWidgetPluginGui? = nil
 local _setKeyScope: Fusion.Scope? = nil
 
-local function _closeSetKeyPrompt()
+const function _closeSetKeyPrompt()
     if _setKeyWidget then
         (_setKeyWidget :: DockWidgetPluginGui).Enabled = false
     end
@@ -306,11 +306,11 @@ toolbar:CreateButton({
     Icon = Assets["Icons/Key.png"],
 }, function()
     if not _setKeyWidget then
-        local widgetInfo = DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Float, false, true, 320, 300, 280, 250)
+        const widgetInfo = DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Float, false, true, 320, 300, 280, 250)
         _setKeyWidget = plugin:CreateDockWidgetPluginGuiAsync(SET_KEY_WIDGET_ID, widgetInfo)
     end
 
-    local widget = _setKeyWidget :: DockWidgetPluginGui
+    const widget = _setKeyWidget :: DockWidgetPluginGui
 
     -- Toggle off if already open
     if widget.Enabled then
@@ -323,9 +323,9 @@ toolbar:CreateButton({
 
     widget.Title = "Set Key"
 
-    local scope = Fusion:scoped()
+    const scope = Fusion:scoped()
     _setKeyScope = scope
-    local ui = SetKeyPrompt(scope, {
+    const ui = SetKeyPrompt(scope, {
         CurrentKey = CredentialStore.getKey(),
         OnSave = function(key: string)
             CredentialStore.setKey(key)

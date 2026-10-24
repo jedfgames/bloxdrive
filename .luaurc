@@ -1,9 +1,10 @@
 {
     "aliases": {
-        "devpackages": "./DevPackages/",
-        "lune": "~/.lune/.typedefs/0.10.4-horse.14.5/",
-        "packages": "./Packages/",
         "bloxdrive": "./Source/Bloxdrive/",
+        "devpackages": "./DevPackages/",
+        "lune": "~/.lune/.typedefs/0.11.1-horse.16.1/",
+        "packages": "./Packages/",
+        "submodules": "./Submodules/",
         "tests": "./Tests/"
     },
     "globals": [
