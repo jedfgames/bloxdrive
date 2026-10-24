@@ -6,14 +6,14 @@ Previews the PromptInput component in UI Labs.
 
 --]]
 
-local Fusion = require("@packages/Fusion")
+const Fusion = require("@packages/Fusion")
 
-local PromptInput = require("./PromptInput")
+const PromptInput = require("./PromptInput")
 
 return {
     fusion = Fusion,
     story = function(props)
-        local scope = props.scope
+        const scope = props.scope
 
         scope:New("Frame")({
             Parent = props.target,

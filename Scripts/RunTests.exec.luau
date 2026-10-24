@@ -11,11 +11,11 @@ name as an argument to run only that test suite.
 
 --]]
 
-local Dotenv = require("@devpackages/Dotenv")
-local Testable = require("@devpackages/Testable")
-local process = require("@lune/process")
+const Dotenv = require("@devpackages/Dotenv")
+const Testable = require("@devpackages/Testable")
+const process = require("@lune/process")
 
-local TESTS = {
+const TESTS = {
     { Name = "Deserializer", Func = require("../Tests/Deserializer.spec") },
     { Name = "E2E", Func = require("../Tests/E2E.spec") },
     { Name = "Merger", Func = require("../Tests/Merger.spec") },
@@ -27,19 +27,19 @@ local TESTS = {
     { Name = "Whitelist", Func = require("../Tests/Whitelist.spec") },
 }
 
-local RunTests = {}
+const RunTests = {}
 
 -- Upload the E2E place before running tests so remote tests use
 -- the latest source code. Skips if ROBLOX_E2E_API_KEY is not set.
 function RunTests.uploadE2EPlace()
-    local apiKey = process.env.ROBLOX_E2E_API_KEY
+    const apiKey = process.env.ROBLOX_E2E_API_KEY
     if not apiKey or apiKey == "" then
         print("ROBLOX_E2E_API_KEY not set, skipping E2E place upload.")
         return
     end
 
     print("Uploading E2E place...")
-    local result = process.exec("lune", { "run", "./Scripts/UploadE2EPlace.exec.luau" })
+    const result = process.exec("lune", { "run", "./Scripts/UploadE2EPlace.exec.luau" })
     if not result.ok then
         print(`Warning: E2E place upload failed. {result.stderr}`)
         print("E2E tests may run against stale code.")
@@ -55,7 +55,7 @@ function RunTests.exec()
 
     RunTests.uploadE2EPlace()
 
-    local filterName = process.args[1]
+    const filterName = process.args[1]
     local testsToRun = TESTS
 
     if filterName then
@@ -76,7 +76,7 @@ function RunTests.exec()
         end
     end
 
-    local _, passed = Testable.run(testsToRun)
+    const _, passed = Testable.run(testsToRun)
     process.exit(if passed then 0 else 1)
 end
 

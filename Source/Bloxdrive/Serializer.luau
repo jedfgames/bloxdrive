@@ -13,12 +13,12 @@ directories with `instance.json`.
 
 --]]
 
-local PropertyReflection = require("./PropertyReflection")
-local TreeUtils = require("./TreeUtils")
+const PropertyReflection = require("./PropertyReflection")
+const TreeUtils = require("./TreeUtils")
 
-local PACKAGE_MARKER_NAME = ".bloxdrive"
+const PACKAGE_MARKER_NAME = ".bloxdrive"
 
-local Serializer = {}
+const Serializer = {}
 
 --[=[
     Serializes an instance and all its descendants into a TreeNode. Skips
@@ -34,18 +34,18 @@ function Serializer.serialize(root: Instance): { [string]: any }
 end
 
 function _serializeInstance(instance: Instance): { [string]: any }
-    local node: { [string]: any } = {}
+    const node: { [string]: any } = {}
 
     node["$className"] = instance.ClassName
 
     -- Serialize properties
-    local properties = PropertyReflection.getSerializableProperties(instance)
+    const properties = PropertyReflection.getSerializableProperties(instance)
     if next(properties) ~= nil then
         node["$properties"] = properties
     end
 
     -- Serialize attributes
-    local attributes = instance:GetAttributes()
+    const attributes = instance:GetAttributes()
     if next(attributes) ~= nil then
         node["$attributes"] = attributes
     end
@@ -54,7 +54,7 @@ function _serializeInstance(instance: Instance): { [string]: any }
     -- multiple children share the same name, auto-increment like
     -- Roblox does (Part, Part1, Part2). The instance is also
     -- renamed in the DataModel to keep things consistent.
-    local usedKeys: { [string]: boolean } = {}
+    const usedKeys: { [string]: boolean } = {}
 
     for _, child in instance:GetChildren() do
         if child.Name == PACKAGE_MARKER_NAME and child:IsA("StringValue") then
@@ -97,8 +97,8 @@ end
 function Serializer.serializeToFiles(tree: { [string]: any }): { Files: { [string]: any }, Manifest: { string } }
     assert(type(tree) == "table", "Expected a table tree")
 
-    local files: { [string]: any } = {}
-    local manifest: { string } = {}
+    const files: { [string]: any } = {}
+    const manifest: { string } = {}
 
     _serializeNodeToFiles(tree, "", files, manifest)
 
@@ -109,7 +109,7 @@ function Serializer.serializeToFiles(tree: { [string]: any }): { Files: { [strin
 end
 
 function _extractMetadata(node: { [string]: any }): { [string]: any }
-    local metadata: { [string]: any } = {}
+    const metadata: { [string]: any } = {}
     metadata["$className"] = node["$className"]
 
     if node["$properties"] then
@@ -124,17 +124,17 @@ function _extractMetadata(node: { [string]: any }): { [string]: any }
 end
 
 function _serializeNodeToFiles(node: { [string]: any }, prefix: string, files: { [string]: any }, manifest: { string })
-    local children = TreeUtils.getChildKeys(node)
-    local hasChildren = next(children) ~= nil
+    const children = TreeUtils.getChildKeys(node)
+    const hasChildren = next(children) ~= nil
 
     if prefix == "" then
         -- Root node always gets instance.json
-        local path = "instance.json"
+        const path = "instance.json"
         files[path] = _extractMetadata(node)
         table.insert(manifest, path)
     elseif hasChildren then
         -- Container: directory with instance.json
-        local path = `{prefix}/instance.json`
+        const path = `{prefix}/instance.json`
         files[path] = _extractMetadata(node)
         table.insert(manifest, path)
     else
@@ -146,15 +146,15 @@ function _serializeNodeToFiles(node: { [string]: any }, prefix: string, files: {
 
     -- Recurse into children
     for childName in children do
-        local childNode = node[childName]
-        local childChildren = TreeUtils.getChildKeys(childNode)
-        local childHasChildren = next(childChildren) ~= nil
+        const childNode = node[childName]
+        const childChildren = TreeUtils.getChildKeys(childNode)
+        const childHasChildren = next(childChildren) ~= nil
 
         if childHasChildren then
-            local childPrefix = if prefix == "" then childName else `{prefix}/{childName}`
+            const childPrefix = if prefix == "" then childName else `{prefix}/{childName}`
             _serializeNodeToFiles(childNode, childPrefix, files, manifest)
         else
-            local childPath = if prefix == "" then `{childName}.json` else `{prefix}/{childName}.json`
+            const childPath = if prefix == "" then `{childName}.json` else `{prefix}/{childName}.json`
             _serializeNodeToFiles(childNode, childPath, files, manifest)
         end
     end

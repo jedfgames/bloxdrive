@@ -13,23 +13,23 @@ either is not available.
 
 --]]
 
-local Dotenv = require("@devpackages/Dotenv")
-local net = require("@lune/net")
-local process = require("@lune/process")
-local serde = require("@lune/serde")
+const Dotenv = require("@devpackages/Dotenv")
+const net = require("@lune/net")
+const process = require("@lune/process")
+const serde = require("@lune/serde")
 
-local FIXTURE_USER_ID = "whitelist-spec-fixture-user"
-local FIXTURE_NAME = "WhitelistSpecFixture"
-local FIXTURE_PACKAGE_ID = "whitelist-spec-fixture-package"
-local MISSING_USER_ID = "whitelist-spec-nonexistent-user"
+const FIXTURE_USER_ID = "whitelist-spec-fixture-user"
+const FIXTURE_NAME = "WhitelistSpecFixture"
+const FIXTURE_PACKAGE_ID = "whitelist-spec-fixture-package"
+const MISSING_USER_ID = "whitelist-spec-nonexistent-user"
 
 local _url: string? = nil
 local _adminToken: string? = nil
 
-local function _loadConfig(): boolean
+const function _loadConfig(): boolean
     pcall(Dotenv.load)
-    local url = process.env.REGISTRY_URL
-    local adminToken = process.env.ADMIN_TOKEN
+    const url = process.env.REGISTRY_URL
+    const adminToken = process.env.ADMIN_TOKEN
     if url == nil or url == "" or adminToken == nil or adminToken == "" then
         return false
     end
@@ -38,7 +38,7 @@ local function _loadConfig(): boolean
     return true
 end
 
-local function _adminRequest(method: string, path: string, body: string?): net.FetchResponse
+const function _adminRequest(method: string, path: string, body: string?): net.FetchResponse
     assert(_url and _adminToken, "Config required")
     return net.request({
         url = `{_url}{path}`,
@@ -51,17 +51,17 @@ local function _adminRequest(method: string, path: string, body: string?): net.F
     })
 end
 
-local function _addUser(userId: string, name: string): string
-    local response = _adminRequest("POST", "/admin/whitelist", serde.encode("json", { userId = userId, name = name }))
+const function _addUser(userId: string, name: string): string
+    const response = _adminRequest("POST", "/admin/whitelist", serde.encode("json", { userId = userId, name = name }))
     assert(response.ok, `Add failed ({response.statusCode}): {response.body}`)
     return serde.decode("json", response.body).token
 end
 
 -- Attempts a version write with the given token and returns the status
 -- code so callers can assert authorization outcomes.
-local function _writeVersion(token: string, version: number): number
+const function _writeVersion(token: string, version: number): number
     assert(_url, "Config required")
-    local response = net.request({
+    const response = net.request({
         url = `{_url}/packages/{FIXTURE_PACKAGE_ID}/versions/{version}`,
         method = "PUT",
         headers = {
@@ -74,11 +74,11 @@ local function _writeVersion(token: string, version: number): number
     return response.statusCode
 end
 
-local function _removeUser(userId: string)
+const function _removeUser(userId: string)
     _adminRequest("DELETE", `/admin/whitelist/{userId}`)
 end
 
-local function _deletePackage(token: string)
+const function _deletePackage(token: string)
     assert(_url, "Config required")
     net.request({
         url = `{_url}/packages/{FIXTURE_PACKAGE_ID}`,
@@ -101,7 +101,7 @@ return function()
 
     describe("admin auth", function()
         it("should reject requests without the admin token", function()
-            local response = net.request({
+            const response = net.request({
                 url = `{_url}/admin/whitelist`,
                 method = "GET",
             })
@@ -109,7 +109,7 @@ return function()
         end)
 
         it("should reject requests with a wrong admin token", function()
-            local response = net.request({
+            const response = net.request({
                 url = `{_url}/admin/whitelist`,
                 method = "GET",
                 headers = { Authorization = "Bearer not-the-admin-token" },
@@ -120,17 +120,17 @@ return function()
 
     describe("validation", function()
         it("should reject adding a user with a missing userId", function()
-            local response = _adminRequest("POST", "/admin/whitelist", serde.encode("json", { name = FIXTURE_NAME }))
+            const response = _adminRequest("POST", "/admin/whitelist", serde.encode("json", { name = FIXTURE_NAME }))
             expect(response.statusCode).to.equal(400)
         end)
 
         it("should reject a non-object body", function()
-            local response = _adminRequest("POST", "/admin/whitelist", serde.encode("json", 42))
+            const response = _adminRequest("POST", "/admin/whitelist", serde.encode("json", 42))
             expect(response.statusCode).to.equal(400)
         end)
 
         it("should return 404 when removing a nonexistent user", function()
-            local response = _adminRequest("DELETE", `/admin/whitelist/{MISSING_USER_ID}`)
+            const response = _adminRequest("DELETE", `/admin/whitelist/{MISSING_USER_ID}`)
             expect(response.statusCode).to.equal(404)
         end)
     end)
@@ -138,21 +138,21 @@ return function()
     describe("lifecycle", function()
         it("should add, list, authorize, rotate, and revoke a token", function()
             -- Add mints a token and returns it once.
-            local addResponse = _adminRequest(
+            const addResponse = _adminRequest(
                 "POST",
                 "/admin/whitelist",
                 serde.encode("json", { userId = FIXTURE_USER_ID, name = FIXTURE_NAME })
             )
             assert(addResponse.ok, `Add failed ({addResponse.statusCode}): {addResponse.body}`)
-            local added = serde.decode("json", addResponse.body)
+            const added = serde.decode("json", addResponse.body)
             expect(added.userId).to.equal(FIXTURE_USER_ID)
             expect(added.name).to.equal(FIXTURE_NAME)
             expect(added.token).to.be.ok()
             expect(#added.token > 0).to.equal(true)
-            local tokenA = added.token
+            const tokenA = added.token
 
             -- List includes the user without exposing the token.
-            local listResponse = _adminRequest("GET", "/admin/whitelist")
+            const listResponse = _adminRequest("GET", "/admin/whitelist")
             assert(listResponse.ok, `List failed ({listResponse.statusCode})`)
             local found = nil
             for _, entry in serde.decode("json", listResponse.body).entries do
@@ -172,18 +172,18 @@ return function()
             -- Re-adding the same user rotates the token: a fresh token is
             -- issued, it differs from the old one, the old one is revoked,
             -- and the new one works.
-            local tokenB = _addUser(FIXTURE_USER_ID, FIXTURE_NAME)
+            const tokenB = _addUser(FIXTURE_USER_ID, FIXTURE_NAME)
             expect(tokenB).to.never.equal(tokenA)
             expect(_writeVersion(tokenA, 3)).to.equal(401)
             expect(_writeVersion(tokenB, 3)).to.equal(200)
 
             -- Removing the user revokes the remaining token.
-            local removeResponse = _adminRequest("DELETE", `/admin/whitelist/{FIXTURE_USER_ID}`)
+            const removeResponse = _adminRequest("DELETE", `/admin/whitelist/{FIXTURE_USER_ID}`)
             assert(removeResponse.ok, `Remove failed ({removeResponse.statusCode})`)
             expect(_writeVersion(tokenB, 4)).to.equal(401)
 
             -- Removing an already-removed user reports 404.
-            local secondRemove = _adminRequest("DELETE", `/admin/whitelist/{FIXTURE_USER_ID}`)
+            const secondRemove = _adminRequest("DELETE", `/admin/whitelist/{FIXTURE_USER_ID}`)
             expect(secondRemove.statusCode).to.equal(404)
         end)
     end)
@@ -191,7 +191,7 @@ return function()
     afterAll(function()
         -- Re-add so cleanup of the fixture package is authorized, delete
         -- the package, then remove the fixture user again.
-        local response = _adminRequest(
+        const response = _adminRequest(
             "POST",
             "/admin/whitelist",
             serde.encode("json", { userId = FIXTURE_USER_ID, name = FIXTURE_NAME })

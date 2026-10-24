@@ -30,15 +30,15 @@ marker is allowed per parent instance.
 
 --]]
 
-local ChangeHistoryService = game:GetService("ChangeHistoryService")
-local HttpService = game:GetService("HttpService")
+const ChangeHistoryService = game:GetService("ChangeHistoryService")
+const HttpService = game:GetService("HttpService")
 
-local GENERATION_ATTR = "_BloxdriveSyncGeneration"
-local PACKAGE_MARKER_NAME = ".bloxdrive"
-local PULL_POLL_SECONDS = 5
-local PUSH_DEBOUNCE_SECONDS = 1
+const GENERATION_ATTR = "_BloxdriveSyncGeneration"
+const PACKAGE_MARKER_NAME = ".bloxdrive"
+const PULL_POLL_SECONDS = 5
+const PUSH_DEBOUNCE_SECONDS = 1
 
-local AutoSync = {}
+const AutoSync = {}
 
 type MarkerInfo = {
     Id: string,
@@ -74,17 +74,17 @@ type AutoSyncState = {
 
 local _state: AutoSyncState? = nil
 
-local function _isCurrentGeneration(): boolean
+const function _isCurrentGeneration(): boolean
     if not _state then
         return false
     end
-    local current = game:GetAttribute(GENERATION_ATTR)
+    const current = game:GetAttribute(GENERATION_ATTR)
     return current == _state.Generation
 end
 
-local function _generateKey(): string
-    local state = _state :: AutoSyncState
-    local key = `reg_{state.NextKey}`
+const function _generateKey(): string
+    const state = _state :: AutoSyncState
+    const key = `reg_{state.NextKey}`
     state.NextKey += 1
     return key
 end
@@ -92,8 +92,8 @@ end
 -- Validates that a marker's JSON value has the required structure
 -- and field types. Returns the decoded table on success, nil on
 -- failure.
-local function _validateMarkerValue(value: string): { [string]: any }?
-    local decodeSuccess, decoded = pcall(function()
+const function _validateMarkerValue(value: string): { [string]: any }?
+    const decodeSuccess, decoded = pcall(function()
         return HttpService:JSONDecode(value)
     end)
 
@@ -125,7 +125,7 @@ local function _validateMarkerValue(value: string): { [string]: any }?
     end
 
     -- Reject any unexpected keys
-    local ALLOWED_KEYS = {
+    const ALLOWED_KEYS = {
         AutoPull = true,
         AutoPush = true,
         Id = true,
@@ -142,13 +142,13 @@ local function _validateMarkerValue(value: string): { [string]: any }?
 end
 
 -- Destroys an invalid marker and logs a warning.
-local function _destroyInvalidMarker(marker: StringValue, reason: string)
+const function _destroyInvalidMarker(marker: StringValue, reason: string)
     if not _state then
         return
     end
 
-    local state = _state :: AutoSyncState
-    local ok, path = pcall(function()
+    const state = _state :: AutoSyncState
+    const ok, path = pcall(function()
         return marker:GetFullName()
     end)
     state.Logger.warn(
@@ -184,7 +184,7 @@ function AutoSync.start(config: {
 
     -- Increment the generation counter to invalidate any zombie
     -- threads from prior plugin reloads
-    local generation = (game:GetAttribute(GENERATION_ATTR) or 0) + 1
+    const generation = (game:GetAttribute(GENERATION_ATTR) or 0) + 1
     game:SetAttribute(GENERATION_ATTR, generation)
 
     -- Clean up local state if any
@@ -212,7 +212,7 @@ function AutoSync.start(config: {
     }
 
     -- Scan for existing packages, validate, and register them
-    local markers = _findAllMarkers()
+    const markers = _findAllMarkers()
 
     for _, info in markers do
         _registerPackage(info)
@@ -267,7 +267,7 @@ function AutoSync.stop()
 end
 
 function _isMarkerRegistered(marker: StringValue): boolean
-    local state = _state :: AutoSyncState
+    const state = _state :: AutoSyncState
     for _, info in state.RegisteredPackages do
         if info.Marker == marker then
             return true
@@ -277,7 +277,7 @@ function _isMarkerRegistered(marker: StringValue): boolean
 end
 
 function _findKeyForMarker(marker: StringValue): string?
-    local state = _state :: AutoSyncState
+    const state = _state :: AutoSyncState
     for key, info in state.RegisteredPackages do
         if info.Marker == marker then
             return key
@@ -287,8 +287,8 @@ function _findKeyForMarker(marker: StringValue): string?
 end
 
 function _unregisterPackage(key: string)
-    local state = _state :: AutoSyncState
-    local info = state.RegisteredPackages[key]
+    const state = _state :: AutoSyncState
+    const info = state.RegisteredPackages[key]
     if not info then
         return
     end
@@ -344,7 +344,7 @@ function _isValidPackageRoot(instance: Instance): boolean
 end
 
 function _registerPackage(info: MarkerInfo)
-    local state = _state :: AutoSyncState
+    const state = _state :: AutoSyncState
 
     -- Skip if this exact marker instance is already registered
     if _isMarkerRegistered(info.Marker) then
@@ -408,7 +408,7 @@ function _registerPackage(info: MarkerInfo)
             if not _isCurrentGeneration() then
                 return
             end
-            local currentState = _state :: AutoSyncState
+            const currentState = _state :: AutoSyncState
             currentState.Pulling[info.Id] = nil
             -- Cancel any push timers that fired during reconciliation
             for _, regInfo in currentState.RegisteredPackages do
@@ -423,26 +423,26 @@ function _registerPackage(info: MarkerInfo)
     -- Enable AutoPush after a delay so deferred events from the
     -- initial pull/reconciliation have time to fire and be ignored
     if info.AutoPush then
-        local key = info.Key
+        const key = info.Key
         task.delay(3, function()
             if not _isCurrentGeneration() then
                 return
             end
 
-            local currentState = _state :: AutoSyncState
+            const currentState = _state :: AutoSyncState
             currentState.PushEnabled[key] = true
         end)
     end
 end
 
 function _lockdownMarker(info: MarkerInfo)
-    local state = _state :: AutoSyncState
-    local key = info.Key
+    const state = _state :: AutoSyncState
+    const key = info.Key
 
     if not state.PushConnections[key] then
         state.PushConnections[key] = {}
     end
-    local connections = state.PushConnections[key]
+    const connections = state.PushConnections[key]
 
     -- Destroy and unregister if marker is moved away from its root
     -- or destroyed. AncestryChanged fires for any ancestor change,
@@ -506,7 +506,7 @@ function _lockdownMarker(info: MarkerInfo)
                 return
             end
 
-            local decoded = _validateMarkerValue(info.Marker.Value)
+            const decoded = _validateMarkerValue(info.Marker.Value)
             if not decoded then
                 _unregisterPackage(key)
                 _destroyInvalidMarker(info.Marker, "marker value was changed to invalid JSON")
@@ -524,12 +524,12 @@ function _lockdownMarker(info: MarkerInfo)
 end
 
 function _findAllMarkers(): { MarkerInfo }
-    local markers: { MarkerInfo } = {}
+    const markers: { MarkerInfo } = {}
 
-    local function scan(instance: Instance)
+    const function scan(instance: Instance)
         for _, child in instance:GetChildren() do
             if child:IsA("StringValue") and child.Name == PACKAGE_MARKER_NAME then
-                local decoded = _validateMarkerValue(child.Value)
+                const decoded = _validateMarkerValue(child.Value)
                 if decoded then
                     table.insert(markers, {
                         AutoPull = decoded.AutoPull == true,
@@ -555,7 +555,7 @@ function _findAllMarkers(): { MarkerInfo }
 end
 
 function _startMarkerWatcher()
-    local state = _state :: AutoSyncState
+    const state = _state :: AutoSyncState
 
     state.MarkerWatcher = game.DescendantAdded:Connect(function(descendant)
         if not _isCurrentGeneration() then
@@ -576,7 +576,7 @@ function _startMarkerWatcher()
                 return
             end
 
-            local parent = descendant.Parent
+            const parent = descendant.Parent
             if not parent then
                 return
             end
@@ -586,13 +586,13 @@ function _startMarkerWatcher()
                 return
             end
 
-            local decoded = _validateMarkerValue(descendant.Value)
+            const decoded = _validateMarkerValue(descendant.Value)
             if not decoded then
                 _destroyInvalidMarker(descendant :: StringValue, "newly added marker has invalid value")
                 return
             end
 
-            local info: MarkerInfo = {
+            const info: MarkerInfo = {
                 AutoPull = decoded.AutoPull == true,
                 AutoPush = decoded.AutoPush == true,
                 Id = decoded.Id,
@@ -612,7 +612,7 @@ end
 -- completes. If a push was queued while pulling (or vice versa),
 -- this picks up the pending work so nothing gets dropped.
 function _drainPendingOperations(packageId: string)
-    local state = _state :: AutoSyncState
+    const state = _state :: AutoSyncState
 
     if not _isCurrentGeneration() then
         return
@@ -650,7 +650,7 @@ end
 -- version, forces a re-pull to fix drift. This runs once on
 -- startup for each registered package.
 function _reconcilePackage(info: MarkerInfo)
-    local state = _state :: AutoSyncState
+    const state = _state :: AutoSyncState
 
     if not _isCurrentGeneration() then
         return
@@ -662,16 +662,16 @@ function _reconcilePackage(info: MarkerInfo)
         return
     end
 
-    local key = state.CredentialStore.getKey()
+    const key = state.CredentialStore.getKey()
     if not key then
         return
     end
 
-    local registryConfig = { RegistryKey = key }
-    local registry = state.Bloxdrive.Registry.new(registryConfig)
+    const registryConfig = { RegistryKey = key }
+    const registry = state.Bloxdrive.Registry.new(registryConfig)
 
     -- Fetch the registry tree for the claimed version
-    local fetchSuccess, registryTree = pcall(function()
+    const fetchSuccess, registryTree = pcall(function()
         return registry:FetchVersion(info.Id, info.Version)
     end)
 
@@ -683,10 +683,10 @@ function _reconcilePackage(info: MarkerInfo)
     end
 
     -- Serialize local tree
-    local localTree = state.Bloxdrive.Serializer.serialize(info.Root)
+    const localTree = state.Bloxdrive.Serializer.serialize(info.Root)
 
     -- Compare using TreeUtils.deepEqual
-    local TreeUtils = state.Bloxdrive.TreeUtils
+    const TreeUtils = state.Bloxdrive.TreeUtils
     if TreeUtils.deepEqual(localTree, registryTree) then
         return
     end
@@ -704,7 +704,7 @@ function _reconcilePackage(info: MarkerInfo)
 end
 
 function _autoPull(info: MarkerInfo)
-    local state = _state :: AutoSyncState
+    const state = _state :: AutoSyncState
 
     if not _isCurrentGeneration() then
         return
@@ -716,17 +716,17 @@ function _autoPull(info: MarkerInfo)
         return
     end
 
-    local key = state.CredentialStore.getKey()
+    const key = state.CredentialStore.getKey()
     if not key then
         return
     end
 
     -- Fetch metadata via the registry API to avoid CDN caching and
     -- check if there's actually a newer version before pulling.
-    local registryConfig = { RegistryKey = key }
-    local registry = state.Bloxdrive.Registry.new(registryConfig)
+    const registryConfig = { RegistryKey = key }
+    const registry = state.Bloxdrive.Registry.new(registryConfig)
 
-    local metaSuccess, metadata = pcall(function()
+    const metaSuccess, metadata = pcall(function()
         return registry:FetchMetadata(info.Id)
     end)
 
@@ -750,7 +750,7 @@ function _autoPull(info: MarkerInfo)
     -- Suppress AutoPush while pulling to avoid feedback loop
     state.Pulling[info.Id] = true
 
-    local result = state.PackagePuller.pull(state.Bloxdrive, {
+    const result = state.PackagePuller.pull(state.Bloxdrive, {
         PackageId = info.Id,
         PackageName = info.Name,
         Parent = info.Root,
@@ -794,11 +794,11 @@ function _autoPull(info: MarkerInfo)
 end
 
 function _setupAutoPush(info: MarkerInfo)
-    local state = _state :: AutoSyncState
-    local key = info.Key
-    local connections: { RBXScriptConnection } = {}
+    const state = _state :: AutoSyncState
+    const key = info.Key
+    const connections: { RBXScriptConnection } = {}
 
-    local function onChanged()
+    const function onChanged()
         if not _isCurrentGeneration() then
             return
         end
@@ -836,7 +836,7 @@ function _setupAutoPush(info: MarkerInfo)
     table.insert(connections, info.Root.DescendantRemoving:Connect(onChanged))
 
     -- Listen for property changes on all descendants
-    local function connectPropertyChanges(instance: Instance)
+    const function connectPropertyChanges(instance: Instance)
         if instance.Name == PACKAGE_MARKER_NAME then
             return
         end
@@ -867,7 +867,7 @@ function _setupAutoPush(info: MarkerInfo)
 end
 
 function _autoPush(info: MarkerInfo)
-    local state = _state :: AutoSyncState
+    const state = _state :: AutoSyncState
 
     if not _isCurrentGeneration() then
         return
@@ -879,13 +879,13 @@ function _autoPush(info: MarkerInfo)
         return
     end
 
-    local key = state.CredentialStore.getKey()
+    const key = state.CredentialStore.getKey()
     if not key then
         return
     end
 
     -- Verify the root still has children before pushing
-    local childCount = #info.Root:GetChildren()
+    const childCount = #info.Root:GetChildren()
     if childCount <= 1 then
         state.Logger.warn(
             `[AutoPush] Skipping publish for "{info.Name or info.Id}" because root has only {childCount} children (expected more than just the marker).`
@@ -896,9 +896,9 @@ function _autoPush(info: MarkerInfo)
     -- Pull-before-push: if the remote has a newer version, merge
     -- it into local first so we don't overwrite changes from other
     -- places. This is the key to multi-place collaboration.
-    local registryConfig = { RegistryKey = key }
-    local registry = state.Bloxdrive.Registry.new(registryConfig)
-    local metaSuccess, metadata = pcall(function()
+    const registryConfig = { RegistryKey = key }
+    const registry = state.Bloxdrive.Registry.new(registryConfig)
+    const metaSuccess, metadata = pcall(function()
         return registry:FetchMetadata(info.Id)
     end)
 
@@ -910,7 +910,7 @@ function _autoPush(info: MarkerInfo)
         -- Set pulling flag to suppress push events from the merge
         state.Pulling[info.Id] = true
 
-        local pullResult = state.PackagePuller.pull(state.Bloxdrive, {
+        const pullResult = state.PackagePuller.pull(state.Bloxdrive, {
             PackageId = info.Id,
             PackageName = info.Name,
             Parent = info.Root,
@@ -933,7 +933,7 @@ function _autoPush(info: MarkerInfo)
 
             -- Update marker
             state.Pushing[info.Id] = true
-            local decoded = HttpService:JSONDecode(info.Marker.Value)
+            const decoded = HttpService:JSONDecode(info.Marker.Value)
             decoded.Version = pullResult.Version
             info.Marker.Value = HttpService:JSONEncode(decoded)
             state.Pushing[info.Id] = nil
@@ -953,7 +953,7 @@ function _autoPush(info: MarkerInfo)
         `[AutoPush] Publishing "{info.Name or info.Id}" from {info.Root:GetFullName()} ({childCount} children)...`
     )
 
-    local result = state.PackagePublisher.publish(state.Bloxdrive.Serializer, {
+    const result = state.PackagePublisher.publish(state.Bloxdrive.Serializer, {
         PackageId = info.Id,
         PackageName = info.Name or info.Id,
         Root = info.Root,
@@ -968,7 +968,7 @@ function _autoPush(info: MarkerInfo)
     if result.Success then
         -- Update marker while Pushing is still true so the
         -- lockdown's value-change listener ignores this update
-        local decoded = HttpService:JSONDecode(info.Marker.Value)
+        const decoded = HttpService:JSONDecode(info.Marker.Value)
         decoded.Version = result.Version
         info.Marker.Value = HttpService:JSONEncode(decoded)
         info.Version = result.Version
@@ -986,7 +986,7 @@ function _autoPush(info: MarkerInfo)
 end
 
 function _startPolling()
-    local state = _state :: AutoSyncState
+    const state = _state :: AutoSyncState
 
     state.PollThread = task.spawn(function()
         while state.Running and _isCurrentGeneration() do

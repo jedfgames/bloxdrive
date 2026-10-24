@@ -7,25 +7,25 @@ deserialization and the reassembleTree file-to-tree reconstruction.
 
 --]]
 
-local Deserializer = require("@bloxdrive/Deserializer")
+const Deserializer = require("@bloxdrive/Deserializer")
 
 return function()
     describe("reassembleTree", function()
         it("should reassemble a root-only tree", function()
-            local files = {
+            const files = {
                 ["instance.json"] = {
                     ["$className"] = "Folder",
                     ["$properties"] = { Value = 10 },
                 },
             }
 
-            local tree = Deserializer.reassembleTree(files)
+            const tree = Deserializer.reassembleTree(files)
             expect(tree["$className"]).to.equal("Folder")
             expect(tree["$properties"].Value).to.equal(10)
         end)
 
         it("should reassemble leaf children from .json files", function()
-            local files = {
+            const files = {
                 ["instance.json"] = { ["$className"] = "Folder" },
                 ["Child.json"] = {
                     ["$className"] = "Part",
@@ -33,14 +33,14 @@ return function()
                 },
             }
 
-            local tree = Deserializer.reassembleTree(files)
+            const tree = Deserializer.reassembleTree(files)
             expect(tree.Child).to.be.ok()
             expect(tree.Child["$className"]).to.equal("Part")
             expect(tree.Child["$properties"].Anchored).to.equal(true)
         end)
 
         it("should reassemble container children from directories", function()
-            local files = {
+            const files = {
                 ["instance.json"] = { ["$className"] = "Folder" },
                 ["Container/instance.json"] = {
                     ["$className"] = "Folder",
@@ -50,7 +50,7 @@ return function()
                 },
             }
 
-            local tree = Deserializer.reassembleTree(files)
+            const tree = Deserializer.reassembleTree(files)
             expect(tree.Container).to.be.ok()
             expect(tree.Container["$className"]).to.equal("Folder")
             expect(tree.Container.Inner).to.be.ok()
@@ -58,20 +58,20 @@ return function()
         end)
 
         it("should reassemble deeply nested structures", function()
-            local files = {
+            const files = {
                 ["instance.json"] = { ["$className"] = "Folder" },
                 ["A/instance.json"] = { ["$className"] = "Folder" },
                 ["A/B/instance.json"] = { ["$className"] = "Folder" },
                 ["A/B/Leaf.json"] = { ["$className"] = "Part" },
             }
 
-            local tree = Deserializer.reassembleTree(files)
+            const tree = Deserializer.reassembleTree(files)
             expect(tree.A.B.Leaf).to.be.ok()
             expect(tree.A.B.Leaf["$className"]).to.equal("Part")
         end)
 
         it("should error when missing root instance.json", function()
-            local files = {
+            const files = {
                 ["Child.json"] = { ["$className"] = "Part" },
             }
 

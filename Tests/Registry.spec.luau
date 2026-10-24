@@ -13,21 +13,21 @@ available.
 
 --]]
 
-local Dotenv = require("@devpackages/Dotenv")
-local net = require("@lune/net")
-local process = require("@lune/process")
-local serde = require("@lune/serde")
+const Dotenv = require("@devpackages/Dotenv")
+const net = require("@lune/net")
+const process = require("@lune/process")
+const serde = require("@lune/serde")
 
-local TreeUtils = require("@bloxdrive/TreeUtils")
+const TreeUtils = require("@bloxdrive/TreeUtils")
 
-local REGISTRY_URL = "https://rbx-package-registry.batchprogrammer314.workers.dev"
-local TEST_PACKAGE_ID = "registry-spec-fixture"
+const REGISTRY_URL = "https://rbx-package-registry.batchprogrammer314.workers.dev"
+const TEST_PACKAGE_ID = "registry-spec-fixture"
 
 local _token: string? = nil
 
-local function _loadToken(): string?
+const function _loadToken(): string?
     pcall(Dotenv.load)
-    local token = process.env.REGISTRY_TOKEN
+    const token = process.env.REGISTRY_TOKEN
     if token == nil or token == "" then
         return nil
     end
@@ -35,10 +35,10 @@ local function _loadToken(): string?
 end
 
 -- Seed test data before running tests
-local function _seedTestPackage()
+const function _seedTestPackage()
     assert(_token, "Token required")
 
-    local v1 = {
+    const v1 = {
         ["$className"] = "Folder",
         Health = {
             ["$className"] = "NumberValue",
@@ -46,7 +46,7 @@ local function _seedTestPackage()
         },
     }
 
-    local v2 = {
+    const v2 = {
         ["$className"] = "Folder",
         Health = {
             ["$className"] = "NumberValue",
@@ -72,7 +72,7 @@ local function _seedTestPackage()
     end
 end
 
-local function _cleanupTestPackage()
+const function _cleanupTestPackage()
     assert(_token, "Token required")
     net.request({
         url = `{REGISTRY_URL}/packages/{TEST_PACKAGE_ID}`,
@@ -96,7 +96,7 @@ return function()
 
     describe("fetch", function()
         it("should fetch package metadata", function()
-            local response = net.request({
+            const response = net.request({
                 url = `{REGISTRY_URL}/packages/{TEST_PACKAGE_ID}`,
                 method = "GET",
                 headers = { Authorization = `Bearer {_token}` },
@@ -104,13 +104,13 @@ return function()
 
             assert(response.ok, `Metadata fetch failed ({response.statusCode})`)
 
-            local metadata = serde.decode("json", response.body)
+            const metadata = serde.decode("json", response.body)
             expect(metadata.name).to.equal("RegistrySpecFixture")
             expect(metadata.latestVersion).to.equal(2)
         end)
 
         it("should fetch a specific version tree", function()
-            local response = net.request({
+            const response = net.request({
                 url = `{REGISTRY_URL}/packages/{TEST_PACKAGE_ID}/versions/1`,
                 method = "GET",
                 headers = { Authorization = `Bearer {_token}` },
@@ -118,13 +118,13 @@ return function()
 
             assert(response.ok, `Version fetch failed ({response.statusCode})`)
 
-            local tree = serde.decode("json", response.body)
+            const tree = serde.decode("json", response.body)
             expect(tree["$className"]).to.equal("Folder")
             expect(tree.Health["$properties"].Value).to.equal(100)
         end)
 
         it("should fetch the latest version tree", function()
-            local response = net.request({
+            const response = net.request({
                 url = `{REGISTRY_URL}/packages/{TEST_PACKAGE_ID}/versions/2`,
                 method = "GET",
                 headers = { Authorization = `Bearer {_token}` },
@@ -132,7 +132,7 @@ return function()
 
             assert(response.ok, `Version fetch failed ({response.statusCode})`)
 
-            local tree = serde.decode("json", response.body)
+            const tree = serde.decode("json", response.body)
             expect(tree["$className"]).to.equal("Folder")
             expect(tree.Health["$properties"].Value).to.equal(200)
             expect(tree.Speed).to.be.ok()
@@ -145,7 +145,7 @@ return function()
         end)
 
         it("should return 404 for nonexistent version", function()
-            local response = net.request({
+            const response = net.request({
                 url = `{REGISTRY_URL}/packages/{TEST_PACKAGE_ID}/versions/999`,
                 method = "GET",
                 headers = { Authorization = `Bearer {_token}` },

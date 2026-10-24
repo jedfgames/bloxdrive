@@ -7,14 +7,14 @@ clicked without a package marker on the selected instance.
 
 --]]
 
-local Fusion = require("@packages/Fusion")
+const Fusion = require("@packages/Fusion")
 
-local PromptInput = require("../Components/PromptInput")
+const PromptInput = require("../Components/PromptInput")
 
 return {
     fusion = Fusion,
     story = function(props)
-        local scope = props.scope
+        const scope = props.scope
 
         scope:New("Frame")({
             Parent = props.target,

@@ -9,11 +9,11 @@ button click. Calls the OnSubmit callback with the text value.
 
 --]]
 
-local Fusion = require("@packages/Fusion")
+const Fusion = require("@packages/Fusion")
 
-local Children = Fusion.Children
-local OnChange = Fusion.OnChange
-local OnEvent = Fusion.OnEvent
+const Children = Fusion.Children
+const OnChange = Fusion.OnChange
+const OnEvent = Fusion.OnEvent
 
 type UsedAs<T> = Fusion.UsedAs<T>
 
@@ -25,10 +25,10 @@ return function(
         PlaceholderText: UsedAs<string>?,
     }
 ): Fusion.Child
-    local text = scope:Value(Fusion.peek(props.DefaultValue) or "")
+    const text = scope:Value(Fusion.peek(props.DefaultValue) or "")
 
-    local function submit()
-        local value = Fusion.peek(text)
+    const function submit()
+        const value = Fusion.peek(text)
         if value ~= "" and props.OnSubmit then
             props.OnSubmit(value)
         end

@@ -8,13 +8,13 @@ it as a new version via a single PUT request.
 
 --]]
 
-local HttpService = game:GetService("HttpService")
+const HttpService = game:GetService("HttpService")
 
-local DEFAULT_REGISTRY_URL = "https://rbx-package-registry.batchprogrammer314.workers.dev"
+const DEFAULT_REGISTRY_URL = "https://rbx-package-registry.batchprogrammer314.workers.dev"
 
-local MAX_PUBLISH_RETRIES = 3
+const MAX_PUBLISH_RETRIES = 3
 
-local PackagePublisher = {}
+const PackagePublisher = {}
 
 type PublishOptions = {
     PackageId: string,
@@ -45,17 +45,17 @@ function PackagePublisher.publish(serializer: any, options: PublishOptions): Pub
     assert(typeof(options.Root) == "Instance", "Expected an Instance Root")
     assert(type(options.RegistryKey) == "string", "Expected a string RegistryKey")
 
-    local baseUrl = options.BaseUrl or DEFAULT_REGISTRY_URL
+    const baseUrl = options.BaseUrl or DEFAULT_REGISTRY_URL
 
     -- Serialize the tree up front
-    local tree = serializer.serialize(options.Root)
-    local treeJson = HttpService:JSONEncode(tree)
+    const tree = serializer.serialize(options.Root)
+    const treeJson = HttpService:JSONEncode(tree)
 
     for attempt = 1, MAX_PUBLISH_RETRIES do
-        local success, result = pcall(function(): PublishResult
+        const success, result = pcall(function(): PublishResult
             -- Fetch current metadata to determine next version
-            local metadata = _fetchMetadata(baseUrl, options.PackageId, options.RegistryKey)
-            local newVersion = metadata.LatestVersion + 1
+            const metadata = _fetchMetadata(baseUrl, options.PackageId, options.RegistryKey)
+            const newVersion = metadata.LatestVersion + 1
 
             -- Single PUT to publish the version
             _putVersion(baseUrl, options.RegistryKey, options.PackageId, options.PackageName, newVersion, treeJson)
@@ -70,11 +70,11 @@ function PackagePublisher.publish(serializer: any, options: PublishOptions): Pub
             return result
         end
 
-        local errorStr = tostring(result)
+        const errorStr = tostring(result)
 
         -- Retry on 409 Conflict (version already claimed by
         -- another publisher)
-        local isConflict = string.find(errorStr, "409")
+        const isConflict = string.find(errorStr, "409")
         if isConflict and attempt < MAX_PUBLISH_RETRIES then
             task.wait(1)
             continue
@@ -97,9 +97,9 @@ function _fetchMetadata(
     packageId: string,
     registryKey: string
 ): { Name: string, LatestVersion: number }
-    local url = `{baseUrl}/packages/{packageId}`
+    const url = `{baseUrl}/packages/{packageId}`
 
-    local success, response = pcall(function()
+    const success, response = pcall(function()
         return HttpService:RequestAsync({
             Url = url,
             Method = "GET",
@@ -110,7 +110,7 @@ function _fetchMetadata(
     end)
 
     if success and response.Success then
-        local decoded = HttpService:JSONDecode(response.Body)
+        const decoded = HttpService:JSONDecode(response.Body)
         return {
             Name = decoded.name or packageId,
             LatestVersion = decoded.latestVersion or 0,
@@ -132,9 +132,9 @@ function _putVersion(
     version: number,
     treeJson: string
 )
-    local url = `{baseUrl}/packages/{packageId}/versions/{version}`
+    const url = `{baseUrl}/packages/{packageId}/versions/{version}`
 
-    local putSuccess, putResponse = pcall(function()
+    const putSuccess, putResponse = pcall(function()
         return HttpService:RequestAsync({
             Url = url,
             Method = "PUT",

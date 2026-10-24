@@ -7,16 +7,16 @@ validation, and remove controls.
 
 --]]
 
-local Fusion = require("@packages/Fusion")
+const Fusion = require("@packages/Fusion")
 
-local SetKeyPrompt = require("../Components/SetKeyPrompt")
+const SetKeyPrompt = require("../Components/SetKeyPrompt")
 
 return {
     fusion = Fusion,
     story = function(props)
-        local scope = props.scope
+        const scope = props.scope
 
-        local ui = SetKeyPrompt(scope, {
+        const ui = SetKeyPrompt(scope, {
             CurrentKey = nil,
             OnSave = function(key: string)
                 print(`[Set Key] Saved key ({#key} characters)`)

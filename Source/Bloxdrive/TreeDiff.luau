@@ -9,9 +9,9 @@ since they are keyed by name in the Rojo format.
 
 --]]
 
-local TreeUtils = require("./TreeUtils")
+const TreeUtils = require("./TreeUtils")
 
-local TreeDiff = {}
+const TreeDiff = {}
 
 type DiffOperation = {
     Kind: "Add" | "Remove" | "Modify",
@@ -33,7 +33,7 @@ function TreeDiff.diff(oldTree: { [string]: any }, newTree: { [string]: any }): 
     assert(type(oldTree) == "table", "Expected a table for oldTree")
     assert(type(newTree) == "table", "Expected a table for newTree")
 
-    local operations: { DiffOperation } = {}
+    const operations: { DiffOperation } = {}
     _diffNodes(oldTree, newTree, {}, operations)
     return operations
 end
@@ -51,13 +51,13 @@ function _diffNodes(
     _diffAttributes(oldNode["$attributes"] or {}, newNode["$attributes"] or {}, path, operations)
 
     -- Diff children
-    local oldChildren = TreeUtils.getChildKeys(oldNode)
-    local newChildren = TreeUtils.getChildKeys(newNode)
+    const oldChildren = TreeUtils.getChildKeys(oldNode)
+    const newChildren = TreeUtils.getChildKeys(newNode)
 
     -- Find removed children
     for childName in oldChildren do
         if newChildren[childName] == nil then
-            local childPath = table.clone(path)
+            const childPath = table.clone(path)
             table.insert(childPath, childName)
             table.insert(operations, {
                 Kind = "Remove",
@@ -70,7 +70,7 @@ function _diffNodes(
     -- Find added children
     for childName in newChildren do
         if oldChildren[childName] == nil then
-            local childPath = table.clone(path)
+            const childPath = table.clone(path)
             table.insert(childPath, childName)
             table.insert(operations, {
                 Kind = "Add",
@@ -83,7 +83,7 @@ function _diffNodes(
     -- Recurse into shared children
     for childName in oldChildren do
         if newChildren[childName] then
-            local childPath = table.clone(path)
+            const childPath = table.clone(path)
             table.insert(childPath, childName)
 
             -- Check if className changed (effectively a replacement)
@@ -111,14 +111,14 @@ function _diffProperties(
     path: { string },
     operations: { DiffOperation }
 )
-    local propPath = table.clone(path)
+    const propPath = table.clone(path)
     table.insert(propPath, "$properties")
 
     -- Find removed or modified properties
     for propName, oldValue in oldProps do
-        local newValue = newProps[propName]
+        const newValue = newProps[propName]
         if newValue == nil then
-            local fullPath = table.clone(propPath)
+            const fullPath = table.clone(propPath)
             table.insert(fullPath, propName)
             table.insert(operations, {
                 Kind = "Remove",
@@ -126,7 +126,7 @@ function _diffProperties(
                 OldValue = oldValue,
             })
         elseif not TreeUtils.deepEqual(oldValue, newValue) then
-            local fullPath = table.clone(propPath)
+            const fullPath = table.clone(propPath)
             table.insert(fullPath, propName)
             table.insert(operations, {
                 Kind = "Modify",
@@ -140,7 +140,7 @@ function _diffProperties(
     -- Find added properties
     for propName, newValue in newProps do
         if oldProps[propName] == nil then
-            local fullPath = table.clone(propPath)
+            const fullPath = table.clone(propPath)
             table.insert(fullPath, propName)
             table.insert(operations, {
                 Kind = "Add",
@@ -157,14 +157,14 @@ function _diffAttributes(
     path: { string },
     operations: { DiffOperation }
 )
-    local attrPath = table.clone(path)
+    const attrPath = table.clone(path)
     table.insert(attrPath, "$attributes")
 
     -- Find removed or modified attributes
     for attrName, oldValue in oldAttrs do
-        local newValue = newAttrs[attrName]
+        const newValue = newAttrs[attrName]
         if newValue == nil then
-            local fullPath = table.clone(attrPath)
+            const fullPath = table.clone(attrPath)
             table.insert(fullPath, attrName)
             table.insert(operations, {
                 Kind = "Remove",
@@ -172,7 +172,7 @@ function _diffAttributes(
                 OldValue = oldValue,
             })
         elseif not TreeUtils.deepEqual(oldValue, newValue) then
-            local fullPath = table.clone(attrPath)
+            const fullPath = table.clone(attrPath)
             table.insert(fullPath, attrName)
             table.insert(operations, {
                 Kind = "Modify",
@@ -186,7 +186,7 @@ function _diffAttributes(
     -- Find added attributes
     for attrName, newValue in newAttrs do
         if oldAttrs[attrName] == nil then
-            local fullPath = table.clone(attrPath)
+            const fullPath = table.clone(attrPath)
             table.insert(fullPath, attrName)
             table.insert(operations, {
                 Kind = "Add",

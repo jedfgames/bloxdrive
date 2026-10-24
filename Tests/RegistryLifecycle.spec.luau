@@ -14,30 +14,30 @@ token is not available.
 
 --]]
 
-local Dotenv = require("@devpackages/Dotenv")
-local net = require("@lune/net")
-local process = require("@lune/process")
-local serde = require("@lune/serde")
-local task = require("@lune/task")
+const Dotenv = require("@devpackages/Dotenv")
+const net = require("@lune/net")
+const process = require("@lune/process")
+const serde = require("@lune/serde")
+const task = require("@lune/task")
 
-local Merger = require("@bloxdrive/Merger")
-local TreeDiff = require("@bloxdrive/TreeDiff")
-local TreeUtils = require("@bloxdrive/TreeUtils")
+const Merger = require("@bloxdrive/Merger")
+const TreeDiff = require("@bloxdrive/TreeDiff")
+const TreeUtils = require("@bloxdrive/TreeUtils")
 
-local REGISTRY_URL = "https://rbx-package-registry.batchprogrammer314.workers.dev"
-local TEST_PREFIX = "test-"
+const REGISTRY_URL = "https://rbx-package-registry.batchprogrammer314.workers.dev"
+const TEST_PREFIX = "test-"
 
-local MAX_RETRIES = 3
-local RETRY_DELAY = 1
+const MAX_RETRIES = 3
+const RETRY_DELAY = 1
 
 local _token: string? = nil
 
 -- Collected test package IDs for cleanup in afterAll
-local _testPackageIds: { string } = {}
+const _testPackageIds: { string } = {}
 
 -- Registry API helpers ------------------------------------------------
 
-local function _request(
+const function _request(
     method: string,
     path: string,
     body: string?,
@@ -45,7 +45,7 @@ local function _request(
 ): net.FetchResponse
     assert(_token, "Token required")
 
-    local headers: { [string]: string } = {
+    const headers: { [string]: string } = {
         Authorization = `Bearer {_token}`,
     }
 
@@ -60,7 +60,7 @@ local function _request(
     end
 
     for attempt = 1, MAX_RETRIES do
-        local ok, response = pcall(net.request, {
+        const ok, response = pcall(net.request, {
             url = `{REGISTRY_URL}{path}`,
             method = method,
             headers = headers,
@@ -81,51 +81,51 @@ local function _request(
     error("Exhausted all retries")
 end
 
-local function _get(path: string): string
-    local response = _request("GET", path)
+const function _get(path: string): string
+    const response = _request("GET", path)
     assert(response.ok, `GET {path} failed ({response.statusCode}): {response.body}`)
     return response.body
 end
 
-local function _put(path: string, body: string, extraHeaders: { [string]: string }?)
-    local response = _request("PUT", path, body, extraHeaders)
+const function _put(path: string, body: string, extraHeaders: { [string]: string }?)
+    const response = _request("PUT", path, body, extraHeaders)
     assert(response.ok, `PUT {path} failed ({response.statusCode}): {response.body}`)
 end
 
 -- Generate a unique test package ID
-local function _generatePackageId(): string
-    local chars = "0123456789abcdef"
-    local result = {}
+const function _generatePackageId(): string
+    const chars = "0123456789abcdef"
+    const result = {}
     for _ = 1, 16 do
-        local idx = math.random(1, #chars)
+        const idx = math.random(1, #chars)
         table.insert(result, string.sub(chars, idx, idx))
     end
-    local id = `{TEST_PREFIX}{table.concat(result)}`
+    const id = `{TEST_PREFIX}{table.concat(result)}`
     table.insert(_testPackageIds, id)
     return id
 end
 
 -- Publishing helpers ------------------------------------------------
 
-local function _publishVersion(packageId: string, packageName: string, tree: { [string]: any }, expectedVersion: number)
-    local treeJson = serde.encode("json", tree)
+const function _publishVersion(packageId: string, packageName: string, tree: { [string]: any }, expectedVersion: number)
+    const treeJson = serde.encode("json", tree)
     _put(`/packages/{packageId}/versions/{expectedVersion}`, treeJson, {
         ["X-Package-Name"] = packageName,
     })
 end
 
-local function _fetchMetadata(packageId: string): { [string]: any }
-    local body = _get(`/packages/{packageId}`)
+const function _fetchMetadata(packageId: string): { [string]: any }
+    const body = _get(`/packages/{packageId}`)
     return serde.decode("json", body)
 end
 
-local function _fetchVersionTree(packageId: string, version: number): { [string]: any }
-    local body = _get(`/packages/{packageId}/versions/{version}`)
+const function _fetchVersionTree(packageId: string, version: number): { [string]: any }
+    const body = _get(`/packages/{packageId}/versions/{version}`)
     return serde.decode("json", body)
 end
 
 -- Cleanup helper
-local function _cleanupTestPackages()
+const function _cleanupTestPackages()
     assert(_token, "Token required")
 
     if #_testPackageIds == 0 then
@@ -135,7 +135,7 @@ local function _cleanupTestPackages()
     print(`  Cleaning up {#_testPackageIds} test packages...`)
 
     local deleted = 0
-    local total = #_testPackageIds
+    const total = #_testPackageIds
 
     for _, packageId in _testPackageIds do
         task.spawn(function()
@@ -154,7 +154,7 @@ end
 
 -- Test trees --------------------------------------------------------
 
-local function _makeSimpleTree(): { [string]: any }
+const function _makeSimpleTree(): { [string]: any }
     return {
         ["$className"] = "Folder",
         Health = {
@@ -168,7 +168,7 @@ local function _makeSimpleTree(): { [string]: any }
     }
 end
 
-local function _makeComplexTree(): { [string]: any }
+const function _makeComplexTree(): { [string]: any }
     return {
         ["$className"] = "Folder",
         Config = {
@@ -210,7 +210,7 @@ local function _makeComplexTree(): { [string]: any }
     }
 end
 
-local function _makeTreeWithAttributes(): { [string]: any }
+const function _makeTreeWithAttributes(): { [string]: any }
     return {
         ["$className"] = "Folder",
         ["$attributes"] = {
@@ -247,16 +247,16 @@ return function()
 
     describe("publish and fetch", function()
         it("should publish a new package and fetch it back", function()
-            local packageId = _generatePackageId()
+            const packageId = _generatePackageId()
 
-            local tree = _makeSimpleTree()
+            const tree = _makeSimpleTree()
             _publishVersion(packageId, "SimpleTest", tree, 1)
 
-            local metadata = _fetchMetadata(packageId)
+            const metadata = _fetchMetadata(packageId)
             expect(metadata.name).to.equal("SimpleTest")
             expect(metadata.latestVersion).to.equal(1)
 
-            local fetched = _fetchVersionTree(packageId, 1)
+            const fetched = _fetchVersionTree(packageId, 1)
             expect(fetched["$className"]).to.equal("Folder")
             expect(fetched.Health).to.be.ok()
             expect(fetched.Health["$className"]).to.equal("NumberValue")
@@ -266,40 +266,40 @@ return function()
         end)
 
         it("should publish multiple versions and fetch each", function()
-            local packageId = _generatePackageId()
+            const packageId = _generatePackageId()
 
-            local v1 = _makeSimpleTree()
+            const v1 = _makeSimpleTree()
             _publishVersion(packageId, "MultiVersion", v1, 1)
 
-            local v2 = TreeUtils.deepClone(v1)
+            const v2 = TreeUtils.deepClone(v1)
             v2.Health["$properties"].Value = 200
             _publishVersion(packageId, "MultiVersion", v2, 2)
 
-            local v3 = TreeUtils.deepClone(v2)
+            const v3 = TreeUtils.deepClone(v2)
             v3.Score = {
                 ["$className"] = "NumberValue",
                 ["$properties"] = { Value = 999 },
             }
             _publishVersion(packageId, "MultiVersion", v3, 3)
 
-            local metadata = _fetchMetadata(packageId)
+            const metadata = _fetchMetadata(packageId)
             expect(metadata.latestVersion).to.equal(3)
 
             expect(_fetchVersionTree(packageId, 1).Health["$properties"].Value).to.equal(100)
             expect(_fetchVersionTree(packageId, 2).Health["$properties"].Value).to.equal(200)
 
-            local fetched3 = _fetchVersionTree(packageId, 3)
+            const fetched3 = _fetchVersionTree(packageId, 3)
             expect(fetched3.Health["$properties"].Value).to.equal(200)
             expect(fetched3.Score["$properties"].Value).to.equal(999)
         end)
 
         it("should publish a complex nested tree", function()
-            local packageId = _generatePackageId()
+            const packageId = _generatePackageId()
 
-            local tree = _makeComplexTree()
+            const tree = _makeComplexTree()
             _publishVersion(packageId, "ComplexTest", tree, 1)
 
-            local fetched = _fetchVersionTree(packageId, 1)
+            const fetched = _fetchVersionTree(packageId, 1)
             expect(fetched["$className"]).to.equal("Folder")
             expect(fetched.Config["$className"]).to.equal("Configuration")
             expect(fetched.Config.MaxHealth["$properties"].Value).to.equal(100)
@@ -310,12 +310,12 @@ return function()
         end)
 
         it("should publish a tree with attributes", function()
-            local packageId = _generatePackageId()
+            const packageId = _generatePackageId()
 
-            local tree = _makeTreeWithAttributes()
+            const tree = _makeTreeWithAttributes()
             _publishVersion(packageId, "AttrTest", tree, 1)
 
-            local fetched = _fetchVersionTree(packageId, 1)
+            const fetched = _fetchVersionTree(packageId, 1)
             expect(fetched["$attributes"].PackageName).to.equal("TestAttrPackage")
             expect(fetched["$attributes"].Version).to.equal(1)
             expect(fetched["$attributes"].IsTest).to.equal(true)
@@ -326,25 +326,25 @@ return function()
 
     describe("diff across versions", function()
         it("should detect property changes between versions", function()
-            local packageId = _generatePackageId()
+            const packageId = _generatePackageId()
 
-            local v1 = _makeSimpleTree()
+            const v1 = _makeSimpleTree()
             _publishVersion(packageId, "DiffPropTest", v1, 1)
 
-            local v2 = TreeUtils.deepClone(v1)
+            const v2 = TreeUtils.deepClone(v1)
             v2.Health["$properties"].Value = 999
             _publishVersion(packageId, "DiffPropTest", v2, 2)
 
-            local fetched1 = _fetchVersionTree(packageId, 1)
-            local fetched2 = _fetchVersionTree(packageId, 2)
+            const fetched1 = _fetchVersionTree(packageId, 1)
+            const fetched2 = _fetchVersionTree(packageId, 2)
 
-            local ops = TreeDiff.diff(fetched1, fetched2)
+            const ops = TreeDiff.diff(fetched1, fetched2)
             expect(#ops > 0).to.equal(true)
 
             local foundHealthChange = false
             for _, op in ops do
                 if op.Kind == "Modify" then
-                    local pathStr = table.concat(op.Path, ".")
+                    const pathStr = table.concat(op.Path, ".")
                     if string.find(pathStr, "Health") and string.find(pathStr, "Value") then
                         foundHealthChange = true
                         expect(op.OldValue).to.equal(100)
@@ -356,19 +356,19 @@ return function()
         end)
 
         it("should detect added children between versions", function()
-            local packageId = _generatePackageId()
+            const packageId = _generatePackageId()
 
-            local v1 = _makeSimpleTree()
+            const v1 = _makeSimpleTree()
             _publishVersion(packageId, "DiffAddTest", v1, 1)
 
-            local v2 = TreeUtils.deepClone(v1)
+            const v2 = TreeUtils.deepClone(v1)
             v2.NewChild = {
                 ["$className"] = "BoolValue",
                 ["$properties"] = { Value = true },
             }
             _publishVersion(packageId, "DiffAddTest", v2, 2)
 
-            local ops = TreeDiff.diff(_fetchVersionTree(packageId, 1), _fetchVersionTree(packageId, 2))
+            const ops = TreeDiff.diff(_fetchVersionTree(packageId, 1), _fetchVersionTree(packageId, 2))
 
             local foundAdd = false
             for _, op in ops do
@@ -380,16 +380,16 @@ return function()
         end)
 
         it("should detect removed children between versions", function()
-            local packageId = _generatePackageId()
+            const packageId = _generatePackageId()
 
-            local v1 = _makeSimpleTree()
+            const v1 = _makeSimpleTree()
             _publishVersion(packageId, "DiffRemoveTest", v1, 1)
 
-            local v2 = TreeUtils.deepClone(v1)
+            const v2 = TreeUtils.deepClone(v1)
             v2.Label = nil
             _publishVersion(packageId, "DiffRemoveTest", v2, 2)
 
-            local ops = TreeDiff.diff(_fetchVersionTree(packageId, 1), _fetchVersionTree(packageId, 2))
+            const ops = TreeDiff.diff(_fetchVersionTree(packageId, 1), _fetchVersionTree(packageId, 2))
 
             local foundRemove = false
             for _, op in ops do
@@ -401,19 +401,19 @@ return function()
         end)
 
         it("should detect className changes between versions", function()
-            local packageId = _generatePackageId()
+            const packageId = _generatePackageId()
 
-            local v1 = _makeSimpleTree()
+            const v1 = _makeSimpleTree()
             _publishVersion(packageId, "DiffClassTest", v1, 1)
 
-            local v2 = TreeUtils.deepClone(v1)
+            const v2 = TreeUtils.deepClone(v1)
             v2.Health = {
                 ["$className"] = "StringValue",
                 ["$properties"] = { Value = "full" },
             }
             _publishVersion(packageId, "DiffClassTest", v2, 2)
 
-            local ops = TreeDiff.diff(_fetchVersionTree(packageId, 1), _fetchVersionTree(packageId, 2))
+            const ops = TreeDiff.diff(_fetchVersionTree(packageId, 1), _fetchVersionTree(packageId, 2))
 
             local foundRemove = false
             local foundAdd = false
@@ -434,93 +434,93 @@ return function()
 
     describe("three-way merge with registry", function()
         it("should merge local and remote changes without conflicts", function()
-            local packageId = _generatePackageId()
+            const packageId = _generatePackageId()
 
-            local base = _makeSimpleTree()
+            const base = _makeSimpleTree()
             _publishVersion(packageId, "MergeNoConflict", base, 1)
-            local fetchedBase = _fetchVersionTree(packageId, 1)
+            const fetchedBase = _fetchVersionTree(packageId, 1)
 
-            local localTree = TreeUtils.deepClone(fetchedBase)
+            const localTree = TreeUtils.deepClone(fetchedBase)
             localTree.Health["$properties"].Value = 500
 
-            local remoteTree = TreeUtils.deepClone(fetchedBase)
+            const remoteTree = TreeUtils.deepClone(fetchedBase)
             remoteTree.Label["$properties"].Value = "world"
             _publishVersion(packageId, "MergeNoConflict", remoteTree, 2)
 
-            local result = Merger.merge(fetchedBase, localTree, _fetchVersionTree(packageId, 2))
+            const result = Merger.merge(fetchedBase, localTree, _fetchVersionTree(packageId, 2))
             expect(#result.Conflicts).to.equal(0)
             expect(result.Tree.Health["$properties"].Value).to.equal(500)
             expect(result.Tree.Label["$properties"].Value).to.equal("world")
         end)
 
         it("should detect conflicts from divergent changes", function()
-            local packageId = _generatePackageId()
+            const packageId = _generatePackageId()
 
-            local base = _makeSimpleTree()
+            const base = _makeSimpleTree()
             _publishVersion(packageId, "MergeConflict", base, 1)
-            local fetchedBase = _fetchVersionTree(packageId, 1)
+            const fetchedBase = _fetchVersionTree(packageId, 1)
 
-            local localTree = TreeUtils.deepClone(fetchedBase)
+            const localTree = TreeUtils.deepClone(fetchedBase)
             localTree.Health["$properties"].Value = 300
 
-            local remoteTree = TreeUtils.deepClone(fetchedBase)
+            const remoteTree = TreeUtils.deepClone(fetchedBase)
             remoteTree.Health["$properties"].Value = 700
             _publishVersion(packageId, "MergeConflict", remoteTree, 2)
 
-            local result = Merger.merge(fetchedBase, localTree, _fetchVersionTree(packageId, 2))
+            const result = Merger.merge(fetchedBase, localTree, _fetchVersionTree(packageId, 2))
             expect(#result.Conflicts > 0).to.equal(true)
             expect(result.Tree.Health["$properties"].Value).to.equal(300)
         end)
 
         it("should merge child additions from both sides", function()
-            local packageId = _generatePackageId()
+            const packageId = _generatePackageId()
 
-            local base = _makeSimpleTree()
+            const base = _makeSimpleTree()
             _publishVersion(packageId, "MergeBothAdd", base, 1)
-            local fetchedBase = _fetchVersionTree(packageId, 1)
+            const fetchedBase = _fetchVersionTree(packageId, 1)
 
-            local localTree = TreeUtils.deepClone(fetchedBase)
+            const localTree = TreeUtils.deepClone(fetchedBase)
             localTree.LocalChild = {
                 ["$className"] = "BoolValue",
                 ["$properties"] = { Value = true },
             }
 
-            local remoteTree = TreeUtils.deepClone(fetchedBase)
+            const remoteTree = TreeUtils.deepClone(fetchedBase)
             remoteTree.RemoteChild = {
                 ["$className"] = "StringValue",
                 ["$properties"] = { Value = "remote" },
             }
             _publishVersion(packageId, "MergeBothAdd", remoteTree, 2)
 
-            local result = Merger.merge(fetchedBase, localTree, _fetchVersionTree(packageId, 2))
+            const result = Merger.merge(fetchedBase, localTree, _fetchVersionTree(packageId, 2))
             expect(#result.Conflicts).to.equal(0)
             expect(result.Tree.LocalChild).to.be.ok()
             expect(result.Tree.RemoteChild).to.be.ok()
         end)
 
         it("should merge and re-publish the result", function()
-            local packageId = _generatePackageId()
+            const packageId = _generatePackageId()
 
-            local base = _makeSimpleTree()
+            const base = _makeSimpleTree()
             _publishVersion(packageId, "MergeRepublish", base, 1)
-            local fetchedBase = _fetchVersionTree(packageId, 1)
+            const fetchedBase = _fetchVersionTree(packageId, 1)
 
-            local localTree = TreeUtils.deepClone(fetchedBase)
+            const localTree = TreeUtils.deepClone(fetchedBase)
             localTree.Health["$properties"].Value = 250
 
-            local remoteTree = TreeUtils.deepClone(fetchedBase)
+            const remoteTree = TreeUtils.deepClone(fetchedBase)
             remoteTree.Label["$properties"].Value = "merged"
             _publishVersion(packageId, "MergeRepublish", remoteTree, 2)
 
-            local mergeResult = Merger.merge(fetchedBase, localTree, _fetchVersionTree(packageId, 2))
+            const mergeResult = Merger.merge(fetchedBase, localTree, _fetchVersionTree(packageId, 2))
             expect(#mergeResult.Conflicts).to.equal(0)
 
             _publishVersion(packageId, "MergeRepublish", mergeResult.Tree, 3)
 
-            local metadata = _fetchMetadata(packageId)
+            const metadata = _fetchMetadata(packageId)
             expect(metadata.latestVersion).to.equal(3)
 
-            local fetched3 = _fetchVersionTree(packageId, 3)
+            const fetched3 = _fetchVersionTree(packageId, 3)
             expect(fetched3.Health["$properties"].Value).to.equal(250)
             expect(fetched3.Label["$properties"].Value).to.equal("merged")
         end)
@@ -528,32 +528,32 @@ return function()
 
     describe("round-trip via registry", function()
         it("should round-trip a complex tree", function()
-            local packageId = _generatePackageId()
+            const packageId = _generatePackageId()
 
-            local original = _makeComplexTree()
+            const original = _makeComplexTree()
             _publishVersion(packageId, "RoundTripComplex", original, 1)
 
-            local fetched = _fetchVersionTree(packageId, 1)
+            const fetched = _fetchVersionTree(packageId, 1)
             expect(TreeUtils.deepEqual(original, fetched)).to.equal(true)
         end)
 
         it("should round-trip a tree with attributes", function()
-            local packageId = _generatePackageId()
+            const packageId = _generatePackageId()
 
-            local original = _makeTreeWithAttributes()
+            const original = _makeTreeWithAttributes()
             _publishVersion(packageId, "RoundTripAttrs", original, 1)
 
-            local fetched = _fetchVersionTree(packageId, 1)
+            const fetched = _fetchVersionTree(packageId, 1)
             expect(TreeUtils.deepEqual(original, fetched)).to.equal(true)
         end)
 
         it("should round-trip updated versions", function()
-            local packageId = _generatePackageId()
+            const packageId = _generatePackageId()
 
-            local v1 = _makeComplexTree()
+            const v1 = _makeComplexTree()
             _publishVersion(packageId, "RoundTripVersions", v1, 1)
 
-            local v2 = TreeUtils.deepClone(v1)
+            const v2 = TreeUtils.deepClone(v1)
             v2.Config.MaxHealth["$properties"].Value = 200
             v2.Config.Settings.Debug["$properties"].Value = true
             v2.Handler["$properties"].Source = "return { version = 2 }"
@@ -566,23 +566,23 @@ return function()
 
     describe("edge cases", function()
         it("should handle a leaf-only package", function()
-            local packageId = _generatePackageId()
+            const packageId = _generatePackageId()
 
-            local tree = {
+            const tree = {
                 ["$className"] = "ModuleScript",
                 ["$properties"] = { Source = 'return "hello"' },
             }
             _publishVersion(packageId, "LeafOnly", tree, 1)
 
-            local fetched = _fetchVersionTree(packageId, 1)
+            const fetched = _fetchVersionTree(packageId, 1)
             expect(fetched["$className"]).to.equal("ModuleScript")
             expect(fetched["$properties"].Source).to.equal('return "hello"')
         end)
 
         it("should handle deeply nested trees", function()
-            local packageId = _generatePackageId()
+            const packageId = _generatePackageId()
 
-            local tree = {
+            const tree = {
                 ["$className"] = "Folder",
                 Level1 = {
                     ["$className"] = "Folder",
@@ -603,14 +603,14 @@ return function()
             }
             _publishVersion(packageId, "DeepNest", tree, 1)
 
-            local fetched = _fetchVersionTree(packageId, 1)
+            const fetched = _fetchVersionTree(packageId, 1)
             expect(TreeUtils.deepEqual(tree, fetched)).to.equal(true)
         end)
 
         it("should handle many siblings", function()
-            local packageId = _generatePackageId()
+            const packageId = _generatePackageId()
 
-            local tree: { [string]: any } = { ["$className"] = "Folder" }
+            const tree: { [string]: any } = { ["$className"] = "Folder" }
             for i = 1, 15 do
                 tree[`Item{i}`] = {
                     ["$className"] = "NumberValue",
@@ -619,16 +619,16 @@ return function()
             end
             _publishVersion(packageId, "ManySiblings", tree, 1)
 
-            local fetched = _fetchVersionTree(packageId, 1)
+            const fetched = _fetchVersionTree(packageId, 1)
             expect(fetched.Item1["$properties"].Value).to.equal(10)
             expect(fetched.Item8["$properties"].Value).to.equal(80)
             expect(fetched.Item15["$properties"].Value).to.equal(150)
         end)
 
         it("should handle special characters in string properties", function()
-            local packageId = _generatePackageId()
+            const packageId = _generatePackageId()
 
-            local tree = {
+            const tree = {
                 ["$className"] = "Folder",
                 Script = {
                     ["$className"] = "ModuleScript",
@@ -645,18 +645,18 @@ return function()
             }
             _publishVersion(packageId, "SpecialChars", tree, 1)
 
-            local fetched = _fetchVersionTree(packageId, 1)
+            const fetched = _fetchVersionTree(packageId, 1)
             expect(fetched.Script["$properties"].Source).to.equal(tree.Script["$properties"].Source)
             expect(fetched.Label["$properties"].Value).to.equal(tree.Label["$properties"].Value)
         end)
 
         it("should reject duplicate version numbers", function()
-            local packageId = _generatePackageId()
+            const packageId = _generatePackageId()
 
-            local tree = _makeSimpleTree()
+            const tree = _makeSimpleTree()
             _publishVersion(packageId, "DuplicateTest", tree, 1)
 
-            local response = _request("PUT", `/packages/{packageId}/versions/1`, serde.encode("json", tree), {
+            const response = _request("PUT", `/packages/{packageId}/versions/1`, serde.encode("json", tree), {
                 ["X-Package-Name"] = "DuplicateTest",
             })
             expect(response.statusCode).to.equal(409)

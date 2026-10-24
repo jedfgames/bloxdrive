@@ -8,13 +8,13 @@ the package already exists locally, and applies the result.
 
 --]]
 
-local HttpService = game:GetService("HttpService")
+const HttpService = game:GetService("HttpService")
 
-local Logger = require("@bloxdrive/Logger")
+const Logger = require("@bloxdrive/Logger")
 
-local PACKAGE_MARKER_NAME = ".bloxdrive"
+const PACKAGE_MARKER_NAME = ".bloxdrive"
 
-local PackagePuller = {}
+const PackagePuller = {}
 
 type PullOptions = {
     PackageId: string,
@@ -44,13 +44,13 @@ function PackagePuller.pull(loader: any, options: PullOptions): PullResult
     assert(type(options.PackageId) == "string", "Expected a string PackageId")
     assert(typeof(options.Parent) == "Instance", "Expected an Instance Parent")
 
-    local success, result = pcall(function(): PullResult
+    const success, result = pcall(function(): PullResult
         local registryConfig = nil
         if options.RegistryKey then
             registryConfig = { RegistryKey = options.RegistryKey }
         end
 
-        local registry = loader.Registry.new(registryConfig)
+        const registry = loader.Registry.new(registryConfig)
 
         -- Determine which version to fetch
         local targetVersion: number
@@ -64,10 +64,10 @@ function PackagePuller.pull(loader: any, options: PullOptions): PullResult
         end
 
         -- Check for existing package marker
-        local existingMarker = _findMarker(options.Parent, options.PackageId)
+        const existingMarker = _findMarker(options.Parent, options.PackageId)
 
         if existingMarker and existingMarker.Version > 0 then
-            local currentVersion = existingMarker.Version
+            const currentVersion = existingMarker.Version
 
             if currentVersion == targetVersion then
                 return {
@@ -78,13 +78,13 @@ function PackagePuller.pull(loader: any, options: PullOptions): PullResult
             end
 
             -- Fetch the base version
-            local baseTree = registry:FetchVersion(options.PackageId, currentVersion)
+            const baseTree = registry:FetchVersion(options.PackageId, currentVersion)
 
             -- Serialize current state
-            local localTree = loader.Serializer.serialize(options.Parent)
+            const localTree = loader.Serializer.serialize(options.Parent)
 
             -- Three-way merge
-            local mergeResult = loader.Merger.merge(baseTree, localTree, remoteTree)
+            const mergeResult = loader.Merger.merge(baseTree, localTree, remoteTree)
 
             -- Surgically apply only the changes needed
             _applyTreeSurgically(loader, mergeResult.Tree, options.Parent)
@@ -93,7 +93,7 @@ function PackagePuller.pull(loader: any, options: PullOptions): PullResult
             _updateMarker(existingMarker.Marker, targetVersion)
 
             -- Log conflicts
-            local conflictCount = #mergeResult.Conflicts
+            const conflictCount = #mergeResult.Conflicts
             if conflictCount > 0 then
                 for _, conflict in mergeResult.Conflicts do
                     Logger.warn(`Conflict in "{options.PackageId}" at {table.concat(conflict.Path, ".")}`)
@@ -138,7 +138,7 @@ end
 function _findMarker(parent: Instance, packageId: string): { Marker: StringValue, Version: number }?
     for _, child in parent:GetChildren() do
         if child:IsA("StringValue") and child.Name == PACKAGE_MARKER_NAME then
-            local decodeSuccess, decoded = pcall(function()
+            const decodeSuccess, decoded = pcall(function()
                 return HttpService:JSONDecode(child.Value)
             end)
 
@@ -163,7 +163,7 @@ function _clearContent(parent: Instance)
 end
 
 function _applyChildren(loader: any, tree: { [string]: any }, parent: Instance)
-    local TreeUtils = loader.TreeUtils
+    const TreeUtils = loader.TreeUtils
 
     for key, value in tree do
         if TreeUtils.isMetadataKey(key) then
@@ -178,7 +178,7 @@ function _applyChildren(loader: any, tree: { [string]: any }, parent: Instance)
     end
 
     -- Apply root-level properties
-    local properties = tree["$properties"]
+    const properties = tree["$properties"]
     if properties then
         for propName, propValue in properties do
             loader.PropertyReflection.setProperty(parent, propName, propValue)
@@ -186,7 +186,7 @@ function _applyChildren(loader: any, tree: { [string]: any }, parent: Instance)
     end
 
     -- Apply root-level attributes
-    local attributes = tree["$attributes"]
+    const attributes = tree["$attributes"]
     if attributes then
         for attrName, attrValue in attributes do
             parent:SetAttribute(attrName, attrValue)
@@ -199,7 +199,7 @@ end
 function _resolveInstance(root: Instance, path: { string }, depth: number): Instance?
     local current = root
     for i = 1, depth do
-        local child = current:FindFirstChild(path[i])
+        const child = current:FindFirstChild(path[i])
         if not child then
             return nil
         end
@@ -223,14 +223,14 @@ end
 -- deleting, or modifying what differs from the current state.
 -- This preserves instance identity and avoids unnecessary churn.
 function _applyTreeSurgically(loader: any, targetTree: { [string]: any }, parent: Instance)
-    local currentTree = loader.Serializer.serialize(parent)
-    local operations = loader.TreeDiff.diff(currentTree, targetTree)
+    const currentTree = loader.Serializer.serialize(parent)
+    const operations = loader.TreeDiff.diff(currentTree, targetTree)
 
     -- Sort operations: removes first (deepest first), then adds
     -- (shallowest first), then modifies
-    local removes = {}
-    local adds = {}
-    local modifies = {}
+    const removes = {}
+    const adds = {}
+    const modifies = {}
 
     for _, op in operations do
         if op.Kind == "Remove" then
@@ -270,21 +270,21 @@ function _applyTreeSurgically(loader: any, targetTree: { [string]: any }, parent
 end
 
 function _applyOperation(loader: any, op: any, root: Instance)
-    local path = op.Path
-    local metaIndex = _findMetadataIndex(path)
+    const path = op.Path
+    const metaIndex = _findMetadataIndex(path)
 
     if metaIndex then
         -- Property or attribute operation
-        local instanceDepth = metaIndex - 1
-        local target = if instanceDepth > 0 then _resolveInstance(root, path, instanceDepth) else root
+        const instanceDepth = metaIndex - 1
+        const target = if instanceDepth > 0 then _resolveInstance(root, path, instanceDepth) else root
 
         if not target then
             Logger.warn(`[PackagePuller] Could not resolve instance for path "{table.concat(path, ".")}".`)
             return
         end
 
-        local metaType = path[metaIndex]
-        local key = path[metaIndex + 1]
+        const metaType = path[metaIndex]
+        const key = path[metaIndex + 1]
 
         if not key then
             return
@@ -293,10 +293,10 @@ function _applyOperation(loader: any, op: any, root: Instance)
         if metaType == "$properties" then
             if op.Kind == "Remove" then
                 -- Reset to default by creating a temp instance
-                local className = target.ClassName
-                local tempSuccess, temp = pcall(Instance.new, className)
+                const className = target.ClassName
+                const tempSuccess, temp = pcall(Instance.new, className)
                 if tempSuccess then
-                    local defaultSuccess, defaultValue = pcall(function()
+                    const defaultSuccess, defaultValue = pcall(function()
                         return (temp :: any)[key]
                     end)
                     if defaultSuccess then
@@ -313,15 +313,15 @@ function _applyOperation(loader: any, op: any, root: Instance)
             if op.Kind == "Remove" then
                 target:SetAttribute(key, nil)
             else
-                local decoded = loader.PropertyReflection.decodeValue(op.NewValue)
+                const decoded = loader.PropertyReflection.decodeValue(op.NewValue)
                 target:SetAttribute(key, decoded)
             end
         end
     else
         -- Child instance operation
-        local instanceDepth = #path - 1
-        local childName = path[#path]
-        local parentInstance = if instanceDepth > 0 then _resolveInstance(root, path, instanceDepth) else root
+        const instanceDepth = #path - 1
+        const childName = path[#path]
+        const parentInstance = if instanceDepth > 0 then _resolveInstance(root, path, instanceDepth) else root
 
         if not parentInstance then
             Logger.warn(`[PackagePuller] Could not resolve parent for path "{table.concat(path, ".")}".`)
@@ -329,7 +329,7 @@ function _applyOperation(loader: any, op: any, root: Instance)
         end
 
         if op.Kind == "Remove" then
-            local child = parentInstance:FindFirstChild(childName)
+            const child = parentInstance:FindFirstChild(childName)
             if child then
                 child:Destroy()
             end
@@ -340,7 +340,7 @@ function _applyOperation(loader: any, op: any, root: Instance)
 end
 
 function _createMarker(parent: Instance, packageId: string, packageName: string?, version: number)
-    local marker = Instance.new("StringValue")
+    const marker = Instance.new("StringValue")
     marker.Name = PACKAGE_MARKER_NAME
     marker.Value = HttpService:JSONEncode({
         AutoPull = true,
@@ -353,7 +353,7 @@ function _createMarker(parent: Instance, packageId: string, packageName: string?
 end
 
 function _updateMarker(marker: StringValue, version: number)
-    local decoded = HttpService:JSONDecode(marker.Value)
+    const decoded = HttpService:JSONDecode(marker.Value)
     decoded.Version = version
     marker.Value = HttpService:JSONEncode(decoded)
 end

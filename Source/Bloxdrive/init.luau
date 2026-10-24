@@ -12,22 +12,22 @@ DataModel.
 
 --]]
 
-local Deserializer = require("@self/Deserializer")
-local Logger = require("@self/Logger")
-local Merger = require("@self/Merger")
-local PackageScanner = require("@self/PackageScanner")
-local PropertyReflection = require("@self/PropertyReflection")
-local Registry = require("@self/Registry")
-local Serializer = require("@self/Serializer")
-local TreeDiff = require("@self/TreeDiff")
-local TreeUtils = require("@self/TreeUtils")
-local Types = require("@self/Types")
+const Deserializer = require("@self/Deserializer")
+const Logger = require("@self/Logger")
+const Merger = require("@self/Merger")
+const PackageScanner = require("@self/PackageScanner")
+const PropertyReflection = require("@self/PropertyReflection")
+const Registry = require("@self/Registry")
+const Serializer = require("@self/Serializer")
+const TreeDiff = require("@self/TreeDiff")
+const TreeUtils = require("@self/TreeUtils")
+const Types = require("@self/Types")
 
-local HttpService = game:GetService("HttpService")
+const HttpService = game:GetService("HttpService")
 
-local PACKAGE_MARKER_NAME = ".bloxdrive"
+const PACKAGE_MARKER_NAME = ".bloxdrive"
 
-local Bloxdrive = {}
+const Bloxdrive = {}
 
 local _registryConfig: { BaseUrl: string?, RegistryKey: string? }? = nil
 
@@ -100,8 +100,8 @@ function Bloxdrive.load(packageId: string, options: LoadOptions): (Instance?, Lo
 
     local rootInstance: Instance? = nil
 
-    local success, result = pcall(function(): LoadResult
-        local registry = Registry.new(_registryConfig)
+    const success, result = pcall(function(): LoadResult
+        const registry = Registry.new(_registryConfig)
 
         -- Determine which version to fetch
         local targetVersion: number
@@ -122,7 +122,7 @@ function Bloxdrive.load(packageId: string, options: LoadOptions): (Instance?, Lo
 
         if existingMarker then
             -- Package already exists, perform a merge
-            local currentVersion = existingMarker.Metadata.Version
+            const currentVersion = existingMarker.Metadata.Version
 
             if currentVersion == targetVersion then
                 rootInstance = existingMarker.Parent
@@ -134,13 +134,13 @@ function Bloxdrive.load(packageId: string, options: LoadOptions): (Instance?, Lo
             end
 
             -- Fetch the base version (what was originally installed)
-            local baseTree = registry:FetchVersion(packageId, currentVersion)
+            const baseTree = registry:FetchVersion(packageId, currentVersion)
 
             -- Serialize the current DataModel state as the local version
-            local localTree = Serializer.serialize(existingMarker.Parent)
+            const localTree = Serializer.serialize(existingMarker.Parent)
 
             -- Three-way merge
-            local mergeResult = Merger.merge(baseTree, localTree, remoteTree)
+            const mergeResult = Merger.merge(baseTree, localTree, remoteTree)
 
             -- Clear existing children (except the marker)
             _clearPackageContent(existingMarker.Parent)
@@ -153,7 +153,7 @@ function Bloxdrive.load(packageId: string, options: LoadOptions): (Instance?, Lo
 
             rootInstance = existingMarker.Parent
 
-            local conflicts = if #mergeResult.Conflicts > 0 then mergeResult.Conflicts else nil
+            const conflicts = if #mergeResult.Conflicts > 0 then mergeResult.Conflicts else nil
 
             if conflicts then
                 for _, conflict in conflicts do
@@ -178,7 +178,7 @@ function Bloxdrive.load(packageId: string, options: LoadOptions): (Instance?, Lo
             else
                 -- No parent specified, create a root instance from
                 -- the tree's className and apply contents into it
-                local className = remoteTree["$className"]
+                const className = remoteTree["$className"]
                 parent = Instance.new(className)
                 _applyTree(remoteTree, parent)
             end
@@ -210,8 +210,8 @@ end
 function _findExistingMarker(parent: Instance, packageId: string): Types.PackageInfo?
     for _, child in parent:GetChildren() do
         if child:IsA("StringValue") and child.Name == PACKAGE_MARKER_NAME then
-            local decodeSuccess, metadata = pcall(function()
-                local decoded = HttpService:JSONDecode(child.Value)
+            const decodeSuccess, metadata = pcall(function()
+                const decoded = HttpService:JSONDecode(child.Value)
                 return {
                     Id = decoded.Id,
                     Version = decoded.Version,
@@ -255,7 +255,7 @@ function _applyTree(tree: { [string]: any }, parent: Instance)
     end
 
     -- Apply root-level properties to the parent
-    local properties = tree["$properties"]
+    const properties = tree["$properties"]
     if properties then
         for propName, propValue in properties do
             PropertyReflection.setProperty(parent, propName, propValue)
@@ -263,7 +263,7 @@ function _applyTree(tree: { [string]: any }, parent: Instance)
     end
 
     -- Apply root-level attributes to the parent
-    local attributes = tree["$attributes"]
+    const attributes = tree["$attributes"]
     if attributes then
         for attrName, attrValue in attributes do
             parent:SetAttribute(attrName, attrValue)
@@ -272,7 +272,7 @@ function _applyTree(tree: { [string]: any }, parent: Instance)
 end
 
 function _createMarker(parent: Instance, packageId: string, version: number)
-    local marker = Instance.new("StringValue")
+    const marker = Instance.new("StringValue")
     marker.Name = PACKAGE_MARKER_NAME
     marker.Value = HttpService:JSONEncode({
         Id = packageId,
@@ -283,7 +283,7 @@ function _createMarker(parent: Instance, packageId: string, version: number)
 end
 
 function _updateMarker(marker: StringValue, packageId: string, version: number)
-    local decoded = HttpService:JSONDecode(marker.Value)
+    const decoded = HttpService:JSONDecode(marker.Value)
     decoded.Version = version
     marker.Value = HttpService:JSONEncode(decoded)
 end

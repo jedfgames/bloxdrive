@@ -12,21 +12,21 @@ set up the place with the latest source modules, then run
 
 --]]
 
-local Dotenv = require("@devpackages/Dotenv")
-local fs = require("@lune/fs")
-local net = require("@lune/net")
-local process = require("@lune/process")
-local serde = require("@lune/serde")
-local task = require("@lune/task")
+const Dotenv = require("@devpackages/Dotenv")
+const fs = require("@lune/fs")
+const net = require("@lune/net")
+const process = require("@lune/process")
+const serde = require("@lune/serde")
+const task = require("@lune/task")
 
-local UNIVERSE_ID = "9873131552"
-local PLACE_ID = "94206881554615"
+const UNIVERSE_ID = "9873131552"
+const PLACE_ID = "94206881554615"
 
 const UploadE2EPlace = {}
 
 function UploadE2EPlace.exec()
     pcall(Dotenv.load)
-    local apiKey = process.env.ROBLOX_E2E_API_KEY
+    const apiKey = process.env.ROBLOX_E2E_API_KEY
     assert(apiKey ~= nil and apiKey ~= "", "ROBLOX_E2E_API_KEY not found in .env")
 
     if not fs.isDir("Build") then
@@ -34,7 +34,7 @@ function UploadE2EPlace.exec()
     end
 
     print("Building E2E place with rojo...")
-    local result = process.exec("rojo", {
+    const result = process.exec("rojo", {
         "build",
         "e2e.project.json",
         "--output",
@@ -45,12 +45,12 @@ function UploadE2EPlace.exec()
         error(`Rojo build failed: {result.stderr}`)
     end
 
-    local placeData = fs.readFile("Build/E2ETest.rbxl")
+    const placeData = fs.readFile("Build/E2ETest.rbxl")
     print(`Uploading place ({#placeData} bytes)...`)
 
-    local maxRetries = 5
+    const maxRetries = 5
     for attempt = 1, maxRetries do
-        local response = net.request({
+        const response = net.request({
             url = `https://apis.roblox.com/universes/v1/{UNIVERSE_ID}/places/{PLACE_ID}/versions?versionType=Published`,
             method = "POST",
             headers = {
@@ -61,13 +61,13 @@ function UploadE2EPlace.exec()
         })
 
         if response.ok then
-            local decoded = serde.decode("json", response.body)
+            const decoded = serde.decode("json", response.body)
             print(`Place uploaded successfully (version {decoded.versionNumber}).`)
             return
         end
 
         if response.statusCode == 409 and attempt < maxRetries then
-            local waitTime = 10 * attempt
+            const waitTime = 10 * attempt
             print(`Upload conflict, retrying in {waitTime} seconds (attempt {attempt}/{maxRetries})...`)
             task.wait(waitTime)
         else
