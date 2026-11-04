@@ -17,7 +17,9 @@ node_modules
 .local
 .luau-lsp
 .mcp.json
-.vscode
+/.vscode/*
+!/.vscode/extensions.json
+!/.vscode/settings.json
 .wrangler
 
 # Generated files
