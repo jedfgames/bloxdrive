@@ -23,4 +23,4 @@ t = "horsenuggets/t@3.1.1-horse.0.5"
 
 [dev-dependencies]
 Dotenv = "horsenuggets/dotenv-luau@0.1.5"
-Testable = "horsenuggets/testable@1.1.4"
+Testable = "horsenuggets/testable@1.1.5"
