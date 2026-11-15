@@ -1,4 +1,4 @@
-name: Publish release
+name: Release / CD
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
       - release
 
 jobs:
-  publish:
-    name: Publish release
+  publish-release:
+    name: publish-release
     runs-on: ubuntu-latest
     permissions:
       contents: write

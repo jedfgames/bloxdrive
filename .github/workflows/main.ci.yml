@@ -1,4 +1,4 @@
-name: CI
+name: Main / CI
 
 on:
   pull_request:
@@ -6,8 +6,8 @@ on:
       - main
 
 jobs:
-  branch-name:
-    name: Validate branch name
+  validate-branch-name:
+    name: validate-branch-name
     runs-on: ubuntu-latest
     steps:
       - name: Check branch name format
@@ -16,23 +16,16 @@ jobs:
         run: |
           echo "Checking branch name: $BRANCH"
 
-          # Must start with a valid prefix
-          if [[ ! "$BRANCH" =~ ^(feature|bugfix|hotfix|chore|docs|refactor|test)/ ]]; then
-            echo "::error::Branch name must start with a valid prefix (feature/, bugfix/, hotfix/, chore/, docs/, refactor/, test/)"
-            exit 1
-          fi
-
-          # After prefix, must be lowercase kebab-case
-          SUFFIX="${BRANCH#*/}"
-          if [[ ! "$SUFFIX" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
-            echo "::error::Branch name after prefix must be lowercase kebab-case (e.g., feature/my-new-feature)"
+          # Must be <prefix>/<name>, with both parts in lowercase kebab-case
+          if [[ ! "$BRANCH" =~ ^[a-z0-9]+(-[a-z0-9]+)*/[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+            echo "::error::Branch name must be <prefix>/<name> in lowercase kebab-case (e.g., feature/my-new-feature)"
             exit 1
           fi
 
           echo "Branch name is valid."
 
-  format:
-    name: Check formatting
+  check-formatting:
+    name: check-formatting
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -46,8 +39,8 @@ jobs:
       - name: Check formatting
         run: ./Submodules/luau-cicd/Scripts/CheckFormatting.exec.luau
 
-  test:
-    name: Run tests
+  run-tests:
+    name: run-tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -64,8 +57,8 @@ jobs:
       - name: Run tests
         run: ./Scripts/RunTests.exec.luau
 
-  analyze:
-    name: Static analysis
+  static-analysis:
+    name: static-analysis
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -80,13 +73,13 @@ jobs:
         run: wally install
 
       - name: Setup Lune typedefs
-        run: lune setup --no-update-luaurc
+        run: lune setup
 
       - name: Run static analysis
         run: ./Submodules/luau-cicd/Scripts/RunStaticAnalysis.exec.luau roblox
 
-  changelog:
-    name: Check changelog format
+  check-changelog-format:
+    name: check-changelog-format
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -100,8 +93,8 @@ jobs:
       - name: Check changelog format
         run: ./Submodules/luau-cicd/Scripts/CheckChangelogFormat.exec.luau
 
-  rokit-format:
-    name: Check rokit.toml format
+  check-rokit-format:
+    name: check-rokit-format
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -115,8 +108,8 @@ jobs:
       - name: Check rokit.toml format
         run: ./Submodules/luau-cicd/Scripts/CheckRokitFormat.exec.luau
 
-  wally-format:
-    name: Check wally.toml format
+  check-wally-format:
+    name: check-wally-format
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -130,8 +123,8 @@ jobs:
       - name: Check wally.toml format
         run: ./Submodules/luau-cicd/Scripts/CheckWallyFormat.exec.luau
 
-  file-headers:
-    name: Check file headers
+  check-file-headers:
+    name: check-file-headers
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -145,8 +138,8 @@ jobs:
       - name: Check file headers
         run: ./Submodules/luau-cicd/Scripts/CheckFileHeaders.exec.luau
 
-  luaurc-format:
-    name: Check .luaurc format
+  check-luaurc-format:
+    name: check-luaurc-format
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -160,8 +153,8 @@ jobs:
       - name: Check .luaurc format
         run: ./Submodules/luau-cicd/Scripts/CheckLuaurcFormat.exec.luau
 
-  json-format:
-    name: Check JSON format
+  check-json-format:
+    name: check-json-format
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -183,8 +176,8 @@ jobs:
       - name: Check JSON format
         run: ./Submodules/luau-cicd/Scripts/CheckJsonFormat.exec.luau
 
-  no-tabs:
-    name: Check for tabs
+  check-for-tabs:
+    name: check-for-tabs
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

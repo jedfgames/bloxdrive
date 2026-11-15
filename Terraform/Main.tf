@@ -33,31 +33,31 @@ provider "github" {
 locals {
     repo_name = "bloxdrive"
 
-    # Must match the job `name:` fields in .github/workflows/ci.yml.
+    # Must match the job `name:` fields in .github/workflows/main.ci.yml.
     main_checks = [
-        "Check .luaurc format",
-        "Check changelog format",
-        "Check file headers",
-        "Check for tabs",
-        "Check formatting",
-        "Check JSON format",
-        "Check rokit.toml format",
-        "Check wally.toml format",
-        "Run tests",
-        "Static analysis",
-        "Validate branch name"
+        "check-changelog-format",
+        "check-file-headers",
+        "check-for-tabs",
+        "check-formatting",
+        "check-json-format",
+        "check-luaurc-format",
+        "check-rokit-format",
+        "check-wally-format",
+        "run-tests",
+        "static-analysis",
+        "validate-branch-name"
     ]
 
-    # Must match the job `name:` fields in .github/workflows/release-checks.yml.
+    # Must match the job `name:` fields in .github/workflows/release.ci.yml.
     release_checks = [
-        "Check formatting",
-        "Check JSON format",
-        "Run tests",
-        "Static analysis",
-        "Validate PR title",
-        "Validate version",
-        "Verify diff matches main",
-        "Verify Wally auth"
+        "check-formatting",
+        "check-json-format",
+        "run-tests",
+        "static-analysis",
+        "validate-pr-title",
+        "validate-version",
+        "verify-diff-matches-main",
+        "verify-wally-auth"
     ]
 }
 
