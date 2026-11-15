@@ -41,3 +41,8 @@ aftman.toml
 # Worktrees
 /.worktrees/
 /.wt/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
