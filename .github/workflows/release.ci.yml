@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - release
+    types: [opened, edited, reopened, synchronize]
 
 jobs:
   verify-wally-auth:
