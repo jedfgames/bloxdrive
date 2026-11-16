@@ -10,19 +10,18 @@ jobs:
     name: validate-branch-name
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup Rokit
+        uses: CompeyDev/setup-rokit@v0.1.2
+
       - name: Check branch name format
         env:
           BRANCH: ${{ github.head_ref }}
-        run: |
-          echo "Checking branch name: $BRANCH"
-
-          # Must be <prefix>/<name>, with both parts in lowercase kebab-case
-          if [[ ! "$BRANCH" =~ ^[a-z0-9]+(-[a-z0-9]+)*/[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
-            echo "::error::Branch name must be <prefix>/<name> in lowercase kebab-case (e.g., feature/my-new-feature)"
-            exit 1
-          fi
-
-          echo "Branch name is valid."
+        run: ./Submodules/luau-cicd/Scripts/CheckBranchName.exec.luau "$BRANCH"
 
   check-formatting:
     name: check-formatting

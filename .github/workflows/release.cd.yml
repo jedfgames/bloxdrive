@@ -29,45 +29,22 @@ jobs:
 
       - name: Get version and changelog
         id: version
-        run: |
-          VERSION=$(cat VERSION | tr -d '[:space:]')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag=$VERSION" >> $GITHUB_OUTPUT
-
-          # Extract changelog for this version
-          CHANGELOG=$(awk -v ver="$VERSION" '
-            /^## / {
-              if (found) exit
-              if ($2 == ver) found=1
-              next
-            }
-            found { print }
-          ' CHANGELOG.md | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | sed '/^$/N;/^\n$/d')
-
-          # Write to file for multi-line support
-          echo "$CHANGELOG" > /tmp/changelog.txt
+        run: ./Submodules/luau-cicd/Scripts/GetReleaseInfo.exec.luau
 
       - name: Create git tag
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag ${{ steps.version.outputs.tag }}
-          git push origin ${{ steps.version.outputs.tag }}
+        env:
+          VERSION_TAG: ${{ steps.version.outputs.tag }}
+        run: ./Submodules/luau-cicd/Scripts/CreateGitTag.exec.luau "$VERSION_TAG"
 
       - name: Publish to Wally
         continue-on-error: true
         env:
           WALLY_AUTH: ${{ secrets.WALLY_AUTH }}
-        run: |
-          mkdir -p ~/.wally
-          echo "$WALLY_AUTH" > ~/.wally/auth.toml
-          wally publish
+        run: ./Submodules/luau-cicd/Scripts/PublishToWally.exec.luau
 
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create ${{ steps.version.outputs.tag }} \
-            --title "${{ steps.version.outputs.tag }}" \
-            --notes-file /tmp/changelog.txt \
-            Build/bloxdrive.rbxm
+          NOTES_FILE: ${{ steps.version.outputs.notes_file }}
+          VERSION_TAG: ${{ steps.version.outputs.tag }}
+        run: ./Submodules/luau-cicd/Scripts/CreateGitHubRelease.exec.luau "$VERSION_TAG" "$NOTES_FILE" Build/bloxdrive.rbxm
