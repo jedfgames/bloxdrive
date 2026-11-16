@@ -47,4 +47,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           NOTES_FILE: ${{ steps.version.outputs.notes_file }}
           VERSION_TAG: ${{ steps.version.outputs.tag }}
-        run: ./Submodules/luau-cicd/Scripts/CreateGitHubRelease.exec.luau "$VERSION_TAG" "$NOTES_FILE" Build/bloxdrive.rbxm
+        run: ./Submodules/luau-cicd/Scripts/CreateGitHubRelease.exec.luau "$VERSION_TAG" "$NOTES_FILE" Build/Bloxdrive.rbxm
