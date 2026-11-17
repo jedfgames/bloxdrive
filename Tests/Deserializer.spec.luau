@@ -7,6 +7,9 @@ deserialization and the reassembleTree file-to-tree reconstruction.
 
 --]]
 
+const Testable = require("@devpackages/Testable")
+const describe, expect, it = Testable.describe, Testable.expect, Testable.it
+
 const Deserializer = require("@bloxdrive/Deserializer")
 
 return function()
