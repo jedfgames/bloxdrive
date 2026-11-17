@@ -50,6 +50,7 @@ function RunTests.exec()
     pcall(Dotenv.load)
 
     Testable.configure({
+        InjectGlobals = false,
         Verbose = true,
     })
 

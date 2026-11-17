@@ -7,7 +7,9 @@ to create real Instance objects for serialization testing.
 
 --]]
 
+const Testable = require("@devpackages/Testable")
 const roblox = require("@lune/roblox")
+const describe, expect, it = Testable.describe, Testable.expect, Testable.it
 const Instance = roblox.Instance
 
 const PropertyReflection = require("@bloxdrive/PropertyReflection")

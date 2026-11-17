@@ -22,11 +22,13 @@ it is not set.
 --]]
 
 const Dotenv = require("@devpackages/Dotenv")
+const Testable = require("@devpackages/Testable")
 const fs = require("@lune/fs")
 const net = require("@lune/net")
 const process = require("@lune/process")
 const serde = require("@lune/serde")
 const task = require("@lune/task")
+const describe, it = Testable.describe, Testable.it
 
 const UNIVERSE_ID = "9873131552"
 const PLACE_ID = "94206881554615"

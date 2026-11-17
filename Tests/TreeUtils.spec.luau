@@ -7,6 +7,9 @@ require any Roblox APIs.
 
 --]]
 
+const Testable = require("@devpackages/Testable")
+const describe, expect, it = Testable.describe, Testable.expect, Testable.it
+
 const TreeUtils = require("@bloxdrive/TreeUtils")
 
 return function()

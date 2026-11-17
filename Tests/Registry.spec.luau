@@ -14,9 +14,11 @@ available.
 --]]
 
 const Dotenv = require("@devpackages/Dotenv")
+const Testable = require("@devpackages/Testable")
 const net = require("@lune/net")
 const process = require("@lune/process")
 const serde = require("@lune/serde")
+const afterAll, describe, expect, it = Testable.afterAll, Testable.describe, Testable.expect, Testable.it
 
 const TreeUtils = require("@bloxdrive/TreeUtils")
 
