@@ -6,6 +6,7 @@
 /Build
 
 # Dependencies
+/.wally-install/
 /DevPackages
 /Packages
 node_modules
@@ -27,6 +28,7 @@ node_modules
 *.gen.*
 *.lock
 *sourcemap*.json
+/wally.install.json
 
 # Legacy
 aftman.toml
