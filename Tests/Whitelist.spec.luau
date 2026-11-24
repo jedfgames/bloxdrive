@@ -47,9 +47,9 @@ const function _adminRequest(method: string, path: string, body: string?): net.F
         method = method :: any,
         headers = {
             Authorization = `Bearer {_adminToken}`,
-            ["Content-Type"] = "application/json",
+            ["Content-Type"] = "application/json"
         },
-        body = body,
+        body = body
     })
 end
 
@@ -69,9 +69,9 @@ const function _writeVersion(token: string, version: number): number
         headers = {
             Authorization = `Bearer {token}`,
             ["Content-Type"] = "application/json",
-            ["X-Package-Name"] = FIXTURE_NAME,
+            ["X-Package-Name"] = FIXTURE_NAME
         },
-        body = serde.encode("json", { ["$className"] = "Folder" }),
+        body = serde.encode("json", { ["$className"] = "Folder" })
     })
     return response.statusCode
 end
@@ -85,7 +85,7 @@ const function _deletePackage(token: string)
     net.request({
         url = `{_url}/packages/{FIXTURE_PACKAGE_ID}`,
         method = "DELETE",
-        headers = { Authorization = `Bearer {token}` },
+        headers = { Authorization = `Bearer {token}` }
     })
 end
 
@@ -105,7 +105,7 @@ return function()
         it("should reject requests without the admin token", function()
             const response = net.request({
                 url = `{_url}/admin/whitelist`,
-                method = "GET",
+                method = "GET"
             })
             expect(response.statusCode).to.equal(401)
         end)
@@ -114,7 +114,7 @@ return function()
             const response = net.request({
                 url = `{_url}/admin/whitelist`,
                 method = "GET",
-                headers = { Authorization = "Bearer not-the-admin-token" },
+                headers = { Authorization = "Bearer not-the-admin-token" }
             })
             expect(response.statusCode).to.equal(401)
         end)

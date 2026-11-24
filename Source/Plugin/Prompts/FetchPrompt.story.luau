@@ -27,8 +27,8 @@ return {
                 PlaceholderText = "Enter package ID...",
                 OnSubmit = function(text: string)
                     print(`[Fetch] Submitted "{text}"`)
-                end,
-            }),
+                end
+            })
         })
-    end,
+    end
 }

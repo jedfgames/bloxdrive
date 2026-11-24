@@ -44,12 +44,12 @@ Bloxdrive.Types = Types
 
 type Config = {
     RegistryKey: string?,
-    BaseUrl: string?,
+    BaseUrl: string?
 }
 
 type LoadOptions = {
     Version: number?,
-    Parent: Instance?,
+    Parent: Instance?
 }
 
 --[=[
@@ -69,7 +69,7 @@ type LoadResult = {
     Success: boolean,
     Version: number,
     Conflicts: { Types.ConflictInfo }?,
-    Error: string?,
+    Error: string?
 }
 
 --[=[
@@ -129,7 +129,7 @@ function Bloxdrive.load(packageId: string, options: LoadOptions): (Instance?, Lo
                 return {
                     PackageId = packageId,
                     Success = true,
-                    Version = targetVersion,
+                    Version = targetVersion
                 }
             end
 
@@ -165,7 +165,7 @@ function Bloxdrive.load(packageId: string, options: LoadOptions): (Instance?, Lo
                 PackageId = packageId,
                 Success = true,
                 Version = targetVersion,
-                Conflicts = conflicts,
+                Conflicts = conflicts
             }
         else
             -- Fresh install
@@ -189,7 +189,7 @@ function Bloxdrive.load(packageId: string, options: LoadOptions): (Instance?, Lo
             return {
                 PackageId = packageId,
                 Success = true,
-                Version = targetVersion,
+                Version = targetVersion
             }
         end
     end)
@@ -200,7 +200,7 @@ function Bloxdrive.load(packageId: string, options: LoadOptions): (Instance?, Lo
                 PackageId = packageId,
                 Success = false,
                 Version = 0,
-                Error = tostring(result),
+                Error = tostring(result)
             }
     end
 
@@ -215,7 +215,7 @@ function _findExistingMarker(parent: Instance, packageId: string): Types.Package
                 return {
                     Id = decoded.Id,
                     Version = decoded.Version,
-                    AutoUpdate = decoded.AutoUpdate or false,
+                    AutoUpdate = decoded.AutoUpdate or false
                 }
             end)
 
@@ -223,7 +223,7 @@ function _findExistingMarker(parent: Instance, packageId: string): Types.Package
                 return {
                     Marker = child :: StringValue,
                     Parent = parent,
-                    Metadata = metadata,
+                    Metadata = metadata
                 }
             end
         end
@@ -277,7 +277,7 @@ function _createMarker(parent: Instance, packageId: string, version: number)
     marker.Value = HttpService:JSONEncode({
         Id = packageId,
         Version = version,
-        AutoUpdate = false,
+        AutoUpdate = false
     })
     marker.Parent = parent
 end

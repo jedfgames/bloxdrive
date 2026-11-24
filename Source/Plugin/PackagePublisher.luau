@@ -21,13 +21,13 @@ type PublishOptions = {
     PackageName: string,
     Root: Instance,
     RegistryKey: string,
-    BaseUrl: string?,
+    BaseUrl: string?
 }
 
 type PublishResult = {
     Success: boolean,
     Version: number?,
-    Error: string?,
+    Error: string?
 }
 
 --[=[
@@ -62,7 +62,7 @@ function PackagePublisher.publish(serializer: any, options: PublishOptions): Pub
 
             return {
                 Success = true,
-                Version = newVersion,
+                Version = newVersion
             }
         end)
 
@@ -82,13 +82,13 @@ function PackagePublisher.publish(serializer: any, options: PublishOptions): Pub
 
         return {
             Success = false,
-            Error = errorStr,
+            Error = errorStr
         }
     end
 
     return {
         Success = false,
-        Error = "Exceeded maximum publish retries due to version conflicts.",
+        Error = "Exceeded maximum publish retries due to version conflicts."
     }
 end
 
@@ -104,8 +104,8 @@ function _fetchMetadata(
             Url = url,
             Method = "GET",
             Headers = {
-                Authorization = `Bearer {registryKey}`,
-            },
+                Authorization = `Bearer {registryKey}`
+            }
         })
     end)
 
@@ -113,14 +113,14 @@ function _fetchMetadata(
         const decoded = HttpService:JSONDecode(response.Body)
         return {
             Name = decoded.name or packageId,
-            LatestVersion = decoded.latestVersion or 0,
+            LatestVersion = decoded.latestVersion or 0
         }
     end
 
     -- Package doesn't exist yet (404)
     return {
         Name = packageId,
-        LatestVersion = 0,
+        LatestVersion = 0
     }
 end
 
@@ -141,9 +141,9 @@ function _putVersion(
             Headers = {
                 Authorization = `Bearer {registryKey}`,
                 ["Content-Type"] = "application/json",
-                ["X-Package-Name"] = packageName,
+                ["X-Package-Name"] = packageName
             },
-            Body = treeJson,
+            Body = treeJson
         })
     end)
 

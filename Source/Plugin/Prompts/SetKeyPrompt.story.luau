@@ -23,12 +23,12 @@ return {
             end,
             OnRemove = function()
                 print("[Set Key] Key removed")
-            end,
+            end
         })
 
         ui.Size = UDim2.fromOffset(320, 300)
         ui.Position = UDim2.fromScale(0.5, 0.5)
         ui.AnchorPoint = Vector2.new(0.5, 0.5)
         ui.Parent = props.target
-    end,
+    end
 }

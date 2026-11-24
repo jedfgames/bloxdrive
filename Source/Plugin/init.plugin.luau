@@ -110,7 +110,7 @@ const function _promptForInput(title: string, defaultValue: string?, placeholder
         OnSubmit = function(text: string)
             result = text
             _promptDone = true
-        end,
+        end
     })
 
     ui.Parent = widget
@@ -138,7 +138,7 @@ toolbar:CreateButton({
     Name = "Publish",
     Label = "Publish",
     Description = "Publish the selected instance subtree as a package version",
-    Icon = Assets["Icons/Publish.png"],
+    Icon = Assets["Icons/Publish.png"]
 }, function()
     const instance = _getSelectedInstance()
     if not instance then
@@ -176,7 +176,7 @@ toolbar:CreateButton({
         PackageId = packageId,
         PackageName = packageName,
         Root = instance,
-        RegistryKey = key,
+        RegistryKey = key
     })
 
     if result.Success then
@@ -188,7 +188,7 @@ toolbar:CreateButton({
                 AutoPush = true,
                 Id = packageId,
                 Name = packageName,
-                Version = result.Version,
+                Version = result.Version
             })
             newMarker.Parent = instance
         else
@@ -208,7 +208,7 @@ toolbar:CreateButton({
     Name = "Fetch",
     Label = "Fetch",
     Description = "Fetch the latest version of the selected package from the registry",
-    Icon = Assets["Icons/CloudDownload.png"],
+    Icon = Assets["Icons/CloudDownload.png"]
 }, function()
     const instance = _getSelectedInstance()
     const key = CredentialStore.getKey()
@@ -264,7 +264,7 @@ toolbar:CreateButton({
         PackageId = packageId,
         PackageName = packageName,
         Parent = pullParent,
-        RegistryKey = key,
+        RegistryKey = key
     })
 
     if result.Success then
@@ -303,7 +303,7 @@ toolbar:CreateButton({
     Name = "SetKey",
     Label = "Set Key",
     Description = "Set or update the registry key for the package registry",
-    Icon = Assets["Icons/Key.png"],
+    Icon = Assets["Icons/Key.png"]
 }, function()
     if not _setKeyWidget then
         const widgetInfo = DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Float, false, true, 320, 300, 280, 250)
@@ -334,7 +334,7 @@ toolbar:CreateButton({
         OnRemove = function()
             CredentialStore.clearKey()
             Logger.print("Registry key removed.")
-        end,
+        end
     })
 
     ui.Parent = widget
@@ -346,7 +346,7 @@ AutoSync.start({
     Logger = Logger,
     PackagePublisher = PackagePublisher,
     PackagePuller = PackagePuller,
-    Bloxdrive = Bloxdrive,
+    Bloxdrive = Bloxdrive
 })
 
 plugin.Unloading:Connect(function()

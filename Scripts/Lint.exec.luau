@@ -19,8 +19,8 @@ function Lint.exec()
         Platforms = {
             { Platform = "roblox", Targets = { "/Source" }, RojoProject = "dev.project.json" },
             { Platform = "roblox", Targets = { "/Tests/E2E" }, RojoProject = "e2e.project.json" },
-            { Platform = "lune", Targets = { "/Scripts", "/Tests" }, IgnorePatterns = { "Source/**", "Tests/E2E/**" } },
-        },
+            { Platform = "lune", Targets = { "/Scripts", "/Tests" }, IgnorePatterns = { "Source/**", "Tests/E2E/**" } }
+        }
     })
 end
 

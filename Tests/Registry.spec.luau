@@ -44,20 +44,20 @@ const function _seedTestPackage()
         ["$className"] = "Folder",
         Health = {
             ["$className"] = "NumberValue",
-            ["$properties"] = { Value = 100 },
-        },
+            ["$properties"] = { Value = 100 }
+        }
     }
 
     const v2 = {
         ["$className"] = "Folder",
         Health = {
             ["$className"] = "NumberValue",
-            ["$properties"] = { Value = 200 },
+            ["$properties"] = { Value = 200 }
         },
         Speed = {
             ["$className"] = "NumberValue",
-            ["$properties"] = { Value = 16 },
-        },
+            ["$properties"] = { Value = 16 }
+        }
     }
 
     for version, tree in { v1, v2 } do
@@ -67,9 +67,9 @@ const function _seedTestPackage()
             headers = {
                 Authorization = `Bearer {_token}`,
                 ["Content-Type"] = "application/json",
-                ["X-Package-Name"] = "RegistrySpecFixture",
+                ["X-Package-Name"] = "RegistrySpecFixture"
             },
-            body = serde.encode("json", tree),
+            body = serde.encode("json", tree)
         })
     end
 end
@@ -79,7 +79,7 @@ const function _cleanupTestPackage()
     net.request({
         url = `{REGISTRY_URL}/packages/{TEST_PACKAGE_ID}`,
         method = "DELETE",
-        headers = { Authorization = `Bearer {_token}` },
+        headers = { Authorization = `Bearer {_token}` }
     })
 end
 
@@ -101,7 +101,7 @@ return function()
             const response = net.request({
                 url = `{REGISTRY_URL}/packages/{TEST_PACKAGE_ID}`,
                 method = "GET",
-                headers = { Authorization = `Bearer {_token}` },
+                headers = { Authorization = `Bearer {_token}` }
             })
 
             assert(response.ok, `Metadata fetch failed ({response.statusCode})`)
@@ -115,7 +115,7 @@ return function()
             const response = net.request({
                 url = `{REGISTRY_URL}/packages/{TEST_PACKAGE_ID}/versions/1`,
                 method = "GET",
-                headers = { Authorization = `Bearer {_token}` },
+                headers = { Authorization = `Bearer {_token}` }
             })
 
             assert(response.ok, `Version fetch failed ({response.statusCode})`)
@@ -129,7 +129,7 @@ return function()
             const response = net.request({
                 url = `{REGISTRY_URL}/packages/{TEST_PACKAGE_ID}/versions/2`,
                 method = "GET",
-                headers = { Authorization = `Bearer {_token}` },
+                headers = { Authorization = `Bearer {_token}` }
             })
 
             assert(response.ok, `Version fetch failed ({response.statusCode})`)
@@ -150,7 +150,7 @@ return function()
             const response = net.request({
                 url = `{REGISTRY_URL}/packages/{TEST_PACKAGE_ID}/versions/999`,
                 method = "GET",
-                headers = { Authorization = `Bearer {_token}` },
+                headers = { Authorization = `Bearer {_token}` }
             })
 
             expect(response.statusCode).to.equal(404)

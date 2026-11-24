@@ -18,7 +18,7 @@ Registry.__index = Registry
 export type Registry = typeof(setmetatable(
     {} :: {
         _baseUrl: string,
-        _registryKey: string?,
+        _registryKey: string?
     },
     Registry
 ))
@@ -51,7 +51,7 @@ function Registry.FetchMetadata(self: Registry, packageId: string): { Name: stri
 
     return {
         Name = metadata.name,
-        LatestVersion = metadata.latestVersion,
+        LatestVersion = metadata.latestVersion
     }
 end
 
@@ -94,7 +94,7 @@ function Registry._get(self: Registry, url: string): string
     local headers: { [string]: string }? = nil
     if self._registryKey then
         headers = {
-            Authorization = `Bearer {self._registryKey}`,
+            Authorization = `Bearer {self._registryKey}`
         }
     end
 

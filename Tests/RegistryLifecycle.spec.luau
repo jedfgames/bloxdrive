@@ -48,7 +48,7 @@ const function _request(
     assert(_token, "Token required")
 
     const headers: { [string]: string } = {
-        Authorization = `Bearer {_token}`,
+        Authorization = `Bearer {_token}`
     }
 
     if body then
@@ -66,7 +66,7 @@ const function _request(
             url = `{REGISTRY_URL}{path}`,
             method = method,
             headers = headers,
-            body = body,
+            body = body
         })
 
         if not ok then
@@ -112,7 +112,7 @@ end
 const function _publishVersion(packageId: string, packageName: string, tree: { [string]: any }, expectedVersion: number)
     const treeJson = serde.encode("json", tree)
     _put(`/packages/{packageId}/versions/{expectedVersion}`, treeJson, {
-        ["X-Package-Name"] = packageName,
+        ["X-Package-Name"] = packageName
     })
 end
 
@@ -161,12 +161,12 @@ const function _makeSimpleTree(): { [string]: any }
         ["$className"] = "Folder",
         Health = {
             ["$className"] = "NumberValue",
-            ["$properties"] = { Value = 100 },
+            ["$properties"] = { Value = 100 }
         },
         Label = {
             ["$className"] = "StringValue",
-            ["$properties"] = { Value = "hello" },
-        },
+            ["$properties"] = { Value = "hello" }
+        }
     }
 end
 
@@ -177,23 +177,23 @@ const function _makeComplexTree(): { [string]: any }
             ["$className"] = "Configuration",
             MaxHealth = {
                 ["$className"] = "NumberValue",
-                ["$properties"] = { Value = 100 },
+                ["$properties"] = { Value = 100 }
             },
             Speed = {
                 ["$className"] = "NumberValue",
-                ["$properties"] = { Value = 16 },
+                ["$properties"] = { Value = 16 }
             },
             Settings = {
                 ["$className"] = "Folder",
                 Debug = {
                     ["$className"] = "BoolValue",
-                    ["$properties"] = { Value = false },
+                    ["$properties"] = { Value = false }
                 },
                 LogLevel = {
                     ["$className"] = "StringValue",
-                    ["$properties"] = { Value = "warn" },
-                },
-            },
+                    ["$properties"] = { Value = "warn" }
+                }
+            }
         },
         Assets = {
             ["$className"] = "Folder",
@@ -201,14 +201,14 @@ const function _makeComplexTree(): { [string]: any }
                 ["$className"] = "Part",
                 ["$properties"] = {
                     Anchored = true,
-                    size = { Vector3 = { 1, 4, 0.2 } },
-                },
-            },
+                    size = { Vector3 = { 1, 4, 0.2 } }
+                }
+            }
         },
         Handler = {
             ["$className"] = "ModuleScript",
-            ["$properties"] = { Source = "return { version = 1 }" },
-        },
+            ["$properties"] = { Source = "return { version = 1 }" }
+        }
     }
 end
 
@@ -218,19 +218,19 @@ const function _makeTreeWithAttributes(): { [string]: any }
         ["$attributes"] = {
             PackageName = "TestAttrPackage",
             Version = 1,
-            IsTest = true,
+            IsTest = true
         },
         Data = {
             ["$className"] = "Folder",
             ["$attributes"] = {
                 Category = "test",
-                Priority = 5,
+                Priority = 5
             },
             Value = {
                 ["$className"] = "NumberValue",
-                ["$properties"] = { Value = 42 },
-            },
-        },
+                ["$properties"] = { Value = 42 }
+            }
+        }
     }
 end
 
@@ -280,7 +280,7 @@ return function()
             const v3 = TreeUtils.deepClone(v2)
             v3.Score = {
                 ["$className"] = "NumberValue",
-                ["$properties"] = { Value = 999 },
+                ["$properties"] = { Value = 999 }
             }
             _publishVersion(packageId, "MultiVersion", v3, 3)
 
@@ -366,7 +366,7 @@ return function()
             const v2 = TreeUtils.deepClone(v1)
             v2.NewChild = {
                 ["$className"] = "BoolValue",
-                ["$properties"] = { Value = true },
+                ["$properties"] = { Value = true }
             }
             _publishVersion(packageId, "DiffAddTest", v2, 2)
 
@@ -411,7 +411,7 @@ return function()
             const v2 = TreeUtils.deepClone(v1)
             v2.Health = {
                 ["$className"] = "StringValue",
-                ["$properties"] = { Value = "full" },
+                ["$properties"] = { Value = "full" }
             }
             _publishVersion(packageId, "DiffClassTest", v2, 2)
 
@@ -484,13 +484,13 @@ return function()
             const localTree = TreeUtils.deepClone(fetchedBase)
             localTree.LocalChild = {
                 ["$className"] = "BoolValue",
-                ["$properties"] = { Value = true },
+                ["$properties"] = { Value = true }
             }
 
             const remoteTree = TreeUtils.deepClone(fetchedBase)
             remoteTree.RemoteChild = {
                 ["$className"] = "StringValue",
-                ["$properties"] = { Value = "remote" },
+                ["$properties"] = { Value = "remote" }
             }
             _publishVersion(packageId, "MergeBothAdd", remoteTree, 2)
 
@@ -572,7 +572,7 @@ return function()
 
             const tree = {
                 ["$className"] = "ModuleScript",
-                ["$properties"] = { Source = 'return "hello"' },
+                ["$properties"] = { Source = 'return "hello"' }
             }
             _publishVersion(packageId, "LeafOnly", tree, 1)
 
@@ -596,12 +596,12 @@ return function()
                                 ["$className"] = "Folder",
                                 DeepValue = {
                                     ["$className"] = "NumberValue",
-                                    ["$properties"] = { Value = 12345 },
-                                },
-                            },
-                        },
-                    },
-                },
+                                    ["$properties"] = { Value = 12345 }
+                                }
+                            }
+                        }
+                    }
+                }
             }
             _publishVersion(packageId, "DeepNest", tree, 1)
 
@@ -616,7 +616,7 @@ return function()
             for i = 1, 15 do
                 tree[`Item{i}`] = {
                     ["$className"] = "NumberValue",
-                    ["$properties"] = { Value = i * 10 },
+                    ["$properties"] = { Value = i * 10 }
                 }
             end
             _publishVersion(packageId, "ManySiblings", tree, 1)
@@ -635,15 +635,15 @@ return function()
                 Script = {
                     ["$className"] = "ModuleScript",
                     ["$properties"] = {
-                        Source = 'local x = "hello\\nworld"\nreturn x .. "tab\\there"',
-                    },
+                        Source = 'local x = "hello\\nworld"\nreturn x .. "tab\\there"'
+                    }
                 },
                 Label = {
                     ["$className"] = "StringValue",
                     ["$properties"] = {
-                        Value = "quotes \"inside\" and 'single' too",
-                    },
-                },
+                        Value = "quotes \"inside\" and 'single' too"
+                    }
+                }
             }
             _publishVersion(packageId, "SpecialChars", tree, 1)
 
@@ -659,7 +659,7 @@ return function()
             _publishVersion(packageId, "DuplicateTest", tree, 1)
 
             const response = _request("PUT", `/packages/{packageId}/versions/1`, serde.encode("json", tree), {
-                ["X-Package-Name"] = "DuplicateTest",
+                ["X-Package-Name"] = "DuplicateTest"
             })
             expect(response.statusCode).to.equal(409)
         end)

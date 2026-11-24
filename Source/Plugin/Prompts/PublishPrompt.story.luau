@@ -28,8 +28,8 @@ return {
                 PlaceholderText = "Enter package name...",
                 OnSubmit = function(text: string)
                     print(`[Publish] Submitted "{text}"`)
-                end,
-            }),
+                end
+            })
         })
-    end,
+    end
 }

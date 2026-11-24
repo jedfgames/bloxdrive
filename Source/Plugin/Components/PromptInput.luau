@@ -22,7 +22,7 @@ return function(
     props: {
         DefaultValue: UsedAs<string>?,
         OnSubmit: ((text: string) -> ())?,
-        PlaceholderText: UsedAs<string>?,
+        PlaceholderText: UsedAs<string>?
     }
 ): Fusion.Child
     const text = scope:Value(Fusion.peek(props.DefaultValue) or "")
@@ -61,7 +61,7 @@ return function(
                     if enterPressed then
                         submit()
                     end
-                end,
+                end
             }),
 
             scope:New("TextButton")({
@@ -75,13 +75,13 @@ return function(
                 Text = "Submit",
 
                 [Children] = scope:New("UICorner")({
-                    CornerRadius = UDim.new(0, 4),
+                    CornerRadius = UDim.new(0, 4)
                 }),
 
                 [OnEvent("MouseButton1Click")] = function()
                     submit()
-                end,
-            }),
-        },
+                end
+            })
+        }
     })
 end

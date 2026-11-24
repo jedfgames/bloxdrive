@@ -412,7 +412,7 @@ test("Surgical child addition via TreeDiff", function()
     const targetTree = TreeUtils.deepClone(currentTree)
     targetTree.NewChild = {
         ["$className"] = "StringValue",
-        ["$properties"] = { Value = "hello" },
+        ["$properties"] = { Value = "hello" }
     }
 
     const ops = TreeDiff.diff(currentTree, targetTree)
@@ -527,12 +527,12 @@ if REGISTRY_TOKEN then
         ["$className"] = "Folder",
         Health = {
             ["$className"] = "NumberValue",
-            ["$properties"] = { Value = 100 },
+            ["$properties"] = { Value = 100 }
         },
         Label = {
             ["$className"] = "StringValue",
-            ["$properties"] = { Value = "hello" },
-        },
+            ["$properties"] = { Value = "hello" }
+        }
     }
 
     HttpService:RequestAsync({
@@ -541,9 +541,9 @@ if REGISTRY_TOKEN then
         Headers = {
             Authorization = "Bearer " .. REGISTRY_TOKEN,
             ["Content-Type"] = "application/json",
-            ["X-Package-Name"] = "E2EFixture",
+            ["X-Package-Name"] = "E2EFixture"
         },
-        Body = HttpService:JSONEncode(seedTree),
+        Body = HttpService:JSONEncode(seedTree)
     })
 
     test("Registry fetches metadata", function()
@@ -582,7 +582,7 @@ if REGISTRY_TOKEN then
 
         const instance, result = Bloxdrive.load(TEST_PACKAGE_ID, {
             Version = 1,
-            Parent = parent,
+            Parent = parent
         })
 
         assert(result.Success, "Load should succeed: " .. tostring(result.Error))
@@ -595,7 +595,7 @@ if REGISTRY_TOKEN then
 
     test("load returns instance and result without Parent", function()
         const instance, result = Bloxdrive.load(TEST_PACKAGE_ID, {
-            Version = 1,
+            Version = 1
         })
 
         assert(result.Success, "Load should succeed: " .. tostring(result.Error))
@@ -607,7 +607,7 @@ if REGISTRY_TOKEN then
 
     test("load returns nil instance on failure", function()
         const instance, result = Bloxdrive.load("nonexistent_package_id_00", {
-            Version = 1,
+            Version = 1
         })
 
         assertEqual(result.Success, false, "Load should fail")
@@ -620,8 +620,8 @@ if REGISTRY_TOKEN then
         Url = REGISTRY_URL .. "/packages/" .. TEST_PACKAGE_ID,
         Method = "DELETE",
         Headers = {
-            Authorization = "Bearer " .. REGISTRY_TOKEN,
-        },
+            Authorization = "Bearer " .. REGISTRY_TOKEN
+        }
     })
 else
     test("Registry and load tests skipped (no REGISTRY_TOKEN)", function() end)
@@ -650,5 +650,5 @@ print("========================================")
 return {
     Passed = passed,
     Failed = failed,
-    Success = failed == 0,
+    Success = failed == 0
 }

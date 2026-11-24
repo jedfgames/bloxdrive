@@ -24,7 +24,7 @@ const TESTS = {
     { Name = "Serializer", Func = require("../Tests/Serializer.spec") },
     { Name = "TreeDiff", Func = require("../Tests/TreeDiff.spec") },
     { Name = "TreeUtils", Func = require("../Tests/TreeUtils.spec") },
-    { Name = "Whitelist", Func = require("../Tests/Whitelist.spec") },
+    { Name = "Whitelist", Func = require("../Tests/Whitelist.spec") }
 }
 
 const RunTests = {}
@@ -51,7 +51,7 @@ function RunTests.exec()
 
     Testable.configure({
         InjectGlobals = false,
-        Verbose = true,
+        Verbose = true
     })
 
     RunTests.uploadE2EPlace()

@@ -21,7 +21,7 @@ from pure-data modules like TreeDiff or Merger.
 -- public API name to use instead.
 const PROPERTY_ALIASES: { [string]: string } = {
     Color3uint8 = "Color",
-    MaterialVariantSerialized = "MaterialVariant",
+    MaterialVariantSerialized = "MaterialVariant"
 }
 
 -- Properties that are serializable according to ReflectionService but
@@ -49,7 +49,7 @@ const SKIP_PROPERTIES: { [string]: boolean } = {
     TopParamB = true,
     TopSurfaceInput = true,
     Velocity = true,
-    formFactorRaw = true,
+    formFactorRaw = true
 }
 
 const PropertyReflection = {}
@@ -57,11 +57,11 @@ const PropertyReflection = {}
 type PropertyInfo = {
     Name: string,
     Type: string,
-    Serialized: boolean,
+    Serialized: boolean
 }
 
 type ReflectionProvider = {
-    GetSerializableProperties: (self: ReflectionProvider, className: string) -> { PropertyInfo },
+    GetSerializableProperties: (self: ReflectionProvider, className: string) -> { PropertyInfo }
 }
 
 local _provider: ReflectionProvider? = nil
@@ -80,7 +80,7 @@ const function _getDefaultProvider(): ReflectionProvider
                 table.insert(result, {
                     Name = prop.Name,
                     Type = tostring(prop.Type),
-                    Serialized = true,
+                    Serialized = true
                 })
             end
         end
@@ -224,9 +224,9 @@ function _encodeValue(value: any, typeName: string): any
                 orientation = {
                     { components[4], components[5], components[6] },
                     { components[7], components[8], components[9] },
-                    { components[10], components[11], components[12] },
-                },
-            },
+                    { components[10], components[11], components[12] }
+                }
+            }
         }
     elseif valueType == "UDim" then
         return { UDim = { value.Scale, value.Offset } }
@@ -234,15 +234,15 @@ function _encodeValue(value: any, typeName: string): any
         return {
             UDim2 = {
                 { value.X.Scale, value.X.Offset },
-                { value.Y.Scale, value.Y.Offset },
-            },
+                { value.Y.Scale, value.Y.Offset }
+            }
         }
     elseif valueType == "Rect" then
         return {
             Rect = {
                 { value.Min.X, value.Min.Y },
-                { value.Max.X, value.Max.Y },
-            },
+                { value.Max.X, value.Max.Y }
+            }
         }
     elseif valueType == "NumberRange" then
         return { NumberRange = { value.Min, value.Max } }
@@ -256,7 +256,7 @@ function _encodeValue(value: any, typeName: string): any
             table.insert(keypoints, {
                 time = kp.Time,
                 value = kp.Value,
-                envelope = kp.Envelope,
+                envelope = kp.Envelope
             })
         end
         return { NumberSequence = { keypoints = keypoints } }
@@ -265,7 +265,7 @@ function _encodeValue(value: any, typeName: string): any
         for _, kp in value.Keypoints do
             table.insert(keypoints, {
                 time = kp.Time,
-                color = { kp.Value.R, kp.Value.G, kp.Value.B },
+                color = { kp.Value.R, kp.Value.G, kp.Value.B }
             })
         end
         return { ColorSequence = { keypoints = keypoints } }
@@ -274,8 +274,8 @@ function _encodeValue(value: any, typeName: string): any
             Font = {
                 family = value.Family,
                 weight = value.Weight.Name,
-                style = value.Style.Name,
-            },
+                style = value.Style.Name
+            }
         }
     end
 

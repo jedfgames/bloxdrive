@@ -16,7 +16,7 @@ export type ToolbarButtonConfig = {
     Name: string,
     Label: string,
     Description: string,
-    Icon: string,
+    Icon: string
 }
 
 function Toolbar.new(plugin: Plugin, toolbarName: string)

@@ -36,7 +36,7 @@ function BuildPlugin.exec()
         "build",
         "plugin.project.json",
         "--output",
-        BUILD_PATH,
+        BUILD_PATH
     })
 
     if not result.ok then

@@ -48,7 +48,7 @@ type MarkerInfo = {
     AutoPull: boolean,
     AutoPush: boolean,
     Marker: StringValue,
-    Root: Instance,
+    Root: Instance
 }
 
 type AutoSyncState = {
@@ -69,7 +69,7 @@ type AutoSyncState = {
     RegisteredPackages: { [string]: MarkerInfo },
     PollThread: thread?,
     MarkerWatcher: RBXScriptConnection?,
-    Running: boolean,
+    Running: boolean
 }
 
 local _state: AutoSyncState? = nil
@@ -130,7 +130,7 @@ const function _validateMarkerValue(value: string): { [string]: any }?
         AutoPush = true,
         Id = true,
         Name = true,
-        Version = true,
+        Version = true
     }
     for key in decoded do
         if not ALLOWED_KEYS[key] then
@@ -174,7 +174,7 @@ function AutoSync.start(config: {
     Logger: any,
     PackagePublisher: any,
     PackagePuller: any,
-    Bloxdrive: any,
+    Bloxdrive: any
 })
     assert(config.CredentialStore, "Expected CredentialStore")
     assert(config.Logger, "Expected Logger")
@@ -208,7 +208,7 @@ function AutoSync.start(config: {
         RegisteredPackages = {},
         PollThread = nil,
         MarkerWatcher = nil,
-        Running = true,
+        Running = true
     }
 
     -- Scan for existing packages, validate, and register them
@@ -539,7 +539,7 @@ function _findAllMarkers(): { MarkerInfo }
                         Marker = child :: StringValue,
                         Name = decoded.Name,
                         Root = instance,
-                        Version = decoded.Version or 0,
+                        Version = decoded.Version or 0
                     })
                 else
                     _destroyInvalidMarker(child :: StringValue, "invalid marker value on startup scan")
@@ -600,7 +600,7 @@ function _startMarkerWatcher()
                 Marker = descendant :: StringValue,
                 Name = decoded.Name,
                 Root = parent,
-                Version = decoded.Version or 0,
+                Version = decoded.Version or 0
             }
 
             _registerPackage(info)
@@ -754,7 +754,7 @@ function _autoPull(info: MarkerInfo)
         PackageId = info.Id,
         PackageName = info.Name,
         Parent = info.Root,
-        RegistryKey = key,
+        RegistryKey = key
     })
 
     if result.Success then
@@ -914,7 +914,7 @@ function _autoPush(info: MarkerInfo)
             PackageId = info.Id,
             PackageName = info.Name,
             Parent = info.Root,
-            RegistryKey = key,
+            RegistryKey = key
         })
 
         state.Pulling[info.Id] = nil
@@ -957,7 +957,7 @@ function _autoPush(info: MarkerInfo)
         PackageId = info.Id,
         PackageName = info.Name or info.Id,
         Root = info.Root,
-        RegistryKey = key,
+        RegistryKey = key
     })
 
     if not _isCurrentGeneration() then
