@@ -104,7 +104,7 @@ function Serializer.serializeToFiles(tree: { [string]: any }): { Files: { [strin
 
     return {
         Files = files,
-        Manifest = manifest,
+        Manifest = manifest
     }
 end
 

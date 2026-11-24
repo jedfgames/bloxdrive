@@ -7,5 +7,7 @@
         "submodules": "./Submodules/",
         "tests": "./Tests/"
     },
-    "globals": ["__REGISTRY_TOKEN__"]
+    "globals": [
+        "__REGISTRY_TOKEN__"
+    ]
 }

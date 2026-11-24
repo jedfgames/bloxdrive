@@ -38,7 +38,7 @@ function UploadE2EPlace.exec()
         "build",
         "e2e.project.json",
         "--output",
-        "Build/E2ETest.rbxl",
+        "Build/E2ETest.rbxl"
     })
 
     if not result.ok then
@@ -55,9 +55,9 @@ function UploadE2EPlace.exec()
             method = "POST",
             headers = {
                 ["Content-Type"] = "application/octet-stream",
-                ["x-api-key"] = apiKey,
+                ["x-api-key"] = apiKey
             },
-            body = placeData,
+            body = placeData
         })
 
         if response.ok then

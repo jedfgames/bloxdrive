@@ -10,7 +10,7 @@ dependencies so it can be used in both Studio and Lune contexts.
 const METADATA_KEYS = {
     ["$className"] = true,
     ["$properties"] = true,
-    ["$attributes"] = true,
+    ["$attributes"] = true
 }
 
 const TreeUtils = {}

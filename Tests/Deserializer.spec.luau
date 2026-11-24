@@ -18,8 +18,8 @@ return function()
             const files = {
                 ["instance.json"] = {
                     ["$className"] = "Folder",
-                    ["$properties"] = { Value = 10 },
-                },
+                    ["$properties"] = { Value = 10 }
+                }
             }
 
             const tree = Deserializer.reassembleTree(files)
@@ -32,8 +32,8 @@ return function()
                 ["instance.json"] = { ["$className"] = "Folder" },
                 ["Child.json"] = {
                     ["$className"] = "Part",
-                    ["$properties"] = { Anchored = true },
-                },
+                    ["$properties"] = { Anchored = true }
+                }
             }
 
             const tree = Deserializer.reassembleTree(files)
@@ -46,11 +46,11 @@ return function()
             const files = {
                 ["instance.json"] = { ["$className"] = "Folder" },
                 ["Container/instance.json"] = {
-                    ["$className"] = "Folder",
+                    ["$className"] = "Folder"
                 },
                 ["Container/Inner.json"] = {
-                    ["$className"] = "Part",
-                },
+                    ["$className"] = "Part"
+                }
             }
 
             const tree = Deserializer.reassembleTree(files)
@@ -65,7 +65,7 @@ return function()
                 ["instance.json"] = { ["$className"] = "Folder" },
                 ["A/instance.json"] = { ["$className"] = "Folder" },
                 ["A/B/instance.json"] = { ["$className"] = "Folder" },
-                ["A/B/Leaf.json"] = { ["$className"] = "Part" },
+                ["A/B/Leaf.json"] = { ["$className"] = "Part" }
             }
 
             const tree = Deserializer.reassembleTree(files)
@@ -75,7 +75,7 @@ return function()
 
         it("should error when missing root instance.json", function()
             const files = {
-                ["Child.json"] = { ["$className"] = "Part" },
+                ["Child.json"] = { ["$className"] = "Part" }
             }
 
             expect(function()

@@ -21,14 +21,14 @@ type PullOptions = {
     PackageName: string?,
     Parent: Instance,
     Version: number?,
-    RegistryKey: string?,
+    RegistryKey: string?
 }
 
 type PullResult = {
     Success: boolean,
     Version: number?,
     ConflictCount: number,
-    Error: string?,
+    Error: string?
 }
 
 --[=[
@@ -73,7 +73,7 @@ function PackagePuller.pull(loader: any, options: PullOptions): PullResult
                 return {
                     Success = true,
                     Version = targetVersion,
-                    ConflictCount = 0,
+                    ConflictCount = 0
                 }
             end
 
@@ -103,7 +103,7 @@ function PackagePuller.pull(loader: any, options: PullOptions): PullResult
             return {
                 Success = true,
                 Version = targetVersion,
-                ConflictCount = conflictCount,
+                ConflictCount = conflictCount
             }
         else
             -- Fresh install (no marker or version 0)
@@ -119,7 +119,7 @@ function PackagePuller.pull(loader: any, options: PullOptions): PullResult
             return {
                 Success = true,
                 Version = targetVersion,
-                ConflictCount = 0,
+                ConflictCount = 0
             }
         end
     end)
@@ -128,7 +128,7 @@ function PackagePuller.pull(loader: any, options: PullOptions): PullResult
         return {
             Success = false,
             ConflictCount = 0,
-            Error = tostring(result),
+            Error = tostring(result)
         }
     end
 
@@ -145,7 +145,7 @@ function _findMarker(parent: Instance, packageId: string): { Marker: StringValue
             if decodeSuccess and decoded.Id == packageId then
                 return {
                     Marker = child :: StringValue,
-                    Version = decoded.Version,
+                    Version = decoded.Version
                 }
             end
         end
@@ -347,7 +347,7 @@ function _createMarker(parent: Instance, packageId: string, packageName: string?
         AutoPush = true,
         Id = packageId,
         Name = packageName or packageId,
-        Version = version,
+        Version = version
     })
     marker.Parent = parent
 end

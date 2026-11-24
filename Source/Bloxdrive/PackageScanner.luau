@@ -17,13 +17,13 @@ const PackageScanner = {}
 type PackageMarker = {
     Id: string,
     Version: number,
-    AutoUpdate: boolean,
+    AutoUpdate: boolean
 }
 
 type PackageInfo = {
     Marker: StringValue,
     Parent: Instance,
-    Metadata: PackageMarker,
+    Metadata: PackageMarker
 }
 
 --[=[
@@ -69,7 +69,7 @@ function _scanDescendants(root: Instance, results: { PackageInfo })
             return {
                 Id = decoded.Id,
                 Version = decoded.Version,
-                AutoUpdate = if type(decoded.AutoUpdate) == "boolean" then decoded.AutoUpdate else false,
+                AutoUpdate = if type(decoded.AutoUpdate) == "boolean" then decoded.AutoUpdate else false
             }
         end)
 
@@ -77,7 +77,7 @@ function _scanDescendants(root: Instance, results: { PackageInfo })
             table.insert(results, {
                 Marker = descendant,
                 Parent = parent,
-                Metadata = metadata,
+                Metadata = metadata
             })
         else
             warn(`Failed to parse package marker under "{parent:GetFullName()}": {metadata}`)

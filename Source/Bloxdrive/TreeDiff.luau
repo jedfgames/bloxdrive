@@ -18,7 +18,7 @@ type DiffOperation = {
     Path: { string },
     OldValue: any?,
     NewValue: any?,
-    Node: { [string]: any }?,
+    Node: { [string]: any }?
 }
 
 --[=[
@@ -62,7 +62,7 @@ function _diffNodes(
             table.insert(operations, {
                 Kind = "Remove",
                 Path = childPath,
-                OldValue = oldNode[childName],
+                OldValue = oldNode[childName]
             })
         end
     end
@@ -75,7 +75,7 @@ function _diffNodes(
             table.insert(operations, {
                 Kind = "Add",
                 Path = childPath,
-                Node = newNode[childName],
+                Node = newNode[childName]
             })
         end
     end
@@ -91,12 +91,12 @@ function _diffNodes(
                 table.insert(operations, {
                     Kind = "Remove",
                     Path = childPath,
-                    OldValue = oldNode[childName],
+                    OldValue = oldNode[childName]
                 })
                 table.insert(operations, {
                     Kind = "Add",
                     Path = childPath,
-                    Node = newNode[childName],
+                    Node = newNode[childName]
                 })
             else
                 _diffNodes(oldNode[childName], newNode[childName], childPath, operations)
@@ -123,7 +123,7 @@ function _diffProperties(
             table.insert(operations, {
                 Kind = "Remove",
                 Path = fullPath,
-                OldValue = oldValue,
+                OldValue = oldValue
             })
         elseif not TreeUtils.deepEqual(oldValue, newValue) then
             const fullPath = table.clone(propPath)
@@ -132,7 +132,7 @@ function _diffProperties(
                 Kind = "Modify",
                 Path = fullPath,
                 OldValue = oldValue,
-                NewValue = newValue,
+                NewValue = newValue
             })
         end
     end
@@ -145,7 +145,7 @@ function _diffProperties(
             table.insert(operations, {
                 Kind = "Add",
                 Path = fullPath,
-                NewValue = newValue,
+                NewValue = newValue
             })
         end
     end
@@ -169,7 +169,7 @@ function _diffAttributes(
             table.insert(operations, {
                 Kind = "Remove",
                 Path = fullPath,
-                OldValue = oldValue,
+                OldValue = oldValue
             })
         elseif not TreeUtils.deepEqual(oldValue, newValue) then
             const fullPath = table.clone(attrPath)
@@ -178,7 +178,7 @@ function _diffAttributes(
                 Kind = "Modify",
                 Path = fullPath,
                 OldValue = oldValue,
-                NewValue = newValue,
+                NewValue = newValue
             })
         end
     end
@@ -191,7 +191,7 @@ function _diffAttributes(
             table.insert(operations, {
                 Kind = "Add",
                 Path = fullPath,
-                NewValue = newValue,
+                NewValue = newValue
             })
         end
     end

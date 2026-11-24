@@ -19,8 +19,8 @@ return function()
                 ["$className"] = "Folder",
                 ["$properties"] = { Value = 10 },
                 Child = {
-                    ["$className"] = "Part",
-                },
+                    ["$className"] = "Part"
+                }
             }
 
             const result = Merger.merge(base, base, base)
@@ -32,11 +32,11 @@ return function()
         it("should accept local-only property changes", function()
             const base = {
                 ["$className"] = "Folder",
-                ["$properties"] = { Value = 10 },
+                ["$properties"] = { Value = 10 }
             }
             const local_ = {
                 ["$className"] = "Folder",
-                ["$properties"] = { Value = 20 },
+                ["$properties"] = { Value = 20 }
             }
 
             const result = Merger.merge(base, local_, base)
@@ -47,11 +47,11 @@ return function()
         it("should accept remote-only property changes", function()
             const base = {
                 ["$className"] = "Folder",
-                ["$properties"] = { Value = 10 },
+                ["$properties"] = { Value = 10 }
             }
             const remote = {
                 ["$className"] = "Folder",
-                ["$properties"] = { Value = 30 },
+                ["$properties"] = { Value = 30 }
             }
 
             const result = Merger.merge(base, base, remote)
@@ -62,15 +62,15 @@ return function()
         it("should merge non-overlapping changes from both sides", function()
             const base = {
                 ["$className"] = "Folder",
-                ["$properties"] = { A = 1, B = 2 },
+                ["$properties"] = { A = 1, B = 2 }
             }
             const local_ = {
                 ["$className"] = "Folder",
-                ["$properties"] = { A = 10, B = 2 },
+                ["$properties"] = { A = 10, B = 2 }
             }
             const remote = {
                 ["$className"] = "Folder",
-                ["$properties"] = { A = 1, B = 20 },
+                ["$properties"] = { A = 1, B = 20 }
             }
 
             const result = Merger.merge(base, local_, remote)
@@ -82,15 +82,15 @@ return function()
         it("should detect conflicts when both sides change the same property", function()
             const base = {
                 ["$className"] = "Folder",
-                ["$properties"] = { Value = 10 },
+                ["$properties"] = { Value = 10 }
             }
             const local_ = {
                 ["$className"] = "Folder",
-                ["$properties"] = { Value = 20 },
+                ["$properties"] = { Value = 20 }
             }
             const remote = {
                 ["$className"] = "Folder",
-                ["$properties"] = { Value = 30 },
+                ["$properties"] = { Value = 30 }
             }
 
             const result = Merger.merge(base, local_, remote)
@@ -104,11 +104,11 @@ return function()
         it("should not conflict when both sides make the same change", function()
             const base = {
                 ["$className"] = "Folder",
-                ["$properties"] = { Value = 10 },
+                ["$properties"] = { Value = 10 }
             }
             const changed = {
                 ["$className"] = "Folder",
-                ["$properties"] = { Value = 20 },
+                ["$properties"] = { Value = 20 }
             }
 
             const result = Merger.merge(base, changed, changed)
@@ -118,13 +118,13 @@ return function()
 
         it("should accept local-only child additions", function()
             const base = {
-                ["$className"] = "Folder",
+                ["$className"] = "Folder"
             }
             const local_ = {
                 ["$className"] = "Folder",
                 NewChild = {
-                    ["$className"] = "Part",
-                },
+                    ["$className"] = "Part"
+                }
             }
 
             const result = Merger.merge(base, local_, base)
@@ -135,13 +135,13 @@ return function()
 
         it("should accept remote-only child additions", function()
             const base = {
-                ["$className"] = "Folder",
+                ["$className"] = "Folder"
             }
             const remote = {
                 ["$className"] = "Folder",
                 NewChild = {
-                    ["$className"] = "Part",
-                },
+                    ["$className"] = "Part"
+                }
             }
 
             const result = Merger.merge(base, base, remote)
@@ -153,11 +153,11 @@ return function()
             const base = {
                 ["$className"] = "Folder",
                 OldChild = {
-                    ["$className"] = "Part",
-                },
+                    ["$className"] = "Part"
+                }
             }
             const local_ = {
-                ["$className"] = "Folder",
+                ["$className"] = "Folder"
             }
 
             const result = Merger.merge(base, local_, base)
@@ -170,18 +170,18 @@ return function()
                 ["$className"] = "Folder",
                 Child = {
                     ["$className"] = "Part",
-                    ["$properties"] = { Anchored = false },
-                },
+                    ["$properties"] = { Anchored = false }
+                }
             }
             const local_ = {
-                ["$className"] = "Folder",
+                ["$className"] = "Folder"
             }
             const remote = {
                 ["$className"] = "Folder",
                 Child = {
                     ["$className"] = "Part",
-                    ["$properties"] = { Anchored = true },
-                },
+                    ["$properties"] = { Anchored = true }
+                }
             }
 
             const result = Merger.merge(base, local_, remote)
@@ -196,18 +196,18 @@ return function()
                 ["$className"] = "Folder",
                 Child = {
                     ["$className"] = "Part",
-                    ["$properties"] = { Anchored = false },
-                },
+                    ["$properties"] = { Anchored = false }
+                }
             }
             const local_ = {
                 ["$className"] = "Folder",
                 Child = {
                     ["$className"] = "Part",
-                    ["$properties"] = { Anchored = true },
-                },
+                    ["$properties"] = { Anchored = true }
+                }
             }
             const remote = {
-                ["$className"] = "Folder",
+                ["$className"] = "Folder"
             }
 
             const result = Merger.merge(base, local_, remote)
@@ -220,11 +220,11 @@ return function()
             const base = {
                 ["$className"] = "Folder",
                 Child = {
-                    ["$className"] = "Part",
-                },
+                    ["$className"] = "Part"
+                }
             }
             const deleted = {
-                ["$className"] = "Folder",
+                ["$className"] = "Folder"
             }
 
             const result = Merger.merge(base, deleted, deleted)
@@ -235,15 +235,15 @@ return function()
         it("should merge attribute changes independently", function()
             const base = {
                 ["$className"] = "Folder",
-                ["$attributes"] = { A = 1, B = 2 },
+                ["$attributes"] = { A = 1, B = 2 }
             }
             const local_ = {
                 ["$className"] = "Folder",
-                ["$attributes"] = { A = 10, B = 2 },
+                ["$attributes"] = { A = 10, B = 2 }
             }
             const remote = {
                 ["$className"] = "Folder",
-                ["$attributes"] = { A = 1, B = 20 },
+                ["$attributes"] = { A = 1, B = 20 }
             }
 
             const result = Merger.merge(base, local_, remote)
@@ -254,19 +254,19 @@ return function()
 
         it("should merge additions from both sides in different subtrees", function()
             const base = {
-                ["$className"] = "Folder",
+                ["$className"] = "Folder"
             }
             const local_ = {
                 ["$className"] = "Folder",
                 LocalChild = {
-                    ["$className"] = "Part",
-                },
+                    ["$className"] = "Part"
+                }
             }
             const remote = {
                 ["$className"] = "Folder",
                 RemoteChild = {
-                    ["$className"] = "MeshPart",
-                },
+                    ["$className"] = "MeshPart"
+                }
             }
 
             const result = Merger.merge(base, local_, remote)

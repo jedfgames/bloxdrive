@@ -26,7 +26,7 @@ type SetKeyPromptProps = {
     CurrentKey: string?,
     OnSave: ((key: string) -> ())?,
     OnRemove: (() -> ())?,
-    OnClose: (() -> ())?,
+    OnClose: (() -> ())?
 }
 
 const function _testRegistryKey(key: string): (boolean, string)
@@ -61,7 +61,7 @@ const function _makeInfoSection(scope: Fusion.Scope): Fusion.Child
         [Children] = {
             scope:New("UIListLayout")({
                 SortOrder = Enum.SortOrder.LayoutOrder,
-                Padding = UDim.new(0, 4),
+                Padding = UDim.new(0, 4)
             }),
 
             scope:New("TextLabel")({
@@ -79,7 +79,7 @@ const function _makeInfoSection(scope: Fusion.Scope): Fusion.Child
                 RichText = true,
                 TextWrapped = true,
                 TextXAlignment = Enum.TextXAlignment.Left,
-                LayoutOrder = 1,
+                LayoutOrder = 1
             }),
 
             scope:New("TextLabel")({
@@ -94,9 +94,9 @@ const function _makeInfoSection(scope: Fusion.Scope): Fusion.Child
                 RichText = true,
                 TextWrapped = true,
                 TextXAlignment = Enum.TextXAlignment.Left,
-                LayoutOrder = 2,
-            }),
-        },
+                LayoutOrder = 2
+            })
+        }
     })
 end
 
@@ -110,13 +110,13 @@ const function _makeKeyStatus(scope: Fusion.Scope, hasKey: Fusion.Value<boolean>
 
         [Children] = {
             scope:New("UICorner")({
-                CornerRadius = UDim.new(0, 4),
+                CornerRadius = UDim.new(0, 4)
             }),
 
             scope:New("UIStroke")({
                 ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
                 Color = Color3.fromRGB(80, 80, 80),
-                Thickness = 1,
+                Thickness = 1
             }),
 
             scope:New("Frame")({
@@ -129,8 +129,8 @@ const function _makeKeyStatus(scope: Fusion.Scope, hasKey: Fusion.Value<boolean>
                 end),
 
                 [Children] = scope:New("UICorner")({
-                    CornerRadius = UDim.new(1, 0),
-                }),
+                    CornerRadius = UDim.new(1, 0)
+                })
             }),
 
             scope:New("TextLabel")({
@@ -144,7 +144,7 @@ const function _makeKeyStatus(scope: Fusion.Scope, hasKey: Fusion.Value<boolean>
                 Text = scope:Computed(function(use)
                     return if use(hasKey) then "Registry key saved" else "No registry key"
                 end),
-                TextXAlignment = Enum.TextXAlignment.Left,
+                TextXAlignment = Enum.TextXAlignment.Left
             }),
 
             scope:New("TextButton")({
@@ -162,17 +162,17 @@ const function _makeKeyStatus(scope: Fusion.Scope, hasKey: Fusion.Value<boolean>
 
                 [Children] = {
                     scope:New("UICorner")({
-                        CornerRadius = UDim.new(0, 4),
+                        CornerRadius = UDim.new(0, 4)
                     }),
                     scope:New("UIPadding")({
                         PaddingLeft = UDim.new(0, 8),
-                        PaddingRight = UDim.new(0, 8),
-                    }),
+                        PaddingRight = UDim.new(0, 8)
+                    })
                 },
 
-                [OnEvent("MouseButton1Click")] = onRemove,
-            }),
-        },
+                [OnEvent("MouseButton1Click")] = onRemove
+            })
+        }
     })
 end
 
@@ -261,7 +261,7 @@ return function(scope: Fusion.Scope, props: SetKeyPromptProps): Fusion.Child
                 [Children] = {
                     scope:New("UIListLayout")({
                         SortOrder = Enum.SortOrder.LayoutOrder,
-                        Padding = UDim.new(0, 6),
+                        Padding = UDim.new(0, 6)
                     }),
 
                     -- Info section
@@ -272,7 +272,7 @@ return function(scope: Fusion.Scope, props: SetKeyPromptProps): Fusion.Child
                         BackgroundTransparency = 1,
                         LayoutOrder = 1,
 
-                        [Children] = _makeInfoSection(scope),
+                        [Children] = _makeInfoSection(scope)
                     }),
 
                     -- Key status indicator
@@ -282,7 +282,7 @@ return function(scope: Fusion.Scope, props: SetKeyPromptProps): Fusion.Child
                         BackgroundTransparency = 1,
                         LayoutOrder = 2,
 
-                        [Children] = _makeKeyStatus(scope, hasKey, removeKey),
+                        [Children] = _makeKeyStatus(scope, hasKey, removeKey)
                     }),
 
                     -- Input field with Test button
@@ -309,12 +309,12 @@ return function(scope: Fusion.Scope, props: SetKeyPromptProps): Fusion.Child
 
                                 [Children] = {
                                     scope:New("UICorner")({
-                                        CornerRadius = UDim.new(0, 4),
+                                        CornerRadius = UDim.new(0, 4)
                                     }),
                                     scope:New("UIPadding")({
                                         PaddingLeft = UDim.new(0, 8),
-                                        PaddingRight = UDim.new(0, 8),
-                                    }),
+                                        PaddingRight = UDim.new(0, 8)
+                                    })
                                 },
 
                                 [OnChange("Text")] = function(newText: string)
@@ -322,7 +322,7 @@ return function(scope: Fusion.Scope, props: SetKeyPromptProps): Fusion.Child
                                     if Fusion.peek(statusText) ~= "" then
                                         setStatus("", Color3.fromRGB(180, 180, 180))
                                     end
-                                end,
+                                end
                             }),
 
                             scope:New("TextButton")({
@@ -337,12 +337,12 @@ return function(scope: Fusion.Scope, props: SetKeyPromptProps): Fusion.Child
                                 Text = "Test",
 
                                 [Children] = scope:New("UICorner")({
-                                    CornerRadius = UDim.new(0, 4),
+                                    CornerRadius = UDim.new(0, 4)
                                 }),
 
-                                [OnEvent("MouseButton1Click")] = testKey,
-                            }),
-                        },
+                                [OnEvent("MouseButton1Click")] = testKey
+                            })
+                        }
                     }),
 
                     -- Status message
@@ -361,10 +361,10 @@ return function(scope: Fusion.Scope, props: SetKeyPromptProps): Fusion.Child
                             FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json"),
                             TextSize = 11,
                             Text = statusText,
-                            TextXAlignment = Enum.TextXAlignment.Left,
-                        }),
-                    }),
-                },
+                            TextXAlignment = Enum.TextXAlignment.Left
+                        })
+                    })
+                }
             }),
 
             -- Save button (anchored to bottom)
@@ -380,11 +380,11 @@ return function(scope: Fusion.Scope, props: SetKeyPromptProps): Fusion.Child
                 Text = "Save",
 
                 [Children] = scope:New("UICorner")({
-                    CornerRadius = UDim.new(0, 4),
+                    CornerRadius = UDim.new(0, 4)
                 }),
 
-                [OnEvent("MouseButton1Click")] = saveKey,
-            }),
-        },
+                [OnEvent("MouseButton1Click")] = saveKey
+            })
+        }
     })
 end

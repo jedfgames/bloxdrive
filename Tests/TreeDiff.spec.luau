@@ -20,8 +20,8 @@ return function()
                 ["$properties"] = { Value = 10 },
                 Child = {
                     ["$className"] = "Part",
-                    ["$properties"] = { Anchored = true },
-                },
+                    ["$properties"] = { Anchored = true }
+                }
             }
 
             const ops = TreeDiff.diff(tree, tree)
@@ -30,13 +30,13 @@ return function()
 
         it("should detect added children", function()
             const oldTree = {
-                ["$className"] = "Folder",
+                ["$className"] = "Folder"
             }
             const newTree = {
                 ["$className"] = "Folder",
                 NewChild = {
-                    ["$className"] = "Part",
-                },
+                    ["$className"] = "Part"
+                }
             }
 
             const ops = TreeDiff.diff(oldTree, newTree)
@@ -49,11 +49,11 @@ return function()
             const oldTree = {
                 ["$className"] = "Folder",
                 OldChild = {
-                    ["$className"] = "Part",
-                },
+                    ["$className"] = "Part"
+                }
             }
             const newTree = {
-                ["$className"] = "Folder",
+                ["$className"] = "Folder"
             }
 
             const ops = TreeDiff.diff(oldTree, newTree)
@@ -65,11 +65,11 @@ return function()
         it("should detect modified properties", function()
             const oldTree = {
                 ["$className"] = "Part",
-                ["$properties"] = { Anchored = true },
+                ["$properties"] = { Anchored = true }
             }
             const newTree = {
                 ["$className"] = "Part",
-                ["$properties"] = { Anchored = false },
+                ["$properties"] = { Anchored = false }
             }
 
             const ops = TreeDiff.diff(oldTree, newTree)
@@ -84,11 +84,11 @@ return function()
         it("should detect added properties", function()
             const oldTree = {
                 ["$className"] = "Part",
-                ["$properties"] = {},
+                ["$properties"] = {}
             }
             const newTree = {
                 ["$className"] = "Part",
-                ["$properties"] = { Anchored = true },
+                ["$properties"] = { Anchored = true }
             }
 
             const ops = TreeDiff.diff(oldTree, newTree)
@@ -100,11 +100,11 @@ return function()
         it("should detect removed properties", function()
             const oldTree = {
                 ["$className"] = "Part",
-                ["$properties"] = { Anchored = true },
+                ["$properties"] = { Anchored = true }
             }
             const newTree = {
                 ["$className"] = "Part",
-                ["$properties"] = {},
+                ["$properties"] = {}
             }
 
             const ops = TreeDiff.diff(oldTree, newTree)
@@ -116,11 +116,11 @@ return function()
         it("should detect modified attributes", function()
             const oldTree = {
                 ["$className"] = "Folder",
-                ["$attributes"] = { Score = 10 },
+                ["$attributes"] = { Score = 10 }
             }
             const newTree = {
                 ["$className"] = "Folder",
-                ["$attributes"] = { Score = 20 },
+                ["$attributes"] = { Score = 20 }
             }
 
             const ops = TreeDiff.diff(oldTree, newTree)
@@ -134,14 +134,14 @@ return function()
             const oldTree = {
                 ["$className"] = "Folder",
                 Child = {
-                    ["$className"] = "Part",
-                },
+                    ["$className"] = "Part"
+                }
             }
             const newTree = {
                 ["$className"] = "Folder",
                 Child = {
-                    ["$className"] = "MeshPart",
-                },
+                    ["$className"] = "MeshPart"
+                }
             }
 
             const ops = TreeDiff.diff(oldTree, newTree)
@@ -169,9 +169,9 @@ return function()
                     ["$className"] = "Folder",
                     B = {
                         ["$className"] = "Part",
-                        ["$properties"] = { Anchored = true },
-                    },
-                },
+                        ["$properties"] = { Anchored = true }
+                    }
+                }
             }
             const newTree = {
                 ["$className"] = "Folder",
@@ -179,9 +179,9 @@ return function()
                     ["$className"] = "Folder",
                     B = {
                         ["$className"] = "Part",
-                        ["$properties"] = { Anchored = false },
-                    },
-                },
+                        ["$properties"] = { Anchored = false }
+                    }
+                }
             }
 
             const ops = TreeDiff.diff(oldTree, newTree)

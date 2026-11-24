@@ -18,7 +18,7 @@ const Types = {}
 export type PackageMarker = {
     Id: string,
     Version: number,
-    AutoUpdate: boolean,
+    AutoUpdate: boolean
 }
 
 --[=[
@@ -31,7 +31,7 @@ export type TreeNode = {
     ["$className"]: string,
     ["$properties"]: { [string]: any }?,
     ["$attributes"]: { [string]: any }?,
-    [string]: TreeNode,
+    [string]: TreeNode
 }
 
 --[=[
@@ -40,7 +40,7 @@ export type TreeNode = {
 ]=]
 export type PackageMetadata = {
     Name: string,
-    LatestVersion: number,
+    LatestVersion: number
 }
 
 --[=[
@@ -48,7 +48,7 @@ export type PackageMetadata = {
 ]=]
 export type RegistryConfig = {
     BaseUrl: string,
-    RegistryKey: string?,
+    RegistryKey: string?
 }
 
 --[=[
@@ -60,7 +60,7 @@ export type DiffOperation = {
     Path: { string },
     OldValue: any?,
     NewValue: any?,
-    Node: TreeNode?,
+    Node: TreeNode?
 }
 
 --[=[
@@ -69,7 +69,7 @@ export type DiffOperation = {
 export type ConflictInfo = {
     Path: { string },
     LocalValue: any,
-    RemoteValue: any,
+    RemoteValue: any
 }
 
 --[=[
@@ -77,7 +77,7 @@ export type ConflictInfo = {
 ]=]
 export type MergeResult = {
     Tree: TreeNode,
-    Conflicts: { ConflictInfo },
+    Conflicts: { ConflictInfo }
 }
 
 --[=[
@@ -85,7 +85,7 @@ export type MergeResult = {
 ]=]
 export type LoadOptions = {
     Version: number?,
-    Parent: Instance?,
+    Parent: Instance?
 }
 
 --[=[
@@ -96,7 +96,7 @@ export type LoadResult = {
     Success: boolean,
     Version: number,
     Conflicts: { ConflictInfo }?,
-    Error: string?,
+    Error: string?
 }
 
 --[=[
@@ -105,7 +105,7 @@ export type LoadResult = {
 export type PackageInfo = {
     Marker: StringValue,
     Parent: Instance,
-    Metadata: PackageMarker,
+    Metadata: PackageMarker
 }
 
 return Types

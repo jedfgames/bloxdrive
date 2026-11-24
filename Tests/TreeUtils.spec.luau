@@ -39,8 +39,8 @@ return function()
                 ["$className"] = "Folder",
                 ["$properties"] = { Value = 10 },
                 Child = {
-                    ["$className"] = "Part",
-                },
+                    ["$className"] = "Part"
+                }
             }
 
             const children = TreeUtils.getChildKeys(node)
@@ -54,8 +54,8 @@ return function()
                 ["$className"] = "Folder",
                 SomeString = "hello",
                 Child = {
-                    ["$className"] = "Part",
-                },
+                    ["$className"] = "Part"
+                }
             }
 
             const children = TreeUtils.getChildKeys(node)
@@ -68,8 +68,8 @@ return function()
                 ["$className"] = "Folder",
                 NotAChild = { key = "value" },
                 Child = {
-                    ["$className"] = "Part",
-                },
+                    ["$className"] = "Part"
+                }
             }
 
             const children = TreeUtils.getChildKeys(node)
@@ -80,7 +80,7 @@ return function()
         it("should return empty for a leaf node", function()
             const node = {
                 ["$className"] = "Part",
-                ["$properties"] = { Anchored = true },
+                ["$properties"] = { Anchored = true }
             }
 
             const children = TreeUtils.getChildKeys(node)

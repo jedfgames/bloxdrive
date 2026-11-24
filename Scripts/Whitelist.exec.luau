@@ -40,9 +40,9 @@ const function addUser(url: string, adminToken: string, userId: string, name: st
         method = "POST",
         headers = {
             Authorization = `Bearer {adminToken}`,
-            ["Content-Type"] = "application/json",
+            ["Content-Type"] = "application/json"
         },
-        body = serde.encode("json", { userId = userId, name = name }),
+        body = serde.encode("json", { userId = userId, name = name })
     })
 
     if not response.ok then
@@ -62,7 +62,7 @@ const function removeUser(url: string, adminToken: string, userId: string)
     const response = net.request({
         url = `{url}/admin/whitelist/{userId}`,
         method = "DELETE",
-        headers = { Authorization = `Bearer {adminToken}` },
+        headers = { Authorization = `Bearer {adminToken}` }
     })
 
     if response.statusCode == 404 then
@@ -79,7 +79,7 @@ const function listUsers(url: string, adminToken: string)
     const response = net.request({
         url = `{url}/admin/whitelist`,
         method = "GET",
-        headers = { Authorization = `Bearer {adminToken}` },
+        headers = { Authorization = `Bearer {adminToken}` }
     })
 
     if not response.ok then

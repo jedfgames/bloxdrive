@@ -40,7 +40,7 @@ const REMOTE_SCRIPT_PATH = "Tests/E2E/RemoteTestScript.luau"
 type TestResult = {
     Name: string,
     Passed: boolean,
-    Error: string?,
+    Error: string?
 }
 
 const function _loadApiKey(): string?
@@ -64,12 +64,12 @@ const function _createTask(apiKey: string, scriptSource: string): string
         method = "POST",
         headers = {
             ["Content-Type"] = "application/json",
-            ["x-api-key"] = apiKey,
+            ["x-api-key"] = apiKey
         },
         body = serde.encode("json", {
             script = scriptSource,
-            timeout = "120s",
-        }),
+            timeout = "120s"
+        })
     })
 
     if not response.ok then
@@ -88,8 +88,8 @@ const function _pollTask(apiKey: string, taskPath: string): { [string]: any }
             url = `{BASE_URL}/{taskPath}`,
             method = "GET",
             headers = {
-                ["x-api-key"] = apiKey,
-            },
+                ["x-api-key"] = apiKey
+            }
         })
 
         if not response.ok then
@@ -117,8 +117,8 @@ const function _getTaskLogs(apiKey: string, taskPath: string): { string }
         url = `{BASE_URL}/{taskPath}/logs`,
         method = "GET",
         headers = {
-            ["x-api-key"] = apiKey,
-        },
+            ["x-api-key"] = apiKey
+        }
     })
 
     if not response.ok then
@@ -151,7 +151,7 @@ const function _parseTestResults(logs: { string }): { TestResult }
         if passName then
             table.insert(results, {
                 Name = passName,
-                Passed = true,
+                Passed = true
             })
             continue
         end
@@ -161,7 +161,7 @@ const function _parseTestResults(logs: { string }): { TestResult }
             table.insert(results, {
                 Name = failName,
                 Passed = false,
-                Error = failErr,
+                Error = failErr
             })
         end
     end
@@ -202,7 +202,7 @@ const function _runRemoteTests(apiKey: string): { TestResult }
         table.insert(results, {
             Name = "Module load",
             Passed = false,
-            Error = errorMsg,
+            Error = errorMsg
         })
     end
 

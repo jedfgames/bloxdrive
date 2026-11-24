@@ -18,12 +18,12 @@ const Merger = {}
 type ConflictInfo = {
     Path: { string },
     LocalValue: any,
-    RemoteValue: any,
+    RemoteValue: any
 }
 
 type MergeResult = {
     Tree: { [string]: any },
-    Conflicts: { ConflictInfo },
+    Conflicts: { ConflictInfo }
 }
 
 --[=[
@@ -51,7 +51,7 @@ function Merger.merge(
 
     return {
         Tree = merged,
-        Conflicts = conflicts,
+        Conflicts = conflicts
     }
 end
 
@@ -141,7 +141,7 @@ function _mergeNodes(
                 table.insert(conflicts, {
                     Path = childPath,
                     LocalValue = nil,
-                    RemoteValue = remoteNode[childName],
+                    RemoteValue = remoteNode[childName]
                 })
             end
             -- Otherwise, deletion stands
@@ -155,7 +155,7 @@ function _mergeNodes(
                 table.insert(conflicts, {
                     Path = childPath,
                     LocalValue = localNode[childName],
-                    RemoteValue = nil,
+                    RemoteValue = nil
                 })
             end
             -- Otherwise, deletion stands
@@ -216,7 +216,7 @@ function _mergeTable(
                 table.insert(conflicts, {
                     Path = _appendPath(path, key),
                     LocalValue = localVal,
-                    RemoteValue = remoteVal,
+                    RemoteValue = remoteVal
                 })
             end
         end

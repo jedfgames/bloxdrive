@@ -136,7 +136,7 @@ return function()
     describe("serializeToFiles", function()
         it("should create instance.json for root", function()
             const tree = {
-                ["$className"] = "Folder",
+                ["$className"] = "Folder"
             }
 
             const result = Serializer.serializeToFiles(tree)
@@ -149,8 +149,8 @@ return function()
                 ["$className"] = "Folder",
                 Child = {
                     ["$className"] = "Part",
-                    ["$properties"] = { Anchored = true },
-                },
+                    ["$properties"] = { Anchored = true }
+                }
             }
 
             const result = Serializer.serializeToFiles(tree)
@@ -164,9 +164,9 @@ return function()
                 Container = {
                     ["$className"] = "Folder",
                     Inner = {
-                        ["$className"] = "Part",
-                    },
-                },
+                        ["$className"] = "Part"
+                    }
+                }
             }
 
             const result = Serializer.serializeToFiles(tree)
@@ -178,8 +178,8 @@ return function()
             const tree = {
                 ["$className"] = "Folder",
                 Leaf = {
-                    ["$className"] = "Part",
-                },
+                    ["$className"] = "Part"
+                }
             }
 
             const result = Serializer.serializeToFiles(tree)
